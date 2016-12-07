@@ -1,0 +1,51 @@
+{
+  "name": "rekit-core",
+  "version": "2.0.0",
+  "description": "Rekit core functions.",
+  "author": "Nate Wang <supnate@gmail.com>",
+  "homepage": "https://github.com/supnate/rekit-core",
+  "keywords": [
+    "rekit",
+    "rekit-core",
+    "react",
+    "redux",
+    "react-router"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/supnate/rekit-core"
+  },
+  "bugs": {
+    "url": "https://github.com/supnate/rekit-core/issues"
+  },
+  "scripts": {
+    "test": "node ./tools/server.js"
+  },
+  "nyc": {
+    "include": [
+      "src/**/*.js"
+    ],
+    "reporter": [
+      "lcov",
+      "text-summary"
+    ],
+    "cache": false,
+    "sourceMap": false,
+    "instrument": true
+  },
+  "dependencies": {
+    "colors": "^1.1.2",
+    "diff": "^3.1.0",
+    "lodash": "^4.15.0",
+    "shelljs": "^0.7.4",
+    "trash": "^4.0.0"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "codecov": "^1.0.1",
+    "eslint": "^3.5.0",
+    "eslint-config-airbnb": "^11.0.0",
+    "mocha": "^3.0.2",
+    "nyc": "^8.1.0"
+  }
+}
