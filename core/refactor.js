@@ -6,7 +6,6 @@
 const _ = require('lodash');
 const traverse = require('babel-traverse').default;
 const vio = require('./vio');
-const utils = require('./utils');
 
 function isStringMatch(str, match) {
   if (_.isString(match)) {
@@ -301,7 +300,7 @@ function lastLineIndex(lines, match) {
 }
 
 function removeLines(lines, str) {
-  return _.remove(lines, line => isStringMatch(line, str));
+  _.remove(lines, line => isStringMatch(line, str));
 }
 
 function addImportLine(lines, importLine) {
@@ -336,6 +335,20 @@ function removeExportFromLine(file, moduleSource) {
 
   const lines = vio.getLines(file);
   removeLines(lines, new RegExp(`export +.* +from +'${_.escapeRegExp(moduleSource)}'`));
+}
+
+function addStyleImport(lines, importLine) {
+  const i = lastLineIndex(lines, '@import ');
+  lines.splice(i + 1, 0, importLine);
+}
+
+function removeStyleImport(lines, moduleSource) {
+  removeLines(lines, new RegExp(`@import '${_.escapeRegExp(moduleSource)}'`));
+}
+
+function renameStyleModuleSource(lines, oldMoudleSource, newModuleSource) {
+  const i = lineIndex(lines, new RegExp(`@import '${_.escapeRegExp(oldMoudleSource)}'`));
+  lines[i] = `@import '${newModuleSource}';`;
 }
 
 // function renameExportFrom(file, oldName, newName, oldModulePath, newModulePath) {
@@ -405,7 +418,7 @@ function acceptFilePathForLines(func) {
     }
     const args = _.toArray(arguments);
     args[0] = lines;
-    lines = func.apply(null, args);
+    func.apply(null, args);
 
     if (_.isString(file)) {
       vio.save(file, lines);
@@ -414,6 +427,7 @@ function acceptFilePathForLines(func) {
 }
 
 module.exports = {
+
   renameClassName,
   renameFunctionName,
   renameImportSpecifier,
@@ -423,13 +437,15 @@ module.exports = {
   renameStringLiteral,
   updateSourceCode,
   updateFile,
-  lineIndex,
-  lastLineIndex,
   renameModuleSource: acceptFilePathForAst(renameModuleSource),
 
+  lineIndex,
+  lastLineIndex,
   addImportLine: acceptFilePathForLines(addImportLine),
   removeImportLine: acceptFilePathForLines(removeImportLine),
-
+  addStyleImport: acceptFilePathForLines(addStyleImport),
+  removeStyleImport: acceptFilePathForLines(removeStyleImport),
+  renameStyleModuleSource: acceptFilePathForLines(renameStyleModuleSource),
   removeLines: acceptFilePathForLines(removeLines),
   addExportFromLine: acceptFilePathForLines(addExportFromLine),
   removeExportFromLine: acceptFilePathForLines(removeExportFromLine),

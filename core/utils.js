@@ -71,10 +71,10 @@ function mapFeatureFile(feature, fileName) {
 }
 
 function mapTestFile(feature, fileName) {
-  return path.join(getProjectRoot(), 'test/features', _.kebabCase(feature), fileName);
+  return path.join(getProjectRoot(), 'tests/features', _.kebabCase(feature), fileName);
 }
 
-function mapComponentName(feature, name) {
+function mapComponent(feature, name) {
   // Map a component, page name to the file.
   return mapFeatureFile(feature, _.pascalCase(name));
 }
@@ -85,6 +85,10 @@ function mapReduxFile(feature, name) {
 
 function mapReduxTestFile(feature, name) {
   return mapTestFile(feature, 'redux/' + _.camelCase(name) + '.test.js');
+}
+
+function mapComponentTestFile(feature, name) {
+  return mapTestFile(feature, _.pascalCase(name) + '.test.js');
 }
 
 function assertNotEmpty(str, name) {
@@ -112,15 +116,17 @@ function getFeatures() {
 }
 
 module.exports = {
+  cssExt: 'less',
   setProjectRoot,
   getProjectRoot,
   getActionType,
   getAsyncActionTypes,
-  mapComponentName,
+  mapComponent,
   mapReduxFile,
   mapReduxTestFile,
   mapFeatureFile,
   mapTestFile,
+  mapComponentTestFile,
   assertNotEmpty,
   assertFeatureExist,
   assertFeatureNotExist,

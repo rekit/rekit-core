@@ -3,15 +3,18 @@
 // Summary
 //  API wrapper for managing Rekit elements.
 
-const component = require('./component');
-const style = require('./style');
-const test = require('./test');
-const action = require('./action');
-const featureMgr = require('./feature');
-const utils = require('./utils');
-const refactor = require('./refactor');
-const entry = require('./entry');
-const injectExtensionPoints = require('./plugin').injectExtensionPoints;
+const _ = require('lodash');
+const component = require('./core/component');
+const style = require('./core/style');
+const test = require('./core/test');
+const action = require('./core/action');
+const featureMgr = require('./core/feature');
+const utils = require('./core/utils');
+const vio = require('./core/vio');
+const refactor = require('./core/refactor');
+const entry = require('./core/entry');
+const plugin = require('./core/plugin');
+const injectExtensionPoints = require('./core/plugin').injectExtensionPoints;
 
 function addComponent(feature, name) {
   component.add(feature, name);
@@ -102,23 +105,7 @@ function moveFeature(oldName, newName) {
   featureMgr.move(oldName, newName);
 }
 
-function handleCommand(args) {
-  console.log('handling command: ', args);
-}
-
-// Inser
-module.exports = {
-  component,
-  style,
-  test,
-  action,
-  feature: featureMgr,
-  entry,
-  utils,
-  refactor,
-
-  handleCommand,
-
+const coreCommands = {
   addComponent: injectExtensionPoints(addComponent, 'add', 'component'),
   removeComponent: injectExtensionPoints(removeComponent, 'remove', 'component'),
   moveComponent: injectExtensionPoints(moveComponent, 'move', 'component'),
@@ -135,3 +122,58 @@ module.exports = {
   removeFeature: injectExtensionPoints(removeFeature, 'remove', 'feature'),
   moveFeature: injectExtensionPoints(moveFeature, 'move', 'feature'),
 };
+
+function splitName(name) {
+  const arr = name.split('/');
+  return {
+    feature: arr[0],
+    name: arr[1],
+  };
+}
+
+function handleCommand(args) {
+  const params = [];
+  switch (args.commandName) {
+    case 'add':
+    case 'remove':
+      params.push(splitName(args.name).feature);
+      params.push(splitName(args.name).name);
+      break;
+
+    case 'move':
+      params.push(splitName(args.source));
+      params.push(splitName(args.target));
+      break;
+
+    default:
+      break;
+  }
+  params.push(args);
+
+  let cmd = plugin.getCommand(args.commandName, args.type);
+  if (!cmd) {
+    cmd = coreCommands[_.camelCase(args.commandName + '-' + args.type)];
+  }
+
+  if (!cmd) {
+    utils.fatalError('Can\'t find the desired command.');
+  }
+  cmd.apply(null, params);
+}
+
+module.exports = Object.assign({
+  vio,
+  refactor,
+  utils,
+  component,
+  style,
+  test,
+  action,
+  feature: featureMgr,
+  entry,
+
+  handleCommand,
+}, coreCommands);
+
+// NOTE: plugin.loadPlutins should be executed after module.exports to avoid circular dependency
+plugin.loadPlugins();

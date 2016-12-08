@@ -19,8 +19,8 @@ module.exports = {
 
     vio.mkdir(targetDir);
     vio.mkdir(path.join(targetDir, 'redux'));
-    vio.mkdir(path.join(utils.getProjectRoot(), 'test/app/features', _.kebabCase(name)));
-    vio.mkdir(path.join(utils.getProjectRoot(), 'test/app/features', _.kebabCase(name), 'redux'));
+    vio.mkdir(path.join(utils.getProjectRoot(), 'tests/features', _.kebabCase(name)));
+    vio.mkdir(path.join(utils.getProjectRoot(), 'tests/features', _.kebabCase(name), 'redux'));
 
     // Create files from template
     [
@@ -33,14 +33,14 @@ module.exports = {
       'redux/constants.js',
       'redux/initialState.js',
     ].forEach((fileName) => {
-      template.create(path.join(targetDir, fileName), {
+      template.generate(path.join(targetDir, fileName), {
         templateFile: fileName,
         context: { feature: name }
       });
     });
 
     // Create wrapper reducer for the feature
-    template.create(path.join(utils.getProjectRoot(), `test/app/features/${_.kebabCase(name)}/redux/reducer.test.js`), {
+    template.generate(path.join(utils.getProjectRoot(), `tests/features/${_.kebabCase(name)}/redux/reducer.test.js`), {
       templateFile: 'reducer.test.js',
       context: { feature: name }
     });
@@ -48,7 +48,7 @@ module.exports = {
 
   remove(name) {
     vio.del(path.join(utils.getProjectRoot(), 'src/features', _.kebabCase(name)));
-    vio.del(path.join(utils.getProjectRoot(), 'test/app/features', _.kebabCase(name)));
+    vio.del(path.join(utils.getProjectRoot(), 'tests/features', _.kebabCase(name)));
   },
 
   move(oldName, newName) {
@@ -67,13 +67,11 @@ module.exports = {
     // Move feature folder
     const oldFolder = path.join(prjRoot, 'src/features', oldName);
     const newFolder = path.join(prjRoot, 'src/features', newName);
-    console.log('Moved: ', oldFolder.replace(prjRoot, ''), 'to', newFolder.replace(prjRoot, ''));
     shell.mv(oldFolder, newFolder);
 
     // Move feature test folder
-    const oldTestFolder = path.join(prjRoot, 'test/app/features', oldName);
-    const newTestFolder = path.join(prjRoot, 'test/app/features', newName);
-    console.log('Moved: ', oldTestFolder.replace(prjRoot, ''), 'to', newTestFolder.replace(prjRoot, ''));
+    const oldTestFolder = path.join(prjRoot, 'tests/features', oldName);
+    const newTestFolder = path.join(prjRoot, 'tests/features', newName);
     shell.mv(oldTestFolder, newTestFolder);
 
     // Update common/routeConfig
@@ -86,7 +84,7 @@ module.exports = {
     entry.renameInRootStyle(oldName, newName);
 
     // Update feature/route.js for path and name if they bind to feature name
-    refactor.updateFile(utils.mapFile(newName, 'route.js'), ast => [].concat(
+    refactor.updateFile(utils.mapFeatureFile(newName, 'route.js'), ast => [].concat(
       refactor.renameStringLiteral(ast, _.kebabCase(oldName), _.kebabCase(newName)), // Rename path
       refactor.renameStringLiteral(ast, _.upperFirst(_.lowerCase(oldName)), _.upperFirst(_.lowerCase(newName))) // Rename name
     ));
@@ -115,7 +113,7 @@ module.exports = {
       });
 
     // Try to do a rougth string replacement based on the original generated code structure
-    const testFolder = path.join(prjRoot, 'test/app/features', newName);
+    const testFolder = path.join(prjRoot, 'tests/features', newName);
     shell.ls('-R', testFolder)
       .filter(f => /\.test\.js$/.test(f))
       .forEach((filePath) => {

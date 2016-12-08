@@ -12,18 +12,18 @@ const utils = require('./utils');
 module.exports = {
   addToIndex(feature, name) {
     name = _.pascalCase(name);
-    const targetPath = utils.mapFile(feature, 'index.js');
+    const targetPath = utils.mapFeatureFile(feature, 'index.js');
     const lines = vio.getLines(targetPath);
-    const i = utils.lastLineIndex(lines, /^export .* from /);
+    const i = refactor.lastLineIndex(lines, /^export .* from /);
     lines.splice(i + 1, 0, `export ${name} from './${name}';`);
     vio.save(targetPath, lines);
   },
 
   removeFromIndex(feature, name) {
     name = _.pascalCase(name);
-    const targetPath = utils.mapFile(feature, 'index.js');
+    const targetPath = utils.mapFeatureFile(feature, 'index.js');
     const lines = vio.getLines(targetPath);
-    utils.removeLines(lines, `export ${name} from './${name}';`);
+    refactor.removeLines(lines, `export ${name} from './${name}';`);
     vio.save(targetPath, lines);
   },
 
@@ -31,9 +31,9 @@ module.exports = {
     // Rename export xxx from './xxx'
     oldName = _.pascalCase(oldName);
     newName = _.pascalCase(newName);
-    const targetPath = utils.mapFile(feature, 'index.js');
+    const targetPath = utils.mapFeatureFile(feature, 'index.js');
     const lines = vio.getLines(targetPath);
-    const i = utils.lineIndex(lines, new RegExp(`export +${oldName} +from '\\.\\/${oldName}'`));
+    const i = refactor.lineIndex(lines, new RegExp(`export +${oldName} +from '\\.\\/${oldName}'`));
     if (i >= 0) {
       lines[i] = `export ${newName} from './${newName}';`;
     }
@@ -42,24 +42,24 @@ module.exports = {
   },
 
   addToStyle(feature, name) {
-    const targetPath = utils.mapFile(feature, 'style.less');
+    const targetPath = utils.mapFeatureFile(feature, 'style.less');
     const lines = vio.getLines(targetPath);
-    const i = utils.lastLineIndex(lines, '@import ');
+    const i = refactor.lastLineIndex(lines, '@import ');
     lines.splice(i + 1, 0, `@import './${_.pascalCase(name)}.less';`);
     vio.save(targetPath, lines);
   },
 
   removeFromStyle(feature, name) {
-    const targetPath = utils.mapFile(feature, 'style.less');
+    const targetPath = utils.mapFeatureFile(feature, 'style.less');
     const lines = vio.getLines(targetPath);
-    utils.removeLines(lines, `@import './${_.pascalCase(name)}.less';`);
+    refactor.removeLines(lines, `@import './${_.pascalCase(name)}.less';`);
     vio.save(targetPath, lines);
   },
 
   renameInStyle(feature, oldName, newName) {
-    const targetPath = utils.mapFile(feature, 'style.less');
+    const targetPath = utils.mapFeatureFile(feature, 'style.less');
     const lines = vio.getLines(targetPath);
-    const i = utils.lineIndex(lines, new RegExp(`@import +'\\.\\/${oldName}\\.less'`));
+    const i = refactor.lineIndex(lines, new RegExp(`@import +'\\.\\/${oldName}\\.less'`));
     if (i >= 0) {
       lines[i] = `@import './${_.pascalCase(newName)}.less';`;
     }
@@ -72,13 +72,13 @@ module.exports = {
     utils.assertFeatureExist(feature);
 
     urlPath = urlPath || _.kebabCase(component);
-    const targetPath = utils.mapFile(feature, 'route.js');
+    const targetPath = utils.mapFeatureFile(feature, 'route.js');
     const lines = vio.getLines(targetPath);
-    let i = utils.lineIndex(lines, '} from \'./index\';');
+    let i = refactor.lineIndex(lines, '} from \'./index\';');
     lines.splice(i, 0, `  ${_.pascalCase(component)},`);
-    i = utils.lineIndex(lines, 'path: \'*\'');
+    i = refactor.lineIndex(lines, 'path: \'*\'');
     if (i === -1) {
-      i = utils.lastLineIndex(lines, /^ {2}]/);
+      i = refactor.lastLineIndex(lines, /^ {2}]/);
     }
     lines.splice(i, 0, `    { path: '${urlPath}', name: '${name || _.upperFirst(_.lowerCase(component))}', component: ${_.pascalCase(component)}${isIndex ? ', isIndex: true' : ''} },`);
     vio.save(targetPath, lines);
@@ -89,10 +89,10 @@ module.exports = {
     utils.assertNotEmpty(component, 'component name');
     utils.assertFeatureExist(feature);
 
-    const targetPath = utils.mapFile(feature, 'route.js');
+    const targetPath = utils.mapFeatureFile(feature, 'route.js');
     const lines = vio.getLines(targetPath);
-    utils.removeLines(lines, `  ${_.pascalCase(component)},`);
-    const removed = utils.removeLines(lines, new RegExp(`component: ${_.pascalCase(component)}[ ,}]`));
+    refactor.removeLines(lines, `  ${_.pascalCase(component)},`);
+    const removed = refactor.removeLines(lines, new RegExp(`component: ${_.pascalCase(component)}[ ,}]`));
     vio.save(targetPath, lines);
     return removed;
   },
@@ -100,7 +100,7 @@ module.exports = {
   moveRoute(source, dest) {
     if (source.feature === dest.feature) {
       // If in the same feature, rename imported component name
-      const targetPath = utils.mapFile(source.feature, 'route.js');
+      const targetPath = utils.mapFeatureFile(source.feature, 'route.js');
       const ast = vio.getAst(targetPath);
       const oldName = _.pascalCase(source.name);
       const newName = _.pascalCase(dest.name);
@@ -140,9 +140,9 @@ module.exports = {
   addToActions(feature, name, actionFile) {
     name = _.camelCase(name);
     actionFile = _.camelCase(actionFile || name);
-    const targetPath = utils.getReduxFile(feature, 'actions');
+    const targetPath = utils.mapReduxFile(feature, 'actions');
     const lines = vio.getLines(targetPath);
-    let i = utils.lineIndex(lines, ` from './${actionFile}'`);
+    let i = refactor.lineIndex(lines, ` from './${actionFile}'`);
     if (i >= 0) {
       // if action already exists
       const line = lines[i];
@@ -153,7 +153,7 @@ module.exports = {
         lines[i] = line.replace(/\{[^}]+\}/, `{ ${arr.join(', ')} }`);
       }
     } else {
-      i = utils.lastLineIndex(lines, /^export .* from /);
+      i = refactor.lastLineIndex(lines, /^export .* from /);
       lines.splice(i + 1, 0, `export { ${name} } from './${actionFile}';`);
     }
 
@@ -163,13 +163,13 @@ module.exports = {
   removeFromActions(feature, name, actionFile) {
     name = _.camelCase(name);
     actionFile = _.camelCase(actionFile || name);
-    const targetPath = utils.getReduxFile(feature, 'actions');
+    const targetPath = utils.mapReduxFile(feature, 'actions');
     const lines = vio.getLines(targetPath);
     if (!name) {
       // Remove all imports from the action
-      utils.removeLines(lines, `from './${actionFile}`);
+      refactor.removeLines(lines, `from './${actionFile}`);
     } else {
-      const i = utils.lineIndex(lines, ` from './${actionFile}'`);
+      const i = refactor.lineIndex(lines, ` from './${actionFile}'`);
       if (i >= 0) {
         const line = lines[i];
         const m = /^export \{([^}]+)\}/.exec(line);
@@ -191,7 +191,7 @@ module.exports = {
     // Rename export { xxx, xxxx } from './xxx'
     oldName = _.camelCase(oldName);
     newName = _.camelCase(newName);
-    const targetPath = utils.getReduxFile(feature, 'actions');
+    const targetPath = utils.mapReduxFile(feature, 'actions');
     const ast = vio.getAst(targetPath);
     const changes = [].concat(
       refactor.renameExportSpecifier(ast, oldName, newName)
@@ -203,28 +203,28 @@ module.exports = {
   },
 
   addToReducer(feature, action) {
-    const targetPath = utils.getReduxFile(feature, 'reducer');
+    const targetPath = utils.mapReduxFile(feature, 'reducer');
     const lines = vio.getLines(targetPath);
     const camelActionName = _.camelCase(action);
-    utils.addImportLine(lines, `import { reducer as ${camelActionName} } from './${camelActionName}';`);
-    const i = utils.lineIndex(lines, /^];/, utils.lineIndex(lines, 'const reducers = ['));
+    refactor.addImportLine(lines, `import { reducer as ${camelActionName} } from './${camelActionName}';`);
+    const i = refactor.lineIndex(lines, /^];/, refactor.lineIndex(lines, 'const reducers = ['));
     lines.splice(i, 0, `  ${camelActionName},`);
 
     vio.save(targetPath, lines);
   },
 
   removeFromReducer(feature, action) {
-    const targetPath = utils.getReduxFile(feature, 'reducer');
+    const targetPath = utils.mapReduxFile(feature, 'reducer');
     const lines = vio.getLines(targetPath);
     const camelActionName = _.camelCase(action);
-    utils.removeLines(lines, `from './${camelActionName}'`);
-    utils.removeLines(lines, `  ${camelActionName},`, utils.lineIndex(lines, 'const reducers = ['));
+    refactor.removeLines(lines, `from './${camelActionName}'`);
+    refactor.removeLines(lines, `  ${camelActionName},`, refactor.lineIndex(lines, 'const reducers = ['));
 
     vio.save(targetPath, lines);
   },
 
   renameInReducer(feature, oldName, newName) {
-    const targetPath = utils.getReduxFile(feature, 'reducer');
+    const targetPath = utils.mapReduxFile(feature, 'reducer');
     const ast = vio.getAst(targetPath);
     oldName = _.camelCase(oldName);
     newName = _.camelCase(newName);
@@ -237,9 +237,9 @@ module.exports = {
   },
 
   addToInitialState(feature, name, value) {
-    const targetPath = utils.getReduxFile(feature, 'initialState');
+    const targetPath = utils.mapReduxFile(feature, 'initialState');
     const lines = vio.getLines(targetPath);
-    const i = utils.lastLineIndex(lines, /^\};/);
+    const i = refactor.lastLineIndex(lines, /^\};/);
     lines.splice(i, 0, `  ${name}: ${value},`);
 
     vio.save(targetPath, lines);
@@ -247,9 +247,9 @@ module.exports = {
 
   removeFromInitialState(feature, name) {
     // TODO: currently only supports to remove one line state.
-    const targetPath = utils.getReduxFile(feature, 'initialState');
+    const targetPath = utils.mapReduxFile(feature, 'initialState');
     const lines = vio.getLines(targetPath);
-    utils.removeLines(lines, `  ${name}: `);
+    refactor.removeLines(lines, `  ${name}: `);
     vio.save(targetPath, lines);
   },
 
@@ -257,15 +257,15 @@ module.exports = {
     // Summary:
     //  Rename initial state property name.
 
-    const targetPath = utils.getReduxFile(feature, 'initialState');
+    const targetPath = utils.mapReduxFile(feature, 'initialState');
     utils.refactorCode(targetPath, _.partialRight(refactor.renameObjectProperty, oldName, newName));
   },
 
   addToRootReducer(feature) {
     const targetPath = path.join(utils.getProjectRoot(), 'src/common/rootReducer.js');
+    refactor.addImportLine(targetPath, `import ${_.camelCase(feature)}Reducer from '../features/${_.kebabCase(feature)}/redux/reducer';`);
     const lines = vio.getLines(targetPath);
-    utils.addImportLine(lines, `import ${_.camelCase(feature)}Reducer from '../features/${_.kebabCase(feature)}/redux/reducer';`);
-    const i = utils.lastLineIndex(lines, /^\}\);$/, utils.lineIndex(lines, 'const rootReducer = combineReducers({'));
+    const i = refactor.lineIndex(lines, /^\}\);$/, 'const rootReducer = combineReducers({');
     lines.splice(i, 0, `  ${_.camelCase(feature)}: ${_.camelCase(feature)}Reducer,`);
 
     vio.save(targetPath, lines);
@@ -274,11 +274,8 @@ module.exports = {
   removeFromRootReducer(feature) {
     // NOTE: currently only used by feature
     const targetPath = path.join(utils.getProjectRoot(), 'src/common/rootReducer.js');
-    const lines = vio.getLines(targetPath);
-    utils.removeLines(lines, `'../features/${_.kebabCase(feature)}/redux/reducer';`);
-    utils.removeLines(lines, `: ${_.camelCase(feature)}Reducer,`);
-
-    vio.save(targetPath, lines);
+    refactor.removeImportLine(targetPath, `../features/${_.kebabCase(feature)}/redux/reducer`);
+    refactor.removeLines(targetPath, `: ${_.camelCase(feature)}Reducer,`);
   },
 
   renameInRootReducer(oldName, newName) {
@@ -288,12 +285,12 @@ module.exports = {
 
   addToRouteConfig(feature) {
     const targetPath = path.join(utils.getProjectRoot(), 'src/common/routeConfig.js');
+    refactor.addImportLine(targetPath, `import ${_.camelCase(feature)}Route from '../features/${_.kebabCase(feature)}/route';`);
     const lines = vio.getLines(targetPath);
-    utils.addImportLine(lines, `import ${_.camelCase(feature)}Route from '../features/${_.kebabCase(feature)}/route';`);
-    let i = utils.lineIndex(lines, 'path: \'*\'');
+    let i = refactor.lineIndex(lines, 'path: \'*\'');
     // istanbul ignore if
     if (i === -1) {
-      i = utils.lastLineIndex(lines, /^ {2}]/);
+      i = refactor.lastLineIndex(lines, /^ {2}]/);
     }
     lines.splice(i, 0, `    ${_.camelCase(feature)}Route,`);
 
@@ -307,39 +304,26 @@ module.exports = {
 
   removeFromRouteConfig(feature) {
     const targetPath = path.join(utils.getProjectRoot(), 'src/common/routeConfig.js');
-    const lines = vio.getLines(targetPath);
-    utils.removeLines(lines, `import ${_.camelCase(feature)}Route from '../features/${_.kebabCase(feature)}/route';`);
-    utils.removeLines(lines, `    ${_.camelCase(feature)}Route,`);
-
-    vio.save(targetPath, lines);
+    refactor.removeImportLine(targetPath, `../features/${_.kebabCase(feature)}/route`);
+    refactor.removeLines(targetPath, `    ${_.camelCase(feature)}Route,`);
   },
 
   addToRootStyle(feature) {
-    const targetPath = path.join(utils.getProjectRoot(), 'src/styles/index.less');
-    const lines = vio.getLines(targetPath);
-    const i = utils.lastLineIndex(lines, '@import ');
-    lines.splice(i + 1, 0, `@import '../features/${_.kebabCase(feature)}/style.less';`);
-
-    vio.save(targetPath, lines);
+    const targetPath = path.join(utils.getProjectRoot(), 'src/styles/index.' + utils.cssExt);
+    refactor.addStyleImport(targetPath, `@import '../features/${_.kebabCase(feature)}/style.${utils.cssExt}';`);
   },
 
   removeFromRootStyle(feature) {
-    const targetPath = path.join(utils.getProjectRoot(), 'src/styles/index.less');
-    const lines = vio.getLines(targetPath);
-    utils.removeLines(lines, `features/${_.kebabCase(feature)}/style.less';`);
-
-    vio.save(targetPath, lines);
+    const targetPath = path.join(utils.getProjectRoot(), 'src/styles/index.' + utils.cssExt);
+    refactor.removeStyleImport(targetPath, `../features/${_.kebabCase(feature)}/style.${utils.cssExt}`);
   },
 
   renameInRootStyle(oldName, newName) {
-    const targetPath = path.join(utils.getProjectRoot(), 'src/styles/index.less');
-    const lines = vio.getLines(targetPath);
-    const i = utils.lineIndex(lines, `features/${_.kebabCase(oldName)}/style.less';`);
-    if (i >= 0) {
-      lines[i] = `@import '../features/${_.kebabCase(newName)}/style.less';`;
-    } else {
-      this.addToRootStyle(newName);
-    }
-    vio.save(targetPath, lines);
+    const targetPath = path.join(utils.getProjectRoot(), 'src/styles/index.' + utils.cssExt);
+    refactor.renameStyleModuleSource(
+      targetPath,
+      `../features/${_.kebabCase(oldName)}/style.${utils.cssExt}`,
+      `../features/${_.kebabCase(newName)}/style.${utils.cssExt}`
+    );
   },
 };

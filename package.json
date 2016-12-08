@@ -4,7 +4,7 @@
   "description": "Rekit core functions.",
   "author": "Nate Wang <supnate@gmail.com>",
   "homepage": "https://github.com/supnate/rekit-core",
-  "main": "core/rekit.js",
+  "main": "index.js",
   "keywords": [
     "rekit",
     "rekit-core",
@@ -35,6 +35,9 @@
     "instrument": true
   },
   "dependencies": {
+    "babel-generator": "^6.19.0",
+    "babel-traverse": "^6.19.0",
+    "babylon": "^6.14.1",
     "colors": "^1.1.2",
     "diff": "^3.1.0",
     "eslint-config-airbnb-base": "^10.0.1",

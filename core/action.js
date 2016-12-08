@@ -16,9 +16,9 @@ module.exports = {
 
     // create component from template
     args = args || {};
-    const actionType = args.actionType || utils.getActionType(feature, name);
-    template.create(utils.getReduxFile(feature, name), Object.assign({}, args, {
-      templateFile: args.templateFile || 'action.js',
+    const actionType = utils.getActionType(feature, name);
+    template.generate(utils.mapReduxFile(feature, name), Object.assign({}, args, {
+      templateFile: args.templateFile || 'redux/action.js',
       context: Object.assign({
         feature,
         actionType,
@@ -36,8 +36,8 @@ module.exports = {
     utils.assertNotEmpty(name, 'action name');
     utils.assertFeatureExist(feature);
 
-    actionType = actionType || utils.getActionType(feature, name);
-    vio.del(utils.getReduxFile(feature, name));
+    actionType = utils.getActionType(feature, name);
+    vio.del(utils.mapReduxFile(feature, name));
     constant.remove(feature, actionType);
     entry.removeFromReducer(feature, name);
     entry.removeFromActions(feature, name);
@@ -56,8 +56,8 @@ module.exports = {
     dest.feature = _.kebabCase(dest.feature);
     dest.name = _.camelCase(dest.name);
 
-    const srcPath = utils.getReduxFile(source.feature, source.name);
-    const destPath = utils.getReduxFile(dest.feature, dest.name);
+    const srcPath = utils.mapReduxFile(source.feature, source.name);
+    const destPath = utils.mapReduxFile(dest.feature, dest.name);
     vio.move(srcPath, destPath);
 
     const oldActionType = utils.getActionType(source.feature, source.name);
@@ -71,7 +71,7 @@ module.exports = {
     if (source.feature === dest.feature) {
       entry.renameInActions(source.feature, source.name, dest.name);
       // update the import path in actions.js
-      const targetPath = utils.getReduxFile(source.feature, 'actions');
+      const targetPath = utils.mapReduxFile(source.feature, 'actions');
       utils.replaceStringLiteral(targetPath, `./${source.name}`, `./${dest.name}`);
 
       entry.renameInReducer(source.feature, source.name, dest.name);
@@ -97,8 +97,8 @@ module.exports = {
     const actionTypes = utils.getAsyncActionTypes(feature, name);
 
     args = args || {};
-    template.create(utils.getReduxFile(feature, name), Object.assign({}, args, {
-      templateFile: args.templateFile || 'async_action.js',
+    template.generate(utils.mapReduxFile(feature, name), Object.assign({}, args, {
+      templateFile: args.templateFile || 'redux/async_action.js',
       context: Object.assign({
         feature,
         actionTypes,
@@ -126,7 +126,7 @@ module.exports = {
     // const upperSnakeActionName = _.upperSnakeCase(name);
     const actionTypes = utils.getAsyncActionTypes(feature, name);
 
-    vio.del(utils.getReduxFile(feature, name));
+    vio.del(utils.mapReduxFile(feature, name));
     constant.remove(feature, actionTypes.begin);
     constant.remove(feature, actionTypes.success);
     constant.remove(feature, actionTypes.failure);
@@ -151,8 +151,8 @@ module.exports = {
     dest.feature = _.kebabCase(dest.feature);
     dest.name = _.camelCase(dest.name);
 
-    const srcPath = utils.getReduxFile(source.feature, source.name);
-    const destPath = utils.getReduxFile(dest.feature, dest.name);
+    const srcPath = utils.mapReduxFile(source.feature, source.name);
+    const destPath = utils.mapReduxFile(dest.feature, dest.name);
     vio.move(srcPath, destPath);
 
     const oldActionTypes = utils.getAsyncActionTypes(source.feature, source.name);
@@ -178,7 +178,7 @@ module.exports = {
       entry.renameInInitialState(source.feature, `${source.name}Error`, `${dest.name}Error`);
 
       // Update the import path in actions.js
-      const targetPath = utils.getReduxFile(source.feature, 'actions');
+      const targetPath = utils.mapReduxFile(source.feature, 'actions');
       refactor.updateFile(targetPath, ast => refactor.renameStringLiteral(ast, `./${source.name}`, `./${dest.name}`));
 
       constant.rename(source.feature, oldActionTypes.begin, newActionTypes.begin);

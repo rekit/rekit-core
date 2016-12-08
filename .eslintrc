@@ -3,6 +3,10 @@
   'rules': {
     'strict': 0,
     'prefer-template': 0,
-    'no-param-reassign': 0
+    'comma-dangle': 0,
+    'prefer-rest-params': 0,
+    'prefer-spread': 0,
+    'no-param-reassign': 0,
+    'import/no-dynamic-require': 0
   }
 }

@@ -9,14 +9,14 @@ const template = require('./template');
 module.exports = {
   add(feature, component, args) {
     args = args || {};
-    template.create(utils.getTestFile(feature, component), Object.assign({}, args, {
+    template.generate(utils.mapComponentTestFile(feature, component), Object.assign({}, args, {
       templateFile: args.templateFile || 'Component.test.js',
       context: Object.assign({ feature, component }, args.context || {}),
     }));
   },
 
   remove(feature, component) {
-    vio.del(utils.getTestFile(feature, component));
+    vio.del(utils.mapComponentTestFile(feature, component));
   },
 
   move(source, dest) {
@@ -25,8 +25,8 @@ module.exports = {
     dest.feature = _.kebabCase(dest.feature);
     dest.name = _.pascalCase(dest.name);
 
-    const srcPath = utils.getTestFile(source.feature, source.name);
-    const destPath = utils.getTestFile(dest.feature, dest.name);
+    const srcPath = utils.mapComponentTestFile(source.feature, source.name);
+    const destPath = utils.mapComponentTestFile(dest.feature, dest.name);
     vio.move(srcPath, destPath);
 
     const oldCssClass = `.${_.kebabCase(source.feature)}-${_.kebabCase(source.name)}`;
@@ -64,14 +64,14 @@ module.exports = {
     } else {
       context.actionType = args.actionType || utils.getActionType(feature, name);
     }
-    template.create(utils.getReduxTestFile(feature, name), Object.assign({}, args, {
-      templateFile: args.templateFile || (args.isAsync ? 'async_action.test.js' : 'action.test.js'),
+    template.generate(utils.mapReduxTestFile(feature, name), Object.assign({}, args, {
+      templateFile: args.templateFile || (args.isAsync ? 'redux/async-action.test.js' : 'redux/action.test.js'),
       context: Object.assign(context, args.context || {}),
     }));
   },
 
   removeAction(feature, name) {
-    vio.del(utils.getReduxTestFile(feature, name));
+    vio.del(utils.mapReduxTestFile(feature, name));
   },
 
   moveAction(source, dest, isAsync) {
@@ -80,8 +80,8 @@ module.exports = {
     dest.feature = _.kebabCase(dest.feature);
     dest.name = _.camelCase(dest.name);
 
-    const srcPath = utils.getReduxTestFile(source.feature, source.name);
-    const destPath = utils.getReduxTestFile(dest.feature, dest.name);
+    const srcPath = utils.mapReduxTestFile(source.feature, source.name);
+    const destPath = utils.mapReduxTestFile(dest.feature, dest.name);
     vio.move(srcPath, destPath);
 
     // Note: below string pattern binds to the test template, update here if template is changed.

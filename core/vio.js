@@ -43,12 +43,12 @@ function getLines(filePath) {
 }
 
 function getContent(filePath) {
-  return this.getLines(filePath).join('\n');
+  return getLines(filePath).join('\n');
 }
 
 function getAst(filePath) {
   if (!asts[filePath]) {
-    const code = this.getLines(filePath).join('\n');
+    const code = getLines(filePath).join('\n');
     const ast = babylon.parse(code, {
       // parse in strict mode and allow module declarations
       sourceType: 'module',
@@ -74,7 +74,7 @@ function getAst(filePath) {
 function saveAst(filePath, ast) {
   asts[filePath] = ast;
   // Update file lines when ast is changed
-  this.save(filePath, generate(ast).code.split(/\r?\n/));
+  save(filePath, generate(ast).code.split(/\r?\n/));
 }
 
 function fileExists(filePath) {
@@ -103,19 +103,19 @@ function mkdir(dir) {
 
 function save(filePath, lines) {
   if (lines) {
-    this.put(filePath, lines);
+    put(filePath, lines);
   }
   toSave[filePath] = true;
 }
 
 function move(oldPath, newPath) {
   if (toDel[oldPath] || !shell.test('-e', oldPath)) {
-    this.log('Error: no file to move: ', 'red', oldPath);
+    log('Error: no file to move: ', 'red', oldPath);
     throw new Error('No file to move');
   }
 
   if (shell.test('-e', newPath)) {
-    this.log('Error: target file already exists: ', 'red', newPath);
+    log('Error: target file already exists: ', 'red', newPath);
     throw new Error('Target file already exists');
   }
 
@@ -163,44 +163,45 @@ function flush() {
   // Delete files first
   for (const filePath of Object.keys(toDel)) {
     if (!shell.test('-e', filePath)) {
-      this.log('Warning: no file to delete: ', 'yellow', filePath);
+      log('Warning: no file to delete: ', 'yellow', filePath);
     } else {
       shell.rm('-rf', filePath);
-      this.log('Deleted: ', 'magenta', filePath);
+      log('Deleted: ', 'magenta', filePath);
     }
   }
 
   // Move files
   for (const filePath of Object.keys(mvs)) {
     if (!shell.test('-e', filePath)) {
-      this.log('Warning: no file to move: ', 'yellow', filePath);
+      log('Warning: no file to move: ', 'yellow', filePath);
     } else {
       shell.mv(filePath, mvs[filePath]);
-      this.log('Moved: ', 'green', filePath, mvs[filePath]);
+      log('Moved: ', 'green', filePath, mvs[filePath]);
     }
   }
 
   // Create/update files
   for (const filePath of Object.keys(toSave)) {
-    const newContent = this.getLines(filePath).join('\n');
+    const newContent = getLines(filePath).join('\n');
     if (shell.test('-e', filePath)) {
       const oldContent = shell.cat(filePath).split(/\r?\n/).join('\n');
       if (oldContent === newContent) {
-        this.log('Warning: nothing is changed for: ', 'yellow', filePath);
+        log('Warning: nothing is changed for: ', 'yellow', filePath);
         continue;
       } else {
-        this.log('Updated: ', 'cyan', filePath);
+        log('Updated: ', 'cyan', filePath);
         printDiff(jsdiff.diffLines(oldContent, newContent));
       }
     } else {
-      this.ensurePathDir(filePath);
-      this.log('Created: ', 'blue', filePath);
+      ensurePathDir(filePath);
+      log('Created: ', 'blue', filePath);
     }
     shell.ShellString(newContent).to(filePath);
   }
 }
 
 module.exports = {
+  getLines,
   getContent,
   getAst,
   saveAst,

@@ -8,15 +8,21 @@ const _ = require('lodash');
 const shell = require('shelljs');
 const utils = require('./utils');
 
-const prjRoot = utils.getProjectRoot();
-const plugins = [];
+let plugins = null;
+
+function getPlugins() {
+  if (!plugins) {
+    utils.fatal('Plugins have not been loaded.');
+  }
+  return plugins;
+}
 
 function injectExtensionPoints(func, command, targetName) {
   // Summary:
   //  Hook: add/move/remove elements
 
   function execExtension(hookName, args) {
-    plugins.forEach((p) => {
+    getPlugins().forEach((p) => {
       if (p.hooks && p.hooks[hookName]) {
         p.hooks[hookName].apply(p.hooks, args);
       }
@@ -36,12 +42,25 @@ function injectExtensionPoints(func, command, targetName) {
   };
 }
 
-shell.ls(path.join(prjRoot, 'tools/plugins'))
-  .filter(d => shell.test('-d', path.join(prjRoot, 'tools/plugins', d))) // only get dirs
-  .forEach((d) => {
-    const pluginRoot = path.join(prjRoot, 'tools/plugins', d);
+function loadPlugins() {
+  const prjRoot = utils.getProjectRoot();
+
+  const prjPkgJson = require(path.join(prjRoot, 'package.json')); // eslint-disable-line
+
+  // Find local plugins
+  plugins = shell.ls(path.join(prjRoot, 'tools/plugins'))
+    .filter(d => shell.test('-d', path.join(prjRoot, 'tools/plugins', d)))
+    .map(d => path.join(prjRoot, 'tools/plugins', d));
+
+  // Find installed plugins
+  if (prjPkgJson.rekit && prjPkgJson.rekit.plugins) {
+    plugins = plugins.concat(prjPkgJson.rekit.plugins.map(p => path.join(prjRoot, 'node_modules', p)));
+  }
+
+  // Map to plugin instances
+  plugins = plugins.map((pluginRoot) => {
     try {
-      const config = require(path.join(pluginRoot, 'config'));
+      const config = require(path.join(pluginRoot, 'config')); // eslint-disable-line
       const item = {
         config,
         commands: {},
@@ -52,7 +71,7 @@ shell.ls(path.join(prjRoot, 'tools/plugins'))
         config.accept.forEach(
           (name) => {
             name = _.camelCase(name);
-            const commands = require(path.join(pluginRoot, name));
+            const commands = require(path.join(pluginRoot, name)); // eslint-disable-line
             item.commands[name] = {};
             Object.keys(commands).forEach((key) => {
               item.commands[name][key] = injectExtensionPoints(commands[key], key, name);
@@ -62,26 +81,33 @@ shell.ls(path.join(prjRoot, 'tools/plugins'))
       }
 
       if (shell.test('-e', path.join(pluginRoot, 'hooks.js'))) {
-        item.hooks = require(path.join(pluginRoot, 'hooks'));
+        item.hooks = require(path.join(pluginRoot, 'hooks')); // eslint-disable-line
       }
 
-      plugins.push(item);
+      return item;
     } catch (e) {
-      console.log(`Warning: failed to load plugin: ${path.basename(d)}`);
-      console.log(e);
+      utils.fatalError(`Failed to load plugin: ${path.basename(pluginRoot)}`);
     }
-  });
 
-function getCommand(command, typeName) {
-  for (const p of plugins) {
-    const a = _.get(p, `commands.${_.camelCase(typeName)}.${_.camelCase(command)}`);
-    if (a) return a;
+    return null;
+  });
+}
+
+// Get the first matched command provided by some plugin
+// Local plugin first, then installed plugin.
+function getCommand(command, elementName) {
+  // example: commands.asyncActionSaga.add
+  const keyPath = `commands.${_.camelCase(elementName)}.${_.camelCase(command)}`;
+  const found = getPlugins().find(item => _.has(item, keyPath));
+  if (found) {
+    return _.get(found, keyPath);
   }
   return null;
 }
 
 module.exports = {
   getCommand,
-  plugins,
+  loadPlugins,
+  getPlugins,
   injectExtensionPoints,
 };
