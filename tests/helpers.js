@@ -5,7 +5,7 @@ const path = require('path');
 const expect = require('chai').expect;
 const shell = require('shelljs');
 const _ = require('lodash');
-const vio = require('../../tools/lib/vio');
+const vio = require('../core/vio');
 
 const TEST_FEATURE_NAME = 'rekit-test-feature';
 

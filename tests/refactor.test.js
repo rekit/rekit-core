@@ -1,9 +1,9 @@
 'use strict';
 
 const expect = require('chai').expect;
-const vio = require('../../../tools/lib/vio');
-const refactor = require('../../../tools/lib/refactor');
-const utils = require('../utils');
+const vio = require('../core/vio');
+const refactor = require('../core/refactor');
+const utils = require('../core/utils');
 
 const V_FILE = '/vio-temp-file';
 
@@ -25,7 +25,7 @@ describe('reafctor tests', function() { // eslint-disable-line
   });
 
   describe('addExportFromLine', () => {
-    it('should be added as the last line when there\'re other exports', () => {
+    it('should add export as the last one when there\'re other exports', () => {
       vio.put(V_FILE, CODE_1);
       const line = "export { e } from './e';";
       refactor.addExportFromLine(V_FILE, line);
@@ -33,7 +33,7 @@ describe('reafctor tests', function() { // eslint-disable-line
       expect(lines[3]).to.equal(line);
     });
 
-    it('should be added as the first line when no other export', () => {
+    it('should add export as the first line when no other export', () => {
       vio.put(V_FILE, CODE_2);
       const line = "export { e } from './e';";
       refactor.addExportFromLine(V_FILE, line);
@@ -52,11 +52,9 @@ describe('reafctor tests', function() { // eslint-disable-line
     });
 
     it('should do nothing if no export is found', () => {
-      vio.put(V_FILE, CODE_2);
-      const line = "export { e } from './e';";
-      refactor.addExportFrom(V_FILE, line);
-      const lines = vio.getLines(V_FILE);
-      expect(lines[3]).to.equal(line);
+      vio.put(V_FILE, CODE_1);
+      refactor.removeExportFromLine(V_FILE, './e');
+      expect(vio.getContent(V_FILE)).to.equal(CODE_1);
     });
   });
 });

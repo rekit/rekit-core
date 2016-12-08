@@ -1,0 +1,10 @@
+{
+  'rules': {
+    'import/no-extraneous-dependencies': 0
+  },
+  'globals': {
+    before: true,
+    it: true,
+    describe: true,
+  }
+}

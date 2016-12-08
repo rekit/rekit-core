@@ -4,6 +4,7 @@
   "description": "Rekit core functions.",
   "author": "Nate Wang <supnate@gmail.com>",
   "homepage": "https://github.com/supnate/rekit-core",
+  "main": "core/rekit.js",
   "keywords": [
     "rekit",
     "rekit-core",
@@ -19,7 +20,7 @@
     "url": "https://github.com/supnate/rekit-core/issues"
   },
   "scripts": {
-    "test": "node ./tools/server.js"
+    "test": "node ./tools/run_test.js"
   },
   "nyc": {
     "include": [
@@ -36,7 +37,10 @@
   "dependencies": {
     "colors": "^1.1.2",
     "diff": "^3.1.0",
+    "eslint-config-airbnb-base": "^10.0.1",
+    "eslint-plugin-import": "^2.2.0",
     "lodash": "^4.15.0",
+    "npm-run": "^4.1.0",
     "shelljs": "^0.7.4",
     "trash": "^4.0.0"
   },
@@ -44,7 +48,6 @@
     "chai": "^3.5.0",
     "codecov": "^1.0.1",
     "eslint": "^3.5.0",
-    "eslint-config-airbnb": "^11.0.0",
     "mocha": "^3.0.2",
     "nyc": "^8.1.0"
   }

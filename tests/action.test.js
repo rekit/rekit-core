@@ -1,8 +1,8 @@
 'use strict';
 const expect = require('chai').expect;
 const helpers = require('./helpers');
-const rekit = require('../../tools/lib/rekit');
-const vio = require('../../tools/lib/vio');
+const rekit = require('../core/rekit');
+const vio = require('../core/vio');
 
 const mapFeatureFile = helpers.mapFeatureFile;
 const mapFeatureTestFile = helpers.mapFeatureTestFile;

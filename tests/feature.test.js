@@ -2,8 +2,8 @@
 const expect = require('chai').expect;
 const _ = require('lodash');
 const helpers = require('./helpers');
-const rekit = require('../../tools/lib/rekit');
-const vio = require('../../tools/lib/vio');
+const rekit = require('../core/rekit');
+const vio = require('../core/vio');
 
 const mapFile = helpers.mapFile;
 const mapFeatureFile = helpers.mapFeatureFile;

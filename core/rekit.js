@@ -8,6 +8,8 @@ const style = require('./style');
 const test = require('./test');
 const action = require('./action');
 const featureMgr = require('./feature');
+const utils = require('./utils');
+const refactor = require('./refactor');
 const entry = require('./entry');
 const injectExtensionPoints = require('./plugin').injectExtensionPoints;
 
@@ -100,8 +102,23 @@ function moveFeature(oldName, newName) {
   featureMgr.move(oldName, newName);
 }
 
+function handleCommand(args) {
+  console.log('handling command: ', args);
+}
+
 // Inser
 module.exports = {
+  component,
+  style,
+  test,
+  action,
+  feature: featureMgr,
+  entry,
+  utils,
+  refactor,
+
+  handleCommand,
+
   addComponent: injectExtensionPoints(addComponent, 'add', 'component'),
   removeComponent: injectExtensionPoints(removeComponent, 'remove', 'component'),
   moveComponent: injectExtensionPoints(moveComponent, 'move', 'component'),

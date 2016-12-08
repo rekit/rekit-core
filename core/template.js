@@ -35,5 +35,5 @@ module.exports = {
     }
     const lines = content.split(/\r?\n/);
     vio.save(targetPath, lines);
-  }
+  },
 };

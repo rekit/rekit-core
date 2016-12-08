@@ -318,7 +318,7 @@ function removeImportLine(file, moduleSource) {
   //  Remove import xxx from '.xxx' line at the top. Usually used by entry files such as index.js
 
   const lines = vio.getLines(file);
-  removeLines(lines, new RegExp(`import +.* +from +'${utils.escapeRegExp(moduleSource)}'`));
+  removeLines(lines, new RegExp(`import +.* +from +'${_.escapeRegExp(moduleSource)}'`));
 }
 
 function addExportFromLine(file, exportLine) {
@@ -335,7 +335,7 @@ function removeExportFromLine(file, moduleSource) {
   //  Remove export xxx from '.xxx' line at the top. Usually used by entry files such as index.js
 
   const lines = vio.getLines(file);
-  removeLines(lines, new RegExp(`export +.* +from +'${utils.escapeRegExp(moduleSource)}'`));
+  removeLines(lines, new RegExp(`export +.* +from +'${_.escapeRegExp(moduleSource)}'`));
 }
 
 // function renameExportFrom(file, oldName, newName, oldModulePath, newModulePath) {
