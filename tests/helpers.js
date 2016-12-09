@@ -5,28 +5,33 @@ const path = require('path');
 const expect = require('chai').expect;
 const shell = require('shelljs');
 const _ = require('lodash');
+const utils = require('../core/utils');
 const vio = require('../core/vio');
 
 const TEST_FEATURE_NAME = 'rekit-test-feature';
 
+// For testing, use a fake project root
+utils.setProjectRoot(path.join(__dirname, '..'));
+utils.setSilent(true);
+
 // NOTE: don't output errors from apps to test.
 console.error = () => {};
 
-function mapFile(file) {
-  return path.join(__dirname, '../../src', file);
-}
+// function mapFile(file) {
+//   return path.join(__dirname, '../../src', file);
+// }
 
-function mapFeatureFile(file) {
-  return path.join(__dirname, '../../src/features', TEST_FEATURE_NAME, file);
-}
+// function mapFeatureFile(file) {
+//   return path.join(__dirname, '../../src/features', TEST_FEATURE_NAME, file);
+// }
 
-function mapTestFile(file) {
-  return path.join(__dirname, '../../test', file);
-}
+// function mapTestFile(file) {
+//   return path.join(__dirname, '../../tests', file);
+// }
 
-function mapFeatureTestFile(file) {
-  return path.join(__dirname, '../../test/app/features', TEST_FEATURE_NAME, file);
-}
+// function mapFeatureTestFile(file) {
+//   return path.join(__dirname, '../../tests/features', TEST_FEATURE_NAME, file);
+// }
 
 function pureExec(cmd) {
   return shell.exec(cmd, { silent: true });
@@ -91,10 +96,6 @@ function escapeRegExp(s) {
 }
 
 module.exports = {
-  mapFile,
-  mapFeatureFile,
-  mapTestFile,
-  mapFeatureTestFile,
   exec,
   execTool,
   pureExecTool,

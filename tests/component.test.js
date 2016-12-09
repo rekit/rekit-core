@@ -1,38 +1,37 @@
 'use strict';
 
+const _ = require('lodash');
 const expect = require('chai').expect;
 const helpers = require('./helpers');
-const rekit = require('../core/rekit');
-const vio = require('../core/vio');
+const core = require('../core');
 
-const mapFeatureFile = helpers.mapFeatureFile;
-const mapFeatureTestFile = helpers.mapFeatureTestFile;
+const vio = core.vio;
+const utils = core.utils;
+
 const expectFiles = helpers.expectFiles;
 const expectNoFiles = helpers.expectNoFiles;
 const expectLines = helpers.expectLines;
 const expectNoLines = helpers.expectNoLines;
 const TEST_FEATURE_NAME = helpers.TEST_FEATURE_NAME;
+const mapFeatureFile = _.partial(utils.mapFeatureFile, TEST_FEATURE_NAME);
+const mapTestFile = _.partial(utils.mapTestFile, TEST_FEATURE_NAME);
 
 describe('cli: component tests', function() { // eslint-disable-line
   before(() => {
     vio.reset();
-    rekit.addFeature(TEST_FEATURE_NAME);
-  });
-
-  after(() => {
-    vio.reset();
+    core.addFeature(TEST_FEATURE_NAME);
   });
 
   it('throw error when no args to add component', () => {
-    expect(rekit.addComponent).to.throw(Error);
+    expect(core.addComponent).to.throw(Error);
   });
 
   it('throw error when no args to remove component', () => {
-    expect(rekit.removeComponent).to.throw(Error);
+    expect(core.removeComponent).to.throw(Error);
   });
 
   it('add component', () => {
-    rekit.addComponent(TEST_FEATURE_NAME, 'test-component');
+    core.addComponent(TEST_FEATURE_NAME, 'test-component');
     expectFiles([
       'TestComponent.js',
       'TestComponent.less',
@@ -45,15 +44,15 @@ describe('cli: component tests', function() { // eslint-disable-line
     ]);
     expectFiles([
       'TestComponent.test.js',
-    ].map(mapFeatureTestFile));
+    ].map(mapTestFile));
   });
 
   it('throw error when component already exists', () => {
-    expect(rekit.addComponent.bind(rekit, TEST_FEATURE_NAME, 'test-component')).to.throw();
+    expect(core.addComponent.bind(core, TEST_FEATURE_NAME, 'test-component')).to.throw();
   });
 
   it('remove component', () => {
-    rekit.removeComponent(TEST_FEATURE_NAME, 'test-component');
+    core.removeComponent(TEST_FEATURE_NAME, 'test-component');
     expectNoFiles([
       'TestComponent.js',
       'TestComponent.less',
@@ -67,6 +66,6 @@ describe('cli: component tests', function() { // eslint-disable-line
     ]);
     expectNoFiles([
       'TestComponent.test.js',
-    ].map(mapFeatureTestFile));
+    ].map(mapTestFile));
   });
 });

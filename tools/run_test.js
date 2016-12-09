@@ -7,8 +7,8 @@
 */
 
 'use strict';
+
 const path = require('path');
-const shell = require('shelljs');
 const npmRun = require('npm-run');
 
 const prjRoot = path.join(__dirname, '../');
@@ -43,33 +43,6 @@ if (needReport) {
 }
 npmRun.execSync(params.join(' '), opts);
 
-
-// function runAllTest() {
-//   const coverageFolder = path.join(prjRoot, 'coverage');
-//   if (!shell.test('-e', coverageFolder)) {
-//     shell.mkdir(coverageFolder);
-//   }
-//   const cacheFolder = path.join(coverageFolder, '.nyc_output');
-//   if (shell.test('-e', cacheFolder)) {
-//     shell.rm('-rf', cacheFolder);
-//   }
-//   shell.mkdir(cacheFolder);
-//   runAppTest();
-//   shell.cp('-R', path.join(prjRoot, '.nyc_output/*'), cacheFolder);
-//   runCliTest();
-//   shell.cp('-R', `${cacheFolder}/*`, path.join(prjRoot, '.nyc_output'));
-//   npmRun.execSync('nyc report --reporter=text-summary --reporter=lcov', opts);
-//   console.log('Overall coverage report: ', path.join(prjRoot, 'coverage/lcov-report/index.html'));
-//   shell.rm('-rf', cacheFolder);
-// }
-
-// if (/^app/.test(args)) {
-//   runAppTest();
-// } else if (/^cli/.test(args)) {
-//   runCliTest();
-// } else if (/^all/.test(args)) {
-//   runAllTest();
-// } else {
-//   console.error('Test files should be under test/app or test/cli.');
-//   process.exit(1);
-// }
+if (needReport) {
+  console.log('Report: ', path.join(prjRoot, 'coverage/lcov-report/index.html'));
+}

@@ -78,7 +78,7 @@ function saveAst(filePath, ast) {
 }
 
 function fileExists(filePath) {
-  return !!toSave[filePath] && !toDel[filePath];
+  return (!!fileLines[filePath] || !!toSave[filePath]) && !toDel[filePath];
 }
 
 function dirExists(dir) {

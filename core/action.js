@@ -13,7 +13,6 @@ module.exports = {
     utils.assertNotEmpty(feature, 'feature');
     utils.assertNotEmpty(name, 'action name');
     utils.assertFeatureExist(feature);
-
     // create component from template
     args = args || {};
     const actionType = utils.getActionType(feature, name);
@@ -98,7 +97,7 @@ module.exports = {
 
     args = args || {};
     template.generate(utils.mapReduxFile(feature, name), Object.assign({}, args, {
-      templateFile: args.templateFile || 'redux/async_action.js',
+      templateFile: args.templateFile || 'redux/async-action.js',
       context: Object.assign({
         feature,
         actionTypes,

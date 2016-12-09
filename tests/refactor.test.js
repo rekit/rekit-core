@@ -3,7 +3,6 @@
 const expect = require('chai').expect;
 const vio = require('../core/vio');
 const refactor = require('../core/refactor');
-const utils = require('../core/utils');
 
 const V_FILE = '/vio-temp-file';
 

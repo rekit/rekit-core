@@ -66,12 +66,12 @@ module.exports = {
     vio.save(targetPath, lines);
   },
 
-  addToRoute(feature, component, urlPath, isIndex, name) {
+  addToRoute(feature, component, args) {
     utils.assertNotEmpty(feature, 'feature');
     utils.assertNotEmpty(component, 'component name');
     utils.assertFeatureExist(feature);
-
-    urlPath = urlPath || _.kebabCase(component);
+    args = args || {};
+    const urlPath = args.urlPath || _.kebabCase(component);
     const targetPath = utils.mapFeatureFile(feature, 'route.js');
     const lines = vio.getLines(targetPath);
     let i = refactor.lineIndex(lines, '} from \'./index\';');
@@ -80,7 +80,7 @@ module.exports = {
     if (i === -1) {
       i = refactor.lastLineIndex(lines, /^ {2}]/);
     }
-    lines.splice(i, 0, `    { path: '${urlPath}', name: '${name || _.upperFirst(_.lowerCase(component))}', component: ${_.pascalCase(component)}${isIndex ? ', isIndex: true' : ''} },`);
+    lines.splice(i, 0, `    { path: '${urlPath}', name: '${args.pageName || _.upperFirst(_.lowerCase(component))}', component: ${_.pascalCase(component)}${args.isIndex ? ', isIndex: true' : ''} },`);
     vio.save(targetPath, lines);
   },
 

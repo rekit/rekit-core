@@ -1,38 +1,38 @@
 'use strict';
 
+const _ = require('lodash');
 const expect = require('chai').expect;
 const helpers = require('./helpers');
-const rekit = require('../core/rekit');
-const vio = require('../core/vio');
+const core = require('../core');
 
-const mapFeatureFile = helpers.mapFeatureFile;
+const vio = core.vio;
+const utils = core.utils;
+
 const expectFiles = helpers.expectFiles;
 const expectNoFiles = helpers.expectNoFiles;
 const expectLines = helpers.expectLines;
 const expectNoLines = helpers.expectNoLines;
-const mapFeatureTestFile = helpers.mapFeatureTestFile;
 const TEST_FEATURE_NAME = helpers.TEST_FEATURE_NAME;
+
+const mapFeatureFile = _.partial(utils.mapFeatureFile, TEST_FEATURE_NAME);
+const mapTestFile = _.partial(utils.mapTestFile, TEST_FEATURE_NAME);
 
 describe('cli: page tests', function() { // eslint-disable-line
   before(() => {
     vio.reset();
-    rekit.addFeature(TEST_FEATURE_NAME);
-  });
-
-  after(() => {
-    vio.reset();
+    core.addFeature(TEST_FEATURE_NAME);
   });
 
   it('throw error when no args to add page', () => {
-    expect(rekit.addPage).to.throw(Error);
+    expect(core.addPage).to.throw(Error);
   });
 
   it('throw error when no args to remove page', () => {
-    expect(rekit.removePage).to.throw(Error);
+    expect(core.removePage).to.throw(Error);
   });
 
   it('add page', () => {
-    rekit.addPage(TEST_FEATURE_NAME, 'test-page');
+    core.addPage(TEST_FEATURE_NAME, 'test-page');
     expectFiles([
       'TestPage.js',
       'TestPage.less',
@@ -44,17 +44,17 @@ describe('cli: page tests', function() { // eslint-disable-line
       'export TestPage from \'./TestPage\';',
     ]);
     expectLines(mapFeatureFile('route.js'), [
-      '    { path: \'test-page\', component: TestPage },',
+      '    { path: \'test-page\', name: \'Test page\', component: TestPage },',
       '  TestPage,',
     ]);
   });
 
   it('throw error when component already exists', () => {
-    expect(rekit.addPage.bind(rekit, TEST_FEATURE_NAME, 'test-page')).to.throw();
+    expect(core.addPage.bind(core, TEST_FEATURE_NAME, 'test-page')).to.throw();
   });
 
   it('add page with url path', () => {
-    rekit.addPage(TEST_FEATURE_NAME, 'test-page-2', 'test-path');
+    core.addPage(TEST_FEATURE_NAME, 'test-page-2', { urlPath: 'test-path' });
     expectFiles([
       'TestPage2.js',
       'TestPage2.less',
@@ -66,13 +66,13 @@ describe('cli: page tests', function() { // eslint-disable-line
       'export TestPage2 from \'./TestPage2\';',
     ]);
     expectLines(mapFeatureFile('route.js'), [
-      '    { path: \'test-path\', component: TestPage2 },',
+      '    { path: \'test-path\', name: \'Test page 2\', component: TestPage2 },',
       '  TestPage2,',
     ]);
   });
 
   it('remove page', () => {
-    rekit.removePage(TEST_FEATURE_NAME, 'test-page');
+    core.removePage(TEST_FEATURE_NAME, 'test-page');
     expectNoFiles([
       'TestPage.js',
       'TestPage.less',
@@ -90,11 +90,11 @@ describe('cli: page tests', function() { // eslint-disable-line
     ]);
     expectNoFiles([
       'TestPage.test.js',
-    ].map(mapFeatureTestFile));
+    ].map(mapTestFile));
   });
 
   it('remove page with url path', () => {
-    rekit.removePage(TEST_FEATURE_NAME, 'test-page-2');
+    core.removePage(TEST_FEATURE_NAME, 'test-page-2');
     expectNoFiles([
       'TestPage2.js',
       'TestPage2.less',
@@ -107,11 +107,11 @@ describe('cli: page tests', function() { // eslint-disable-line
       '  TestPage2,',
     ]);
     expectNoLines(mapFeatureFile('route.js'), [
-      '    { path: \'test-path\', component: TestPage2 },',
+      '    { path: \'test-path\', name: \'Test page 2\' component: TestPage2 },',
       '  TestPage2,',
     ]);
     expectNoFiles([
       'TestPage2.test.js',
-    ].map(mapFeatureTestFile));
+    ].map(mapTestFile));
   });
 });

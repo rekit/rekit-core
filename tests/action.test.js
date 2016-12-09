@@ -1,11 +1,13 @@
 'use strict';
+
+const _ = require('lodash');
 const expect = require('chai').expect;
 const helpers = require('./helpers');
-const rekit = require('../core/rekit');
-const vio = require('../core/vio');
+const core = require('../core');
 
-const mapFeatureFile = helpers.mapFeatureFile;
-const mapFeatureTestFile = helpers.mapFeatureTestFile;
+const vio = core.vio;
+const utils = core.utils;
+
 const expectFile = helpers.expectFile;
 const expectFiles = helpers.expectFiles;
 const expectNoFile = helpers.expectNoFile;
@@ -14,28 +16,28 @@ const expectLines = helpers.expectLines;
 const expectNoLines = helpers.expectNoLines;
 const TEST_FEATURE_NAME = helpers.TEST_FEATURE_NAME;
 
+const mapFeatureFile = _.partial(utils.mapFeatureFile, TEST_FEATURE_NAME);
+const mapTestFile = _.partial(utils.mapTestFile, TEST_FEATURE_NAME);
+
 describe('cli: action tests', function() { // eslint-disable-line
   before(() => {
     vio.reset();
-    rekit.addFeature(TEST_FEATURE_NAME);
-  });
-
-  after(() => {
-    vio.reset();
+    core.addFeature(TEST_FEATURE_NAME);
   });
 
   it('throw error when no args to add action', () => {
-    expect(rekit.addAction).to.throw(Error);
+    expect(core.addAction).to.throw(Error);
   });
 
   it('throw error when no args to remove action', () => {
-    expect(rekit.removeAction).to.throw(Error);
+    expect(core.removeAction).to.throw(Error);
   });
 
   it('add sync action', () => {
-    rekit.addAction(TEST_FEATURE_NAME, 'test-action');
+    core.addAction(TEST_FEATURE_NAME, 'test-action');
+    const actionType = core.utils.getActionType(TEST_FEATURE_NAME, 'test-action');
     expectLines(mapFeatureFile('redux/constants.js'), [
-      'export const TEST_ACTION = \'TEST_ACTION\';',
+      `export const ${actionType} = '${actionType}';`,
     ]);
     expectLines(mapFeatureFile('redux/actions.js'), [
       'export { testAction } from \'./testAction\';',
@@ -43,27 +45,14 @@ describe('cli: action tests', function() { // eslint-disable-line
     expectFile(mapFeatureFile('redux/testAction.js'));
     expectFiles([
       'redux/testAction.test.js',
-    ].map(mapFeatureTestFile));
-  });
-
-  it('add sync action with custom action type', () => {
-    rekit.addAction(TEST_FEATURE_NAME, 'test-action-2', 'my-action-type');
-    expectLines(mapFeatureFile('redux/constants.js'), [
-      'export const MY_ACTION_TYPE = \'MY_ACTION_TYPE\';',
-    ]);
-    expectLines(mapFeatureFile('redux/actions.js'), [
-      'export { testAction2 } from \'./testAction2\';',
-    ]);
-    expectFile(mapFeatureFile('redux/testAction2.js'));
-    expectFiles([
-      'redux/testAction2.test.js',
-    ].map(mapFeatureTestFile));
+    ].map(mapTestFile));
   });
 
   it('remove sync action', () => {
-    rekit.removeAction(TEST_FEATURE_NAME, 'test-action');
+    core.removeAction(TEST_FEATURE_NAME, 'test-action');
+    const actionType = core.utils.getActionType(TEST_FEATURE_NAME, 'test-action');
     expectNoLines(mapFeatureFile('redux/constants.js'), [
-      'TEST_ACTION',
+      actionType,
     ]);
     expectNoLines(mapFeatureFile('redux/actions.js'), [
       'testAction',
@@ -71,20 +60,20 @@ describe('cli: action tests', function() { // eslint-disable-line
     expectNoFile(mapFeatureFile('redux/testAction.js'));
     expectNoFiles([
       'redux/testAction.test.js',
-    ].map(mapFeatureTestFile));
+    ].map(mapTestFile));
   });
 
-  it('remove sync action with custom action type', () => {
-    rekit.removeAction(TEST_FEATURE_NAME, 'test-action-2', 'my-action-type');
-    expectNoLines(mapFeatureFile('redux/constants.js'), [
-      'MY_ACTION_TYPE',
-    ]);
-    expectNoLines(mapFeatureFile('redux/actions.js'), [
-      'testAction2',
-    ]);
-    expectNoFile(mapFeatureFile('redux/testAction2.js'));
-    expectNoFiles([
-      'redux/testAction2.test.js',
-    ].map(mapFeatureTestFile));
-  });
+  // it('remove sync action with custom action type', () => {
+  //   core.removeAction(TEST_FEATURE_NAME, 'test-action-2', 'my-action-type');
+  //   expectNoLines(mapFeatureFile('redux/constants.js'), [
+  //     'MY_ACTION_TYPE',
+  //   ]);
+  //   expectNoLines(mapFeatureFile('redux/actions.js'), [
+  //     'testAction2',
+  //   ]);
+  //   expectNoFile(mapFeatureFile('redux/testAction2.js'));
+  //   expectNoFiles([
+  //     'redux/testAction2.test.js',
+  //   ].map(mapTestFile));
+  // });
 });

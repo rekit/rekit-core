@@ -2,6 +2,7 @@
 
 const _ = require('lodash');
 const utils = require('./utils');
+const refactor = require('./refactor');
 const vio = require('./vio');
 
 function add(feature, name) {
@@ -18,10 +19,7 @@ function add(feature, name) {
 function remove(feature, name) {
   name = _.upperSnakeCase(name);
   const targetPath = utils.mapReduxFile(feature, 'constants');
-  const lines = vio.getLines(targetPath);
-  utils.removeLines(lines, `export const ${name} = '${name}';`);
-
-  vio.save(targetPath, lines);
+  refactor.removeLines(targetPath, `export const ${name} = '${name}';`);
 }
 
 function rename(feature, oldName, newName) {

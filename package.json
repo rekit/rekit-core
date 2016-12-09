@@ -4,7 +4,7 @@
   "description": "Rekit core functions.",
   "author": "Nate Wang <supnate@gmail.com>",
   "homepage": "https://github.com/supnate/rekit-core",
-  "main": "index.js",
+  "main": "core/index.js",
   "keywords": [
     "rekit",
     "rekit-core",
@@ -24,7 +24,7 @@
   },
   "nyc": {
     "include": [
-      "src/**/*.js"
+      "core/**/*.js"
     ],
     "reporter": [
       "lcov",
