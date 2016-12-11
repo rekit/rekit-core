@@ -1,4 +1,5 @@
 'use strict';
+
 const expect = require('chai').expect;
 const _ = require('lodash');
 const helpers = require('./helpers');
@@ -41,7 +42,6 @@ describe('cli: feature test', function() { // eslint-disable-line
       'route.js',
       'DefaultPage.js',
       'DefaultPage.less',
-      'selectors.js',
       'style.less',
     ].map(mapFeatureFile));
     expectLines(utils.mapSrcFile('common/rootReducer.js'), [

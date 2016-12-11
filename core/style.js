@@ -1,7 +1,6 @@
 'use strict';
 
 const _ = require('lodash');
-const shell = require('shelljs');
 const utils = require('./utils');
 const vio = require('./vio');
 // const refactor = require('./refactor');
@@ -12,9 +11,14 @@ module.exports = {
   add(feature, component, args) {
     // Create style file for a component
     args = args || {};
-    template.generate(utils.mapComponent(feature, component) + '.less', Object.assign({}, args, {
+    template.generate(utils.mapComponent(feature, component) + '.' + utils.getCssExt(), Object.assign({}, args, {
       templateFile: args.templateFile || 'Component.less',
-      context: Object.assign({ feature, component, depth: 2 }, args.context || {}),
+      context: Object.assign({
+        feature,
+        component,
+        depth: 2,
+        cssExt: utils.getCssExt(),
+      }, args.context || {}),
     }));
 
     entry.addToStyle(feature, component);
@@ -22,7 +26,7 @@ module.exports = {
 
   remove(feature, component) {
     // Remove style file of a component
-    vio.del(utils.mapComponent(feature, component) + '.less');
+    vio.del(utils.mapComponent(feature, component) + '.' + utils.getCssExt());
     entry.removeFromStyle(feature, component);
   },
 
@@ -36,8 +40,8 @@ module.exports = {
     dest.feature = _.kebabCase(dest.feature);
     dest.name = _.pascalCase(dest.name);
 
-    const srcPath = utils.mapComponent(source.feature, source.name) + '.less';
-    const destPath = utils.mapComponent(dest.feature, dest.name) + '.less';
+    const srcPath = utils.mapComponent(source.feature, source.name) + '.' + utils.getCssExt();
+    const destPath = utils.mapComponent(dest.feature, dest.name) + '.' + utils.getCssExt();
     vio.move(srcPath, destPath);
 
     let lines = vio.getLines(destPath);

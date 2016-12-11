@@ -44,7 +44,7 @@ module.exports = {
     const oldDescribe = `${_.kebabCase(source.feature)}/${_.pascalCase(source.name)}`;
     const newDescribe = `${_.kebabCase(dest.feature)}/${_.pascalCase(dest.name)}`;
 
-    refactor.udpateFile(destPath, ast => [].concat(
+    refactor.updateFile(destPath, ast => [].concat(
       refactor.renameImportSpecifier(ast, source.name, dest.name),
       refactor.renameStringLiteral(ast, oldImportPath1, newImportPath1),
       refactor.renameStringLiteral(ast, oldImportPath2, newImportPath2),

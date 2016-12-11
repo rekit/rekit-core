@@ -337,9 +337,9 @@ function removeExportFromLine(file, moduleSource) {
   removeLines(lines, new RegExp(`export +.* +from +'${_.escapeRegExp(moduleSource)}'`));
 }
 
-function addStyleImport(lines, importLine) {
+function addStyleImport(lines, moduleSource) {
   const i = lastLineIndex(lines, '@import ');
-  lines.splice(i + 1, 0, importLine);
+  lines.splice(i + 1, 0, `@import '${moduleSource}';`);
 }
 
 function removeStyleImport(lines, moduleSource) {

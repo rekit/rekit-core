@@ -48,7 +48,8 @@ function getProjectRoot() {
     let lastDir = null;
     // Traverse above until find the package.json.
     while (cwd && lastDir !== cwd) {
-      if (shell.test('-e', path.join(cwd, 'package.json'))) {
+      const pkgPath = path.join(cwd, 'package.json');
+      if (shell.test('-e', pkgPath) && require(pkgPath).rekit) { // eslint-disable-line
         prjRoot = cwd;
         break;
       }
@@ -126,8 +127,14 @@ function getFeatures() {
   return _.toArray(shell.ls(path.join(getProjectRoot(), 'src/features')));
 }
 
+function getCssExt() {
+  const pkgPath = path.join(getProjectRoot(), 'package.json');
+  const pkg = require(pkgPath); // eslint-disable-line
+  return (pkg && pkg.rekit && pkg.rekit.css === 'sass') ? 'scss' : 'less';
+}
+
 module.exports = {
-  cssExt: 'less',
+  getCssExt,
   setProjectRoot,
   getProjectRoot,
   getActionType,

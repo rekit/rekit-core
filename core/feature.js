@@ -26,8 +26,7 @@ module.exports = {
     [
       'index.js',
       'route.js',
-      'selectors.js',
-      'style.less',
+      'style.' + utils.getCssExt(),
       'redux/actions.js',
       'redux/reducer.js',
       'redux/constants.js',
@@ -101,7 +100,7 @@ module.exports = {
           refactor.updateFile(absPath, ast => [].concat(
             refactor.renameStringLiteral(ast, `${oldName}-${_.kebabCase(moduleName)}`, `${newName}-${_.kebabCase(moduleName)}`) // rename css class name
           ));
-        } else if (/\.less$/.test(filePath)) {
+        } else if (/\.less$|\.scss$/.test(filePath)) {
           // For style update
           let lines = vio.getLines(absPath);
           const oldCssClass = `${oldName}-${_.kebabCase(moduleName)}`;

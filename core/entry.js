@@ -42,28 +42,21 @@ module.exports = {
   },
 
   addToStyle(feature, name) {
-    const targetPath = utils.mapFeatureFile(feature, 'style.less');
+    const targetPath = utils.mapFeatureFile(feature, 'style.' + utils.getCssExt());
     const lines = vio.getLines(targetPath);
     const i = refactor.lastLineIndex(lines, '@import ');
-    lines.splice(i + 1, 0, `@import './${_.pascalCase(name)}.less';`);
+    lines.splice(i + 1, 0, `@import './${_.pascalCase(name)}.${utils.getCssExt()}';`);
     vio.save(targetPath, lines);
   },
 
   removeFromStyle(feature, name) {
-    const targetPath = utils.mapFeatureFile(feature, 'style.less');
-    const lines = vio.getLines(targetPath);
-    refactor.removeLines(lines, `@import './${_.pascalCase(name)}.less';`);
-    vio.save(targetPath, lines);
+    const targetPath = utils.mapFeatureFile(feature, 'style.' + utils.getCssExt());
+    refactor.removeStyleImport(targetPath, `./${_.pascalCase(name)}.${utils.getCssExt()}`);
   },
 
   renameInStyle(feature, oldName, newName) {
-    const targetPath = utils.mapFeatureFile(feature, 'style.less');
-    const lines = vio.getLines(targetPath);
-    const i = refactor.lineIndex(lines, new RegExp(`@import +'\\.\\/${oldName}\\.less'`));
-    if (i >= 0) {
-      lines[i] = `@import './${_.pascalCase(newName)}.less';`;
-    }
-    vio.save(targetPath, lines);
+    const targetPath = utils.mapFeatureFile(feature, 'style.' + utils.getCssExt());
+    refactor.renameStyleModuleSource(targetPath, `./${_.pascalCase(oldName)}.${utils.getCssExt()}`, `./${_.pascalCase(newName)}.${utils.getCssExt()}`);
   },
 
   addToRoute(feature, component, args) {
@@ -309,21 +302,21 @@ module.exports = {
   },
 
   addToRootStyle(feature) {
-    const targetPath = path.join(utils.getProjectRoot(), 'src/styles/index.' + utils.cssExt);
-    refactor.addStyleImport(targetPath, `@import '../features/${_.kebabCase(feature)}/style.${utils.cssExt}';`);
+    const targetPath = path.join(utils.getProjectRoot(), 'src/styles/index.' + utils.getCssExt());
+    refactor.addStyleImport(targetPath, `../features/${_.kebabCase(feature)}/style.${utils.getCssExt()}`);
   },
 
   removeFromRootStyle(feature) {
-    const targetPath = path.join(utils.getProjectRoot(), 'src/styles/index.' + utils.cssExt);
-    refactor.removeStyleImport(targetPath, `../features/${_.kebabCase(feature)}/style.${utils.cssExt}`);
+    const targetPath = path.join(utils.getProjectRoot(), 'src/styles/index.' + utils.getCssExt());
+    refactor.removeStyleImport(targetPath, `../features/${_.kebabCase(feature)}/style.${utils.getCssExt()}`);
   },
 
   renameInRootStyle(oldName, newName) {
-    const targetPath = path.join(utils.getProjectRoot(), 'src/styles/index.' + utils.cssExt);
+    const targetPath = path.join(utils.getProjectRoot(), 'src/styles/index.' + utils.getCssExt());
     refactor.renameStyleModuleSource(
       targetPath,
-      `../features/${_.kebabCase(oldName)}/style.${utils.cssExt}`,
-      `../features/${_.kebabCase(newName)}/style.${utils.cssExt}`
+      `../features/${_.kebabCase(oldName)}/style.${utils.getCssExt()}`,
+      `../features/${_.kebabCase(newName)}/style.${utils.getCssExt()}`
     );
   },
 };

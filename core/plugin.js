@@ -54,7 +54,8 @@ function loadPlugins() {
 
   // Find installed plugins
   if (prjPkgJson.rekit && prjPkgJson.rekit.plugins) {
-    plugins = plugins.concat(prjPkgJson.rekit.plugins.map(p => path.join(prjRoot, 'node_modules', p)));
+    plugins = plugins.concat(prjPkgJson.rekit.plugins.map(p => path.join(prjRoot, 'node_modules',
+      /^rekit-plugin-/.test(p) ? p : ('rekit-plugin-' + p)))); // rekit plugin should be prefix 'rekit-plugin'.
   }
 
   // Map to plugin instances
