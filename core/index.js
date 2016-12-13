@@ -13,6 +13,7 @@ const utils = require('./utils');
 const vio = require('./vio');
 const refactor = require('./refactor');
 const entry = require('./entry');
+const template = require('./template');
 const plugin = require('./plugin');
 
 const injectExtensionPoints = plugin.injectExtensionPoints;
@@ -170,6 +171,7 @@ module.exports = Object.assign({
   style,
   test,
   action,
+  template,
   feature: featureMgr,
   entry,
 
