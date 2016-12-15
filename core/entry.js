@@ -258,7 +258,7 @@ module.exports = {
     const targetPath = path.join(utils.getProjectRoot(), 'src/common/rootReducer.js');
     refactor.addImportLine(targetPath, `import ${_.camelCase(feature)}Reducer from '../features/${_.kebabCase(feature)}/redux/reducer';`);
     const lines = vio.getLines(targetPath);
-    const i = refactor.lineIndex(lines, /^\}\);$/, 'const rootReducer = combineReducers({');
+    const i = refactor.lineIndex(lines, /^\}\);/, 'const rootReducer = combineReducers({');
     lines.splice(i, 0, `  ${_.camelCase(feature)}: ${_.camelCase(feature)}Reducer,`);
 
     vio.save(targetPath, lines);

@@ -48,9 +48,13 @@ function loadPlugins() {
   const prjPkgJson = require(path.join(prjRoot, 'package.json')); // eslint-disable-line
 
   // Find local plugins
-  plugins = shell.ls(path.join(prjRoot, 'tools/plugins'))
-    .filter(d => shell.test('-d', path.join(prjRoot, 'tools/plugins', d)))
-    .map(d => path.join(prjRoot, 'tools/plugins', d));
+  const localPluginsFolder = path.join(prjRoot, 'tools/plugins');
+  plugins = [];
+  if (shell.test('-e', localPluginsFolder)) {
+    plugins = plugins.concat(shell.ls(localPluginsFolder)
+      .filter(d => shell.test('-d', path.join(prjRoot, 'tools/plugins', d)))
+      .map(d => path.join(prjRoot, 'tools/plugins', d)));
+  }
 
   // Find installed plugins
   if (prjPkgJson.rekit && prjPkgJson.rekit.plugins) {
