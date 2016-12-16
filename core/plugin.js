@@ -110,7 +110,13 @@ function getCommand(command, elementName) {
   return null;
 }
 
+function add(name) {
+  // Summary:
+  //  Add a local plugin.
+}
+
 module.exports = {
+  add,
   getCommand,
   loadPlugins,
   getPlugins,
