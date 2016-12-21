@@ -7,6 +7,7 @@ const path = require('path');
 const _ = require('lodash');
 const shell = require('shelljs');
 const utils = require('./utils');
+const template = require('./template');
 
 let plugins = null;
 
@@ -113,6 +114,17 @@ function getCommand(command, elementName) {
 function add(name) {
   // Summary:
   //  Add a local plugin.
+  name = _.kebabCase(name);
+
+  const pluginDir = path.join(utils.getProjectRoot(), 'tools/plugins', name);
+  shell.mkdir(pluginDir);
+  const configPath = path.join(pluginDir, name, 'config.js');
+  template.generate(configPath, {
+    templateFile: 'plugin/config.js',
+    context: {
+      pluginName: name,
+    },
+  });
 }
 
 module.exports = {
