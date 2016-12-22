@@ -13,19 +13,29 @@ const utils = require('./utils');
 const vio = require('./vio');
 const refactor = require('./refactor');
 const entry = require('./entry');
+const route = require('./route');
 const template = require('./template');
 const plugin = require('./plugin');
 
 const injectExtensionPoints = plugin.injectExtensionPoints;
 
-function addComponent(feature, name) {
-  component.add(feature, name);
+function addComponent(feature, name, args) {
+  component.add(feature, name, {
+    templateFile: args.connect ? 'ConnectedComponent.js' : 'Component.js',
+  });
+  if (args.urlPath) {
+    let urlPath = args.urlPath;
+    if (urlPath === '$auto') urlPath = name;
+    urlPath = _.kebabCase(urlPath);
+    route.add(feature, name, urlPath);
+  }
   style.add(feature, name);
   test.add(feature, name);
 }
 
 function removeComponent(feature, name) {
   component.remove(feature, name);
+  route.remove(feature, name);
   style.remove(feature, name);
   test.remove(feature, name);
 }
@@ -34,13 +44,14 @@ function moveComponent(source, dest) {
   component.move(source, dest);
   test.move(source, dest);
   style.move(source, dest);
+  moveRoute(source, dest);
 }
 
 function addPage(feature, name, args) {
-  component.add(feature, name, { templateFile: 'Page.js' });
+  component.add(feature, name, { templateFile: 'ConnectedComponent.js' });
   entry.addToRoute(feature, name, args);
   style.add(feature, name);
-  test.add(feature, name, { templateFile: 'Page.test.js' });
+  test.add(feature, name, { templateFile: 'ConnectedComponent.test.js' });
 }
 
 function removePage(feature, name, args) {

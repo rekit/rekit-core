@@ -1,15 +1,78 @@
 'use strict';
 
-function add(feature, componentName, urlPath) {
+const _ = require('lodash');
+const refactor = require('./refactor');
+const utils = require('./utils');
+const vio = require('./vio');
 
+function add(feature, component, urlPath) {
+  utils.assertNotEmpty(feature, 'feature');
+  utils.assertNotEmpty(component, 'component name');
+  utils.assertFeatureExist(feature);
+  urlPath = _.kebabCase(urlPath || component);
+  const targetPath = utils.mapFeatureFile(feature, 'route.js');
+  const lines = vio.getLines(targetPath);
+  let i = refactor.lineIndex(lines, '} from \'./index\';');
+  lines.splice(i, 0, `  ${_.pascalCase(component)},`);
+  i = refactor.lineIndex(lines, 'path: \'*\'');
+  if (i === -1) {
+    i = refactor.lastLineIndex(lines, /^ {2}]/);
+  }
+  lines.splice(i, 0, `    { path: '${urlPath}', name: '${args.pageName || _.upperFirst(_.lowerCase(component))}', component: ${_.pascalCase(component)}${args.isIndex ? ', isIndex: true' : ''} },`);
+  vio.save(targetPath, lines);
 }
 
-function remove(feature, componentName) {
+function remove(feature, component) {
+  utils.assertNotEmpty(feature, 'feature');
+  utils.assertNotEmpty(component, 'component name');
+  utils.assertFeatureExist(feature);
 
+  const targetPath = utils.mapFeatureFile(feature, 'route.js');
+  const lines = vio.getLines(targetPath);
+  refactor.removeLines(lines, `  ${_.pascalCase(component)},`);
+  const removed = refactor.removeLines(lines, new RegExp(`component: ${_.pascalCase(component)}[ ,}]`));
+  vio.save(targetPath, lines);
+  return removed;
 }
 
-function move(source, target) {
-
+function move(source, dest) {
+  if (source.feature === dest.feature) {
+    // If in the same feature, rename imported component name
+    const targetPath = utils.mapFeatureFile(source.feature, 'route.js');
+    const ast = vio.getAst(targetPath);
+    const oldName = _.pascalCase(source.name);
+    const newName = _.pascalCase(dest.name);
+    const changes = [].concat(
+      refactor.renameImportSpecifier(ast, oldName, newName),
+      refactor.renameStringLiteral(ast, _.kebabCase(oldName), _.kebabCase(newName)), // Rename path
+      refactor.renameStringLiteral(ast, _.upperFirst(_.lowerCase(oldName)), _.upperFirst(_.lowerCase(newName))) // Rename name
+    );
+    const code = refactor.updateSourceCode(vio.getContent(targetPath), changes);
+    vio.save(targetPath, code);
+  } else {
+    const lines = this.removeFromRoute(source.feature, source.name);
+    let urlPath = null;
+    let isIndex = false;
+    let name = null;
+    if (lines && lines.length) {
+      const m1 = /path: *'([^']+)'/.exec(lines[0]);
+      if (m1) {
+        urlPath = m1[1];
+        if (urlPath === _.kebabCase(source.name)) {
+          urlPath = null;
+        }
+      }
+      const m2 = /name: *'([^']+)'/.exec(lines[0]);
+      if (m2) {
+        name = m2[1];
+        if (name === _.upperFirst(_.lowerCase(source.name))) {
+          name = null;
+        }
+      }
+      isIndex = /isIndex: true/.test(lines[0]);
+    }
+    this.addToRoute(dest.feature, dest.name, urlPath, isIndex, name);
+  }
 }
 
 module.exports = {

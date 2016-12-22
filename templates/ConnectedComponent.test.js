@@ -5,12 +5,12 @@ import { ${_.pascalCase(component)} } from 'src/features/${_.kebabCase(feature)}
 
 describe('${_.kebabCase(feature)}/${_.pascalCase(component)}', () => {
   it('renders node with correct class name', () => {
-    const pageProps = {
+    const props = {
       ${_.camelCase(feature)}: {},
       actions: {},
     };
     const renderedComponent = shallow(
-      <${_.pascalCase(component)} {...pageProps} />
+      <${_.pascalCase(component)} {...props} />
     );
 
     expect(
