@@ -20,6 +20,7 @@ const plugin = require('./plugin');
 const injectExtensionPoints = plugin.injectExtensionPoints;
 
 function addComponent(feature, name, args) {
+  args = args || {};
   component.add(feature, name, {
     templateFile: args.connect ? 'ConnectedComponent.js' : 'Component.js',
   });

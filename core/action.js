@@ -97,7 +97,7 @@ module.exports = {
 
     args = args || {};
     template.generate(utils.mapReduxFile(feature, name), Object.assign({}, args, {
-      templateFile: args.templateFile || 'redux/async-action.js',
+      templateFile: args.templateFile || 'redux/async_action.js',
       context: Object.assign({
         feature,
         actionTypes,

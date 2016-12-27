@@ -65,7 +65,7 @@ module.exports = {
       context.actionType = args.actionType || utils.getActionType(feature, name);
     }
     template.generate(utils.mapReduxTestFile(feature, name), Object.assign({}, args, {
-      templateFile: args.templateFile || (args.isAsync ? 'redux/async-action.test.js' : 'redux/action.test.js'),
+      templateFile: args.templateFile || (args.isAsync ? 'redux/async_action.test.js' : 'redux/action.test.js'),
       context: Object.assign(context, args.context || {}),
     }));
   },
