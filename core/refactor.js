@@ -408,6 +408,10 @@ function getRekitProps(file) {
   return props;
 }
 
+function getFeatures() {
+  return _.toArray(shell.ls(mPath.join(utils.getProjectRoot(), 'src/features')));
+}
+
 function getFeatureStructure(feature) {
   const dir = mPath.join(utils.getProjectRoot(), 'src/features', feature);
   const noneMisc = {};
@@ -441,11 +445,11 @@ function getFeatureStructure(feature) {
   function getMiscFiles(root) {
     const arr = [];
     shell.ls(root).forEach((file) => {
-      const fullPath = mPath.join(dir, file);
-
+      const fullPath = mPath.join(root, file);
       if (shell.test('-d', fullPath)) {
         arr.push({
           name: mPath.basename(fullPath),
+          file: fullPath,
           children: getMiscFiles(fullPath),
         });
       } else if (!noneMisc[fullPath]) {
@@ -455,7 +459,11 @@ function getFeatureStructure(feature) {
         });
       }
     });
-    return arr.sort((a, b) => a.name.localeCompare(b.name));
+    return arr.sort((a, b) => {
+      if (a.children && !b.children) return -1;
+      if (!a.children && b.children) return 1;
+      return a.name.localeCompare(b.name);
+    });
   }
 
   return {
@@ -553,6 +561,7 @@ module.exports = {
   updateFile,
   renameModuleSource: acceptFilePathForAst(renameModuleSource),
   getRekitProps,
+  getFeatures,
   getFeatureStructure,
 
   lineIndex,

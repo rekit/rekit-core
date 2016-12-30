@@ -45,7 +45,7 @@ function moveComponent(source, dest) {
   component.move(source, dest);
   test.move(source, dest);
   style.move(source, dest);
-  moveRoute(source, dest);
+  route.move(source, dest);
 }
 
 function addPage(feature, name, args) {

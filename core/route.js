@@ -5,11 +5,12 @@ const refactor = require('./refactor');
 const utils = require('./utils');
 const vio = require('./vio');
 
-function add(feature, component, urlPath) {
+function add(feature, component, args) {
   utils.assertNotEmpty(feature, 'feature');
   utils.assertNotEmpty(component, 'component name');
   utils.assertFeatureExist(feature);
-  urlPath = _.kebabCase(urlPath || component);
+  args = args || {};
+  const urlPath = _.kebabCase(args.urlPath || component);
   const targetPath = utils.mapFeatureFile(feature, 'route.js');
   const lines = vio.getLines(targetPath);
   let i = refactor.lineIndex(lines, '} from \'./index\';');
@@ -50,7 +51,7 @@ function move(source, dest) {
     const code = refactor.updateSourceCode(vio.getContent(targetPath), changes);
     vio.save(targetPath, code);
   } else {
-    const lines = this.removeFromRoute(source.feature, source.name);
+    const lines = remove(source.feature, source.name);
     let urlPath = null;
     let isIndex = false;
     let name = null;
@@ -71,7 +72,7 @@ function move(source, dest) {
       }
       isIndex = /isIndex: true/.test(lines[0]);
     }
-    this.addToRoute(dest.feature, dest.name, urlPath, isIndex, name);
+    add(dest.feature, dest.name, urlPath, isIndex, name);
   }
 }
 
