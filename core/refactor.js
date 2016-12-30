@@ -4,8 +4,11 @@
 //  Rename variables in a Rekit element
 
 const _ = require('lodash');
+const mPath = require('path');
+const shell = require('shelljs');
 const traverse = require('babel-traverse').default;
 const vio = require('./vio');
+const utils = require('./utils');
 
 function isStringMatch(str, match) {
   if (_.isString(match)) {
@@ -351,6 +354,117 @@ function renameStyleModuleSource(lines, oldMoudleSource, newModuleSource) {
   lines[i] = `@import '${newModuleSource}';`;
 }
 
+function getRekitProps(file) {
+  const ast = vio.getAst(file);
+  const ff = {}; // File features
+
+  traverse(ast, {
+    ImportDeclaration(path) {
+      switch (path.node.source.value) {
+        case 'react':
+          ff.importReact = true;
+          break;
+        case 'redux':
+          ff.importRedux = true;
+          break;
+        case 'react-redux':
+          ff.importReactRedux = true;
+          break;
+        case './constants':
+          ff.importConstant = true;
+          ff.importMultipleConstants = path.node.specifiers.length > 3;
+          break;
+        default:
+          break;
+      }
+    },
+    ClassDeclaration(path) {
+      if (
+        path.node.superClass
+        && path.node.body.body.some(n => n.type === 'ClassMethod' && n.key.name === 'render')
+      ) {
+        ff.hasClassAndRenderMethod = true;
+      }
+    },
+    CallExpression(path) {
+      if (path.node.callee.name === 'connect') {
+        ff.connectCall = true;
+      }
+    },
+    ExportNamedDeclaration(path) {
+      if (_.get(path, 'node.declaration.id.name') === 'reducer') {
+        ff.exportReducer = true;
+      }
+    }
+  });
+  const props = {
+    component: ff.importReact && ff.hasClassAndRenderMethod && {
+      connectToStore: ff.connectCall,
+    },
+    action: ff.exportReducer && ff.importConstant && {
+      isAsync: ff.importMultipleConstants,
+    }
+  };
+  return props;
+}
+
+function getFeatureStructure(feature) {
+  const dir = mPath.join(utils.getProjectRoot(), 'src/features', feature);
+  const noneMisc = {};
+
+  const components = shell.ls(dir + '/*.js').map((file) => {
+    const props = getRekitProps(file);
+    if (props && props.component) {
+      noneMisc[file] = true;
+      noneMisc[file.replace('.js', '.less')] = true;
+      noneMisc[file.replace('.js', '.scss')] = true;
+      return Object.assign({
+        name: mPath.basename(file).replace('.js', ''),
+        file,
+      }, props.component);
+    }
+    return null;
+  }).filter(item => !!item).sort((a, b) => a.name.localeCompare(b.name));
+
+  const actions = shell.ls(dir + '/redux/*.js').map((file) => {
+    const props = getRekitProps(file);
+    if (props && props.action) {
+      noneMisc[file] = true;
+      return Object.assign({
+        name: mPath.basename(file).replace('.js', ''),
+        file,
+      }, props.action);
+    }
+    return null;
+  }).filter(item => !!item).sort((a, b) => a.name.localeCompare(b.name));
+
+  function getMiscFiles(root) {
+    const arr = [];
+    shell.ls(root).forEach((file) => {
+      const fullPath = mPath.join(dir, file);
+
+      if (shell.test('-d', fullPath)) {
+        arr.push({
+          name: mPath.basename(fullPath),
+          children: getMiscFiles(fullPath),
+        });
+      } else if (!noneMisc[fullPath]) {
+        arr.push({
+          name: mPath.basename(fullPath),
+          file: fullPath,
+        });
+      }
+    });
+    return arr.sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  return {
+    actions,
+    components,
+    misc: getMiscFiles(dir),
+  };
+}
+
 // function renameExportFrom(file, oldName, newName, oldModulePath, newModulePath) {
 //   // Summary:
 //   //  Rename export xxx from '.xxx' at the top. Usually used by entry files such as index.js
@@ -438,6 +552,8 @@ module.exports = {
   updateSourceCode,
   updateFile,
   renameModuleSource: acceptFilePathForAst(renameModuleSource),
+  getRekitProps,
+  getFeatureStructure,
 
   lineIndex,
   lastLineIndex,
