@@ -6,11 +6,12 @@ const vio = require('./vio');
 const refactor = require('./refactor');
 const template = require('./template');
 const entry = require('./entry');
+const assert = require('./assert');
 
 function add(feature, component, args) {
-  utils.assertNotEmpty(feature, 'feature');
-  utils.assertNotEmpty(component, 'component name');
-  utils.assertFeatureExist(feature);
+  assert.notEmpty(feature, 'feature');
+  assert.notEmpty(component, 'component name');
+  assert.featureExist(feature);
 
   // create component from template
   args = args || {};
@@ -24,9 +25,9 @@ function add(feature, component, args) {
 }
 
 function remove(feature, component) {
-  utils.assertNotEmpty(feature, 'feature');
-  utils.assertNotEmpty(component, 'component name');
-  utils.assertFeatureExist(feature);
+  assert.notEmpty(feature, 'feature');
+  assert.notEmpty(component, 'component name');
+  assert.featureExist(feature);
 
   vio.del(utils.mapComponent(feature, component) + '.js');
   entry.removeFromIndex(feature, component);

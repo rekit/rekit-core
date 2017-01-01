@@ -8,10 +8,11 @@ const vio = require('./vio');
 const refactor = require('./refactor');
 const entry = require('./entry');
 const template = require('./template');
+const assert = require('./assert');
 
 module.exports = {
   add(name) {
-    utils.assertNotEmpty(name);
+    assert.notEmpty(name);
     const targetDir = path.join(utils.getProjectRoot(), `src/features/${_.kebabCase(name)}`);
     if (shell.test('-e', targetDir)) {
       utils.fatalError(`feature already exists: ${_.kebabCase(name)}`);
@@ -53,10 +54,10 @@ module.exports = {
   move(oldName, newName) {
     // Summary:
     //  Move or rename a feature. Seems very heavy.
-    utils.assertNotEmpty(oldName);
-    utils.assertNotEmpty(newName);
-    utils.assertFeatureExist(oldName);
-    utils.assertFeatureNotExist(newName);
+    assert.notEmpty(oldName);
+    assert.notEmpty(newName);
+    assert.featureExist(oldName);
+    assert.featureNotExist(newName);
 
     oldName = _.kebabCase(oldName);
     newName = _.kebabCase(newName);

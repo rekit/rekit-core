@@ -7,12 +7,13 @@ const constant = require('./constant');
 const refactor = require('./refactor');
 const template = require('./template');
 const entry = require('./entry');
+const assert = require('./assert');
 
 module.exports = {
   add(feature, name, args) {
-    utils.assertNotEmpty(feature, 'feature');
-    utils.assertNotEmpty(name, 'action name');
-    utils.assertFeatureExist(feature);
+    assert.notEmpty(feature, 'feature');
+    assert.notEmpty(name, 'action name');
+    assert.featureExist(feature);
     // create component from template
     args = args || {};
     const actionType = utils.getActionType(feature, name);
@@ -31,9 +32,9 @@ module.exports = {
   },
 
   remove(feature, name, actionType) {
-    utils.assertNotEmpty(feature, 'feature');
-    utils.assertNotEmpty(name, 'action name');
-    utils.assertFeatureExist(feature);
+    assert.notEmpty(feature, 'feature');
+    assert.notEmpty(name, 'action name');
+    assert.featureExist(feature);
 
     actionType = utils.getActionType(feature, name);
     vio.del(utils.mapReduxFile(feature, name));
@@ -43,12 +44,12 @@ module.exports = {
   },
 
   move(source, dest) {
-    utils.assertNotEmpty(source.feature, 'feature');
-    utils.assertNotEmpty(source.name, 'action name');
-    utils.assertFeatureExist(source.feature);
-    utils.assertNotEmpty(dest.feature, 'feature');
-    utils.assertNotEmpty(dest.name, 'action name');
-    utils.assertFeatureExist(dest.feature);
+    assert.notEmpty(source.feature, 'feature');
+    assert.notEmpty(source.name, 'action name');
+    assert.featureExist(source.feature);
+    assert.notEmpty(dest.feature, 'feature');
+    assert.notEmpty(dest.name, 'action name');
+    assert.featureExist(dest.feature);
 
     source.feature = _.kebabCase(source.feature);
     source.name = _.camelCase(source.name);
@@ -88,9 +89,9 @@ module.exports = {
   },
 
   addAsync(feature, name, args) {
-    utils.assertNotEmpty(feature, 'feature');
-    utils.assertNotEmpty(name, 'action name');
-    utils.assertFeatureExist(feature);
+    assert.notEmpty(feature, 'feature');
+    assert.notEmpty(name, 'action name');
+    assert.featureExist(feature);
 
     // const upperSnakeActionName = _.upperSnakeCase(name);
     const actionTypes = utils.getAsyncActionTypes(feature, name);
@@ -118,9 +119,9 @@ module.exports = {
   },
 
   removeAsync(feature, name) {
-    utils.assertNotEmpty(feature, 'feature');
-    utils.assertNotEmpty(name, 'action name');
-    utils.assertFeatureExist(feature);
+    assert.notEmpty(feature, 'feature');
+    assert.notEmpty(name, 'action name');
+    assert.featureExist(feature);
 
     // const upperSnakeActionName = _.upperSnakeCase(name);
     const actionTypes = utils.getAsyncActionTypes(feature, name);
@@ -138,12 +139,12 @@ module.exports = {
   },
 
   moveAsync(source, dest) {
-    utils.assertNotEmpty(source.feature, 'feature');
-    utils.assertNotEmpty(source.name, 'action name');
-    utils.assertFeatureExist(source.feature);
-    utils.assertNotEmpty(dest.feature, 'feature');
-    utils.assertNotEmpty(dest.name, 'action name');
-    utils.assertFeatureExist(dest.feature);
+    assert.notEmpty(source.feature, 'feature');
+    assert.notEmpty(source.name, 'action name');
+    assert.featureExist(source.feature);
+    assert.notEmpty(dest.feature, 'feature');
+    assert.notEmpty(dest.name, 'action name');
+    assert.featureExist(dest.feature);
 
     source.feature = _.kebabCase(source.feature);
     source.name = _.camelCase(source.name);

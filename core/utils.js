@@ -6,7 +6,6 @@ const path = require('path');
 const _ = require('lodash');
 const shell = require('shelljs');
 const colors = require('colors/safe');
-const vio = require('./vio');
 
 let silent = false;
 
@@ -33,7 +32,7 @@ function error(msg) {
 
 function fatalError(msg) {
   error(msg);
-  throw new Error('Error: ' + msg);
+  throw new Error(msg);
 }
 
 let prjRoot;
@@ -103,26 +102,6 @@ function mapComponentTestFile(feature, name) {
   return mapTestFile(feature, _.pascalCase(name) + '.test.js');
 }
 
-function assertNotEmpty(str, name) {
-  if (!str) {
-    fatalError(name + ' should not be empty.');
-  }
-}
-
-function assertFeatureExist(feature) {
-  const p = path.join(getProjectRoot(), 'src/features', _.kebabCase(feature));
-  if (!shell.test('-e', p) && !vio.dirExists(p)) {
-    fatalError('Feature doesn\'t exist: ' + feature);
-  }
-}
-
-function assertFeatureNotExist(feature) {
-  const p = path.join(getProjectRoot(), 'src/features', _.kebabCase(feature));
-  if (shell.test('-e', p) || vio.dirExists(p)) {
-    fatalError('Feature doesn\'t exist: ' + feature);
-  }
-}
-
 function getFeatures() {
   return _.toArray(shell.ls(path.join(getProjectRoot(), 'src/features')));
 }
@@ -146,9 +125,6 @@ module.exports = {
   mapFeatureFile,
   mapTestFile,
   mapComponentTestFile,
-  assertNotEmpty,
-  assertFeatureExist,
-  assertFeatureNotExist,
   getFeatures,
   fatalError,
   setSilent,

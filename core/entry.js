@@ -8,6 +8,7 @@ const _ = require('lodash');
 const vio = require('./vio');
 const refactor = require('./refactor');
 const utils = require('./utils');
+const assert = require('./assert');
 
 module.exports = {
   addToIndex(feature, name) {
@@ -60,9 +61,9 @@ module.exports = {
   },
 
   addToRoute(feature, component, args) {
-    utils.assertNotEmpty(feature, 'feature');
-    utils.assertNotEmpty(component, 'component name');
-    utils.assertFeatureExist(feature);
+    assert.notEmpty(feature, 'feature');
+    assert.notEmpty(component, 'component name');
+    assert.featureExist(feature);
     args = args || {};
     const urlPath = args.urlPath || _.kebabCase(component);
     const targetPath = utils.mapFeatureFile(feature, 'route.js');
@@ -78,9 +79,9 @@ module.exports = {
   },
 
   removeFromRoute(feature, component) {
-    utils.assertNotEmpty(feature, 'feature');
-    utils.assertNotEmpty(component, 'component name');
-    utils.assertFeatureExist(feature);
+    assert.notEmpty(feature, 'feature');
+    assert.notEmpty(component, 'component name');
+    assert.featureExist(feature);
 
     const targetPath = utils.mapFeatureFile(feature, 'route.js');
     const lines = vio.getLines(targetPath);

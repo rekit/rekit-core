@@ -4,11 +4,12 @@ const _ = require('lodash');
 const refactor = require('./refactor');
 const utils = require('./utils');
 const vio = require('./vio');
+const assert = require('./assert');
 
 function add(feature, component, args) {
-  utils.assertNotEmpty(feature, 'feature');
-  utils.assertNotEmpty(component, 'component name');
-  utils.assertFeatureExist(feature);
+  assert.notEmpty(feature, 'feature');
+  assert.notEmpty(component, 'component name');
+  assert.featureExist(feature);
   args = args || {};
   const urlPath = _.kebabCase(args.urlPath || component);
   const targetPath = utils.mapFeatureFile(feature, 'route.js');
@@ -24,9 +25,9 @@ function add(feature, component, args) {
 }
 
 function remove(feature, component) {
-  utils.assertNotEmpty(feature, 'feature');
-  utils.assertNotEmpty(component, 'component name');
-  utils.assertFeatureExist(feature);
+  assert.notEmpty(feature, 'feature');
+  assert.notEmpty(component, 'component name');
+  assert.featureExist(feature);
 
   const targetPath = utils.mapFeatureFile(feature, 'route.js');
   const lines = vio.getLines(targetPath);

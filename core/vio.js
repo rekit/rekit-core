@@ -9,8 +9,9 @@ const jsdiff = require('diff');
 const colors = require('colors/safe');
 const babylon = require('babylon');
 const generate = require('babel-generator').default;
+const utils = require('./utils');
 
-const prjRoot = path.join(__dirname, '../../');
+const prjRoot = utils.getProjectRoot();
 
 let toSave = {};
 let toDel = {};
@@ -28,6 +29,13 @@ function printDiff(diff) {
     }
   });
 }
+
+function log(label, color, filePath, toFilePath) {
+  const p = filePath.replace(prjRoot, '');
+  const to = toFilePath ? toFilePath.replace(prjRoot, '') : '';
+  console.log(colors[color](label + p + (to ? (' to ' + to) : '')));
+}
+
 function getLines(filePath) {
   if (_.isArray(filePath)) {
     // If it's already lines, return the arg.
@@ -146,58 +154,91 @@ function reset() {
   mvs = {};
 }
 
-function log(label, color, filePath, toFilePath) {
-  const p = filePath.replace(prjRoot, '');
-  const to = toFilePath ? toFilePath.replace(prjRoot, '') : '';
-  console.log(colors[color](label + p + (to ? (' to ' + to) : '')));
-}
-
-
 function flush() {
-  for (const dir of Object.keys(dirs)) {
+  const res = [];
+  Object.keys(dirs).forEach((dir) => {
     if (!shell.test('-e', dir)) {
       shell.mkdir('-p', dir);
+      log('Created: ', 'blue', dir);
+      res.push({
+        type: 'create-dir',
+        file: dir.replace(prjRoot, ''),
+      });
     }
-  }
+  });
 
   // Delete files first
-  for (const filePath of Object.keys(toDel)) {
+  Object.keys(toDel).forEach((filePath) => {
     if (!shell.test('-e', filePath)) {
       log('Warning: no file to delete: ', 'yellow', filePath);
+      res.push({
+        type: 'del-file-warning',
+        warning: 'no-file',
+        file: filePath.replace(prjRoot, ''),
+      });
     } else {
       shell.rm('-rf', filePath);
       log('Deleted: ', 'magenta', filePath);
+      res.push({
+        type: 'del-file',
+        file: filePath.replace(prjRoot, ''),
+      });
     }
-  }
+  });
 
   // Move files
-  for (const filePath of Object.keys(mvs)) {
+  Object.keys(mvs).forEach((filePath) => {
     if (!shell.test('-e', filePath)) {
       log('Warning: no file to move: ', 'yellow', filePath);
+      res.push({
+        type: 'mv-file-warning',
+        warning: 'no-file',
+        file: filePath.replace(prjRoot, ''),
+      });
     } else {
       shell.mv(filePath, mvs[filePath]);
       log('Moved: ', 'green', filePath, mvs[filePath]);
+      res.push({
+        type: 'mv-file',
+        file: filePath.replace(prjRoot, ''),
+      });
     }
-  }
+  });
 
   // Create/update files
-  for (const filePath of Object.keys(toSave)) {
+  Object.keys(toSave).forEach((filePath) => {
     const newContent = getLines(filePath).join('\n');
     if (shell.test('-e', filePath)) {
       const oldContent = shell.cat(filePath).split(/\r?\n/).join('\n');
       if (oldContent === newContent) {
         log('Warning: nothing is changed for: ', 'yellow', filePath);
-        continue;
-      } else {
-        log('Updated: ', 'cyan', filePath);
-        printDiff(jsdiff.diffLines(oldContent, newContent));
+        res.push({
+          type: 'update-file-warning',
+          warning: 'no-change',
+          file: filePath.replace(prjRoot, ''),
+        });
+        return;
       }
+      log('Updated: ', 'cyan', filePath);
+      const diff = jsdiff.diffLines(oldContent, newContent);
+      res.push({
+        type: 'update-file',
+        diff,
+        file: filePath.replace(prjRoot, ''),
+      });
+      printDiff(diff);
     } else {
       ensurePathDir(filePath);
       log('Created: ', 'blue', filePath);
+      res.push({
+        type: 'create-file',
+        file: filePath.replace(prjRoot, ''),
+      });
     }
     shell.ShellString(newContent).to(filePath);
-  }
+  });
+
+  return res;
 }
 
 module.exports = {
