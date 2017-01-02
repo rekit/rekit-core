@@ -67,21 +67,6 @@ function movePage(source, dest) {
   entry.moveRoute(source, dest);
 }
 
-function addAction(feature, name) {
-  action.add(feature, name);
-  test.addAction(feature, name);
-}
-
-function removeAction(feature, name) {
-  action.remove(feature, name);
-  test.removeAction(feature, name);
-}
-
-function moveAction(source, dest) {
-  action.move(source, dest);
-  test.moveAction(source, dest);
-}
-
 function addAsyncAction(feature, name) {
   action.addAsync(feature, name);
   test.addAction(feature, name, { isAsync: true });
@@ -95,6 +80,33 @@ function removeAsyncAction(feature, name) {
 function moveAsyncAction(source, dest) {
   action.moveAsync(source, dest);
   test.moveAction(source, dest, true);
+}
+
+function addAction(feature, name, args) {
+  if (args.async) {
+    addAsyncAction(feature, name);
+    return;
+  }
+  action.add(feature, name);
+  test.addAction(feature, name);
+}
+
+function removeAction(feature, name, args) {
+  if (args.async) {
+    removeAsyncAction(feature, name);
+    return;
+  }
+  action.remove(feature, name);
+  test.removeAction(feature, name);
+}
+
+function moveAction(source, dest, args) {
+  if (args.async) {
+    moveAsyncAction(source, dest);
+    return;
+  }
+  action.move(source, dest);
+  test.moveAction(source, dest);
 }
 
 function addFeature(name) {
@@ -170,7 +182,7 @@ function handleCommand(args) {
   }
 
   if (!cmd) {
-    utils.fatalError('Can\'t find the desired command.');
+    utils.fatalError(`Can't find the desired command: ${args.commandName}`);
   }
   cmd.apply(null, params);
 }

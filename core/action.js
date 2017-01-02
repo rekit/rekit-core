@@ -36,8 +36,14 @@ module.exports = {
     assert.notEmpty(name, 'action name');
     assert.featureExist(feature);
 
+    const targetPath = utils.mapReduxFile(feature, name);
+    if (_.get(refactor.getRekitProps(targetPath), 'action.isAsync')) {
+      this.removeAsync(feature, name);
+      return;
+    }
+
     actionType = utils.getActionType(feature, name);
-    vio.del(utils.mapReduxFile(feature, name));
+    vio.del(targetPath);
     constant.remove(feature, actionType);
     entry.removeFromReducer(feature, name);
     entry.removeFromActions(feature, name);
@@ -50,6 +56,12 @@ module.exports = {
     assert.notEmpty(dest.feature, 'feature');
     assert.notEmpty(dest.name, 'action name');
     assert.featureExist(dest.feature);
+
+    const targetPath = utils.mapReduxFile(source, dest);
+    if (_.get(refactor.getRekitProps(targetPath), 'action.isAsync')) {
+      this.moveAsync(source, dest);
+      return;
+    }
 
     source.feature = _.kebabCase(source.feature);
     source.name = _.camelCase(source.name);
