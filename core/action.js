@@ -72,7 +72,7 @@ module.exports = {
       entry.renameInActions(source.feature, source.name, dest.name);
       // update the import path in actions.js
       const targetPath = utils.mapReduxFile(source.feature, 'actions');
-      utils.replaceStringLiteral(targetPath, `./${source.name}`, `./${dest.name}`);
+      refactor.renameModuleSource(targetPath, `./${source.name}`, `./${dest.name}`);
 
       entry.renameInReducer(source.feature, source.name, dest.name);
       constant.rename(source.feature, oldActionType, newActionType);
