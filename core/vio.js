@@ -57,24 +57,29 @@ function getContent(filePath) {
 function getAst(filePath) {
   if (!asts[filePath]) {
     const code = getLines(filePath).join('\n');
-    const ast = babylon.parse(code, {
-      // parse in strict mode and allow module declarations
-      sourceType: 'module',
-      plugins: [
-        'jsx',
-        'flow',
-        'doExpressions',
-        'objectRestSpread',
-        'decorators',
-        'classProperties',
-        'exportExtensions',
-        'asyncGenerators',
-        'functionBind',
-        'functionSent',
-        'dynamicImport',
-      ]
-    });
-    asts[filePath] = ast;
+    try {
+      const ast = babylon.parse(code, {
+        // parse in strict mode and allow module declarations
+        sourceType: 'module',
+        plugins: [
+          'jsx',
+          'flow',
+          'doExpressions',
+          'objectRestSpread',
+          'decorators',
+          'classProperties',
+          'exportExtensions',
+          'asyncGenerators',
+          'functionBind',
+          'functionSent',
+          'dynamicImport',
+        ]
+      });
+      if (!ast) utils.fatalError(`Error: failed to parse ${filePath}, please check syntax.`);
+      asts[filePath] = ast;
+    } catch (e) {
+      utils.fatalError(`Error: failed to parse ${filePath}, please check syntax.`);
+    }
   }
   return asts[filePath];
 }

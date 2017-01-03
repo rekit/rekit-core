@@ -83,6 +83,7 @@ function moveAsyncAction(source, dest) {
 }
 
 function addAction(feature, name, args) {
+  args = args || {};
   if (args.async) {
     addAsyncAction(feature, name);
     return;
@@ -92,6 +93,7 @@ function addAction(feature, name, args) {
 }
 
 function removeAction(feature, name, args) {
+  args = args || {};
   if (args.async) {
     removeAsyncAction(feature, name);
     return;
@@ -101,6 +103,7 @@ function removeAction(feature, name, args) {
 }
 
 function moveAction(source, dest, args) {
+  args = args || {};
   if (args.async) {
     moveAsyncAction(source, dest);
     return;
