@@ -474,11 +474,11 @@ function getFeatureStructure(feature) {
 }
 
 function isActionEntry(modulePath) {
-  return /src\/features\/[^\/]+\/redux\/actions\.js$/.test(modulePath);
+  return /src\/features\/[^/]+\/redux\/actions\.js$/.test(modulePath);
 }
 
 function isFeatureIndex(modulePath) {
-  return /src\/features\/[^\/]+$/.test(modulePath);
+  return /src\/features\/[^/]+(\/index)?$/.test(modulePath);
 }
 
 function getActionEntry(feature) {
@@ -522,7 +522,35 @@ function getDeps(filePath) {
     constants: [],
   };
 
+  const namespaceActions = {}; // import * as xxx from 'actions';
+  const namespaceIndex = {}; // import * as xxx from 'feature';
+
+  function pushDep(type, data) {
+    // Be sure no duplicated deps
+    const exist = _.find(deps[type], { feature: data.feature, name: data.name });
+    if (!exist) {
+      deps.actions.push(data);
+    }
+  }
+
   traverse(ast, {
+    MemberExpression(path) {
+      // Find actions imported by NamespaceImport
+      const node = path.node;
+      const objName = _.get(node, 'object.property.name'); // this.props.'actions'.fetchNavTree
+      const actionName = _.get(node, 'property.name'); // this.props.actions.'fetchNavTree'
+      if (!objName || !actionName) return;
+      const actionEntry = namespaceActions[objName];
+      if (!actionEntry || !actionEntry.bySpecifier[actionName]) return;
+
+      pushDep('actions', {
+        feature: actionEntry.feature,
+        type: 'action',
+        name: actionName,
+        file: actionEntry.bySpecifier[actionName],
+      });
+    },
+
     ImportDeclaration(path) {
       const node = path.node;
       const depModule = node.source.value;
@@ -534,18 +562,24 @@ function getDeps(filePath) {
 
         if (isActionEntry(fullPath)) {
           const actionEntry = getActionEntry(utils.getFeatureName(fullPath));
+
           node.specifiers.forEach((specifier) => {
             if (specifier.type === 'ImportNamespaceSpecifier') {
-              // TODO: handle import * as xxx from 'yyy';
+              namespaceActions[specifier.local.name] = actionEntry;
               return;
             }
-            const depActionFile = actionEntry.bySpecifier[specifier.imported.name];
-            if (!shell.test('-e')) utils.fatalError(`Error: can't find ${depActionFile}`);
-            deps.actions.push({
-              name: mPath.basename(depActionFile).replace('.js', ''),
+
+            const importedName = specifier.imported.name;
+            if (!actionEntry.bySpecifier[importedName]) {
+              utils.warn(`Warning: can't find '${importedName}' from '${fullPath}'`);
+              return;
+            }
+
+            pushDep('actions', {
               feature: actionEntry.feature,
-              file: depActionFile,
               type: 'action',
+              name: importedName,
+              file: actionEntry.bySpecifier[importedName],
             });
           });
           return;
@@ -553,21 +587,21 @@ function getDeps(filePath) {
 
         if (props.component) {
           deps.components.push({
-            name: mPath.basename(depModule),
             feature: utils.getFeatureName(fullPath),
             type: 'component',
+            name: mPath.basename(depModule),
           });
         } else if (props.action) {
-          deps.actions.push({
-            name: mPath.basename(depModule),
+          pushDep('actions', {
             feature: utils.getFeatureName(fullPath),
             type: 'action',
+            name: mPath.basename(depModule),
           });
         } else {
           deps.misc.push({
-            name: mPath.basename(depModule),
             feature: utils.getFeatureName(fullPath),
             type: 'misc',
+            name: mPath.basename(depModule),
           });
         }
       }
