@@ -473,6 +473,109 @@ function getFeatureStructure(feature) {
   };
 }
 
+function isActionEntry(modulePath) {
+  return /src\/features\/[^\/]+\/redux\/actions\.js$/.test(modulePath);
+}
+
+function isFeatureIndex(modulePath) {
+  return /src\/features\/[^\/]+$/.test(modulePath);
+}
+
+function getActionEntry(feature) {
+  const filePath = utils.mapReduxFile(feature, 'actions');
+  const ast = vio.getAst(filePath);
+
+  const data = {
+    feature,
+    bySpecifier: {},
+    actions: {}
+  };
+  traverse(ast, {
+    ExportNamedDeclaration(path) {
+      const node = path.node;
+      const fullPath = utils.resolveModulePath(filePath, node.source.value) + '.js';
+      const specifiers = {};
+      node.specifiers.forEach((specifier) => {
+        specifiers[specifier.exported.name] = specifier.local.name;
+        data.bySpecifier[specifier.exported.name] = fullPath;
+      });
+      data.actions[fullPath] = specifiers;
+    },
+  });
+  return data;
+}
+
+function getFeatureIndex(feature) {
+  const filePath = utils.mapFeatureFile(feature, 'index.js');
+  const ast = vio.getAst(filePath);
+}
+
+function getDeps(filePath) {
+  // Summary:
+  //   Get dependencies of a module
+  const ast = vio.getAst(filePath);
+
+  const deps = {
+    actions: [],
+    components: [],
+    misc: [],
+    constants: [],
+  };
+
+  traverse(ast, {
+    ImportDeclaration(path) {
+      const node = path.node;
+      const depModule = node.source.value;
+
+      if (utils.isLocalModule(depModule)) {
+        const fullPath = utils.resolveModulePath(filePath, depModule) + '.js';
+        if (!shell.test('-e', fullPath)) return;  // only depends on js modules, no json or other support
+        const props = getRekitProps(fullPath);
+
+        if (isActionEntry(fullPath)) {
+          const actionEntry = getActionEntry(utils.getFeatureName(fullPath));
+          node.specifiers.forEach((specifier) => {
+            if (specifier.type === 'ImportNamespaceSpecifier') {
+              // TODO: handle import * as xxx from 'yyy';
+              return;
+            }
+            const depActionFile = actionEntry.bySpecifier[specifier.imported.name];
+            if (!shell.test('-e')) utils.fatalError(`Error: can't find ${depActionFile}`);
+            deps.actions.push({
+              name: mPath.basename(depActionFile).replace('.js', ''),
+              feature: actionEntry.feature,
+              file: depActionFile,
+              type: 'action',
+            });
+          });
+          return;
+        }
+
+        if (props.component) {
+          deps.components.push({
+            name: mPath.basename(depModule),
+            feature: utils.getFeatureName(fullPath),
+            type: 'component',
+          });
+        } else if (props.action) {
+          deps.actions.push({
+            name: mPath.basename(depModule),
+            feature: utils.getFeatureName(fullPath),
+            type: 'action',
+          });
+        } else {
+          deps.misc.push({
+            name: mPath.basename(depModule),
+            feature: utils.getFeatureName(fullPath),
+            type: 'misc',
+          });
+        }
+      }
+    },
+  });
+  return deps;
+}
+
 // function renameExportFrom(file, oldName, newName, oldModulePath, newModulePath) {
 //   // Summary:
 //   //  Rename export xxx from '.xxx' at the top. Usually used by entry files such as index.js
@@ -550,6 +653,11 @@ function acceptFilePathForLines(func) {
 
 module.exports = {
 
+  isActionEntry,
+  isFeatureIndex,
+  getActionEntry,
+  getFeatureIndex,
+
   renameClassName,
   renameFunctionName,
   renameImportSpecifier,
@@ -563,6 +671,8 @@ module.exports = {
   getRekitProps,
   getFeatures,
   getFeatureStructure,
+
+  getDeps,
 
   lineIndex,
   lastLineIndex,

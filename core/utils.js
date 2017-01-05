@@ -112,6 +112,20 @@ function getCssExt() {
   return (pkg && pkg.rekit && pkg.rekit.css === 'sass') ? 'scss' : 'less';
 }
 
+function isLocalModule(modulePath) {
+  // TODO: handle alias module path like src
+  return /^\./.test(modulePath);
+}
+
+function resolveModulePath(relativeToFile, modulePath) {
+  // TODO: handle alias module path
+  return path.resolve(path.dirname(relativeToFile), modulePath);
+}
+
+function getFeatureName(filePath) {
+  return filePath.replace(getProjectRoot() + '/', '').split('/')[2];
+}
+
 module.exports = {
   getCssExt,
   setProjectRoot,
@@ -131,4 +145,8 @@ module.exports = {
   log,
   warn,
   error,
+
+  isLocalModule,
+  resolveModulePath,
+  getFeatureName,
 };
