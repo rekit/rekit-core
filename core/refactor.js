@@ -354,7 +354,13 @@ function renameStyleModuleSource(lines, oldMoudleSource, newModuleSource) {
   lines[i] = `@import '${newModuleSource}';`;
 }
 
+const propsCache = {};
+const depsCache = {};
+
 function getRekitProps(file) {
+  if (propsCache[file] && propsCache[file].content === vio.getContent(file)) {
+    return propsCache[file].props;
+  }
   const ast = vio.getAst(file);
   const ff = {}; // File features
 
@@ -404,6 +410,11 @@ function getRekitProps(file) {
     action: ff.exportReducer && ff.importConstant && {
       isAsync: ff.importMultipleConstants,
     }
+  };
+
+  propsCache[file] = {
+    content: vio.getContent(file),
+    props,
   };
   return props;
 }
@@ -481,6 +492,10 @@ function isFeatureIndex(modulePath) {
   return /src\/features\/[^/]+(\/index)?$/.test(modulePath);
 }
 
+function isConstantEntry(modulePath) {
+  return /src\/features\/[^/]+\/redux\/constants\.js$/.test(modulePath);
+}
+
 function getEntryData(filePath) {
   // Summary:
   //  Get entry files content such as actions.js, index.js where usually define 'export { aaa, bbb } from 'xxx';
@@ -497,70 +512,26 @@ function getEntryData(filePath) {
     ExportNamedDeclaration(path) {
       const node = path.node;
       if (!node.source || !node.source.value) return;
-      const fullPath = utils.resolveModulePath(filePath, node.source.value) + '.js'; // from which file
+      const sourceFile = utils.resolveModulePath(filePath, node.source.value) + '.js'; // from which file
       const specifiers = {};
       node.specifiers.forEach((specifier) => {
-        specifiers[specifier.exported.name] = specifier.local && specifier.local.name || true,
-        data.exported[specifier.exported.name] = fullPath;
+        specifiers[specifier.exported.name] = specifier.local && specifier.local.name || true;
+        data.exported[specifier.exported.name] = sourceFile;
       });
-      data.bySource[fullPath] = specifiers;
+      data.bySource[sourceFile] = specifiers;
     },
   });
   return data;
 }
 
-// function getActionEntry(feature) {
-//   const filePath = utils.mapReduxFile(feature, 'actions');
-//   const ast = vio.getAst(filePath);
-
-//   const data = {
-//     feature,
-//     bySpecifier: {},
-//     actions: {}
-//   };
-//   traverse(ast, {
-//     ExportNamedDeclaration(path) {
-//       const node = path.node;
-//       if (!node.source || !node.source.value) return;
-//       const fullPath = utils.resolveModulePath(filePath, node.source.value) + '.js';
-//       const specifiers = {};
-//       node.specifiers.forEach((specifier) => {
-//         specifiers[specifier.exported.name] = specifier.local.name;
-//         data.bySpecifier[specifier.exported.name] = fullPath;
-//       });
-//       data.actions[fullPath] = specifiers;
-//     },
-//   });
-//   return data;
-// }
-
-// function getIndexEntry(feature) {
-//   const filePath = utils.mapFeatureFile(feature, 'index.js');
-//   const ast = vio.getAst(filePath);
-
-//   const data = {
-//     feature,
-//     bySpecifier: {},
-//     exported: {}
-//   };
-//   traverse(ast, {
-//     ExportNamedDeclaration(path) {
-//       const node = path.node;
-//       const fullPath = utils.resolveModulePath(filePath, node.source.value) + '.js';
-//       const specifiers = {};
-//       node.specifiers.forEach((specifier) => {
-//         specifiers[specifier.exported.name] = specifier.local.name;
-//         data.bySpecifier[specifier.exported.name] = fullPath;
-//       });
-//       data.exported[fullPath] = specifiers;
-//     },
-//   });
-//   return data;
-// }
-
 function getDeps(filePath) {
   // Summary:
   //   Get dependencies of a module
+
+  if (propsCache[filePath] && propsCache[filePath].content === vio.getContent(filePath)) {
+    return propsCache[filePath].deps;
+  }
+
   const ast = vio.getAst(filePath);
 
   const deps = {
@@ -584,23 +555,6 @@ function getDeps(filePath) {
   const depFiles = [];
 
   traverse(ast, {
-    MemberExpression(path) {
-      // Find actions imported by NamespaceImport
-      const node = path.node;
-      const objName = _.get(node, 'object.property.name'); // this.props.'actions'.fetchNavTree
-      const actionName = _.get(node, 'property.name'); // this.props.actions.'fetchNavTree'
-      if (!objName || !actionName) return;
-      const actionEntry = namespaceActions[objName];
-      if (!actionEntry || !actionEntry.exported[actionName]) return;
-
-      pushDep('actions', {
-        feature: actionEntry.feature,
-        type: 'action',
-        name: actionName,
-        file: actionEntry.exported[actionName],
-      });
-    },
-
     ImportDeclaration(path) {
       const node = path.node;
       const depModule = node.source.value;
@@ -666,42 +620,77 @@ function getDeps(filePath) {
           return;
         }
 
-
-        node.specifiers.forEach((specifier) => {
-          depFiles.push({
-              name: mPath.basename(resolvedPath),
-            file: resolvedPath + '.js',
+        if (isConstantEntry(fullPath)) {
+          node.specifiers.forEach((specifier) => {
+            deps.constants.push({
+              name: specifier.imported.name,
+              feature: utils.getFeatureName(fullPath),
+              file: fullPath,
+            });
           });
+          return;
+        }
+
+        depFiles.push({
+          name: mPath.basename(resolvedPath),
+          file: resolvedPath + '.js',
+        });
+      }
+    },
+
+    MemberExpression(path) {
+      // Find actions imported by NamespaceImport
+      const node = path.node;
+      const objName = _.get(node, 'object.property.name') || _.get(node, 'object.name'); // this.props.'actions'.fetchNavTree
+      const propName = _.get(node, 'property.name'); // this.props.actions.'fetchNavTree'
+      if (!objName || !propName) return;
+      if (namespaceActions[objName]) {
+        const actionEntry = namespaceActions[objName];
+        if (!actionEntry.exported[propName]) return;
+
+        pushDep('actions', {
+          feature: actionEntry.feature,
+          type: 'action',
+          name: propName,
+          file: actionEntry.exported[propName],
+        });
+      } else if (namespaceIndex[objName]) {
+        const indexEntry = namespaceIndex[objName];
+        if (!indexEntry.exported[propName]) return;
+        depFiles.push({
+          name: propName,
+          file: indexEntry.exported[propName],
         });
       }
     },
   });
 
-  depFiles.forEach(item => {
+  depFiles.forEach((item) => {
     const props = getRekitProps(item.file);
     // Other files
     if (props.component) {
       const feature = utils.getFeatureName(item.file);
-      if (feature && !_.find(deps.component, { feature, name: item.name })) deps.components.push({
-        feature,
-        type: 'component',
-        name: item.name,
-        file: item.file,
-      });
-    } else if (props.action) {
-      pushDep('actions', {
-        feature: utils.getFeatureName(fullPath),
-        type: 'action',
-        name: mPath.basename(depModule),
-      });
+      if (feature && !_.find(deps.component, { feature, name: item.name })) {
+        deps.components.push({
+          feature,
+          type: 'component',
+          name: item.name,
+          file: item.file,
+        });
+      }
     } else {
       deps.misc.push({
-        feature: utils.getFeatureName(fullPath),
+        feature: utils.getFeatureName(item.file),
         type: 'misc',
-        name: mPath.basename(depModule),
+        name: mPath.basename(item.file).replace('.js', ''),
       });
     }
   });
+
+  depsCache[filePath] = {
+    content: vio.getContent(filePath),
+    deps,
+  };
   return deps;
 }
 
