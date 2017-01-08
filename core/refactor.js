@@ -528,8 +528,8 @@ function getDeps(filePath) {
   // Summary:
   //   Get dependencies of a module
 
-  if (propsCache[filePath] && propsCache[filePath].content === vio.getContent(filePath)) {
-    return propsCache[filePath].deps;
+  if (depsCache[filePath] && depsCache[filePath].content === vio.getContent(filePath)) {
+    return depsCache[filePath].deps;
   }
 
   const ast = vio.getAst(filePath);
