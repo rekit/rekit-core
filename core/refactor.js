@@ -435,6 +435,7 @@ function getFeatureStructure(feature) {
       noneMisc[file.replace('.js', '.scss')] = true;
       return Object.assign({
         name: mPath.basename(file).replace('.js', ''),
+        type: 'component',
         file,
       }, props.component);
     }
@@ -447,6 +448,7 @@ function getFeatureStructure(feature) {
       noneMisc[file] = true;
       return Object.assign({
         name: mPath.basename(file).replace('.js', ''),
+        type: 'action',
         file,
       }, props.action);
     }
@@ -458,14 +460,17 @@ function getFeatureStructure(feature) {
     shell.ls(root).forEach((file) => {
       const fullPath = mPath.join(root, file);
       if (shell.test('-d', fullPath)) {
+        // is directory
         arr.push({
           name: mPath.basename(fullPath),
+          type: 'misc',
           file: fullPath,
           children: getMiscFiles(fullPath),
         });
       } else if (!noneMisc[fullPath]) {
         arr.push({
-          name: mPath.basename(fullPath),
+          type: 'misc',
+          name: mPath.basename(fullPath).replace('.js', ''),
           file: fullPath,
         });
       }
@@ -626,6 +631,7 @@ function getDeps(filePath) {
               name: specifier.imported.name,
               feature: utils.getFeatureName(fullPath),
               file: fullPath,
+              type: 'constant',
             });
           });
           return;
@@ -683,6 +689,7 @@ function getDeps(filePath) {
         feature: utils.getFeatureName(item.file),
         type: 'misc',
         name: mPath.basename(item.file).replace('.js', ''),
+        file: item.file,
       });
     }
   });
