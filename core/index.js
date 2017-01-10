@@ -69,15 +69,23 @@ function addPage(feature, name, args) {
 }
 
 function removePage(feature, name, args) {
+  feature = _.kebabCase(feature);
+  name = _.pascalCase(name);
+
   component.remove(feature, name);
   entry.removeFromRoute(feature, name, args);
   style.remove(feature, name);
   test.remove(feature, name);
 }
 
-function movePage(source, dest) {
-  moveComponent(source, dest);
-  entry.moveRoute(source, dest);
+function movePage(source, target) {
+  source.feature = _.kebabCase(source.feature);
+  source.name = _.pascalCase(source.name);
+  target.feature = _.kebabCase(target.feature);
+  target.name = _.pascalCase(target.name);
+
+  moveComponent(source, target);
+  entry.moveRoute(source, target);
 }
 
 function addAsyncAction(feature, name) {
