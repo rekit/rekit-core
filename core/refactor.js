@@ -7,6 +7,7 @@ const _ = require('lodash');
 const mPath = require('path');
 const shell = require('shelljs');
 const traverse = require('babel-traverse').default;
+const generate = require('babel-generator').default;
 const vio = require('./vio');
 const utils = require('./utils');
 
@@ -45,6 +46,10 @@ function updateSourceCode(code, changes) {
 
   const chars = code.split('');
   newChanges.forEach((c) => {
+    // Special case: after the change, two empty lines occurs, should delete one line
+    if (c.replacement === '' && (c.start === 0 || chars[c.start - 1] === '\n') && chars[c.end] === '\n') {
+      c.end += 1;
+    }
     chars.splice(c.start, c.end - c.start, c.replacement);
   });
   return chars.join('');
@@ -61,6 +66,45 @@ function updateFile(filePath, changes) {
   let code = vio.getContent(filePath);
   code = updateSourceCode(code, changes);
   vio.save(filePath, code);
+}
+
+function addImport(ast, name, moduleSource) {
+  // Summary:
+  //  Add import from source module. Such as import { xxx } from './x';
+  let names = name;
+  if (typeof name === 'string') {
+    names = [name];
+  }
+  const changes = [];
+  let targetImportPos = 0;
+  traverse(ast, {
+    ImportDeclaration(path) {
+      const node = path.node;
+      targetImportPos = path.node.end + 2;
+      if (!node.specifiers || !node.source || node.source.value !== moduleSource) return;
+
+      const newSpecifiers = node.specifiers.filter(s => !names.includes(s.local.name));
+      if (newSpecifiers.length === 0) {
+        // no specifiers, should delete the import statement
+        changes.push({
+          start: node.start,
+          end: node.end,
+          replacement: '',
+        });
+      } else if (newSpecifiers.length !== node.specifiers.length) {
+        // remove the specifier import
+        const newNode = Object.assign({}, node, { specifiers: newSpecifiers });
+        const newCode = generate(newNode, {}).code;
+        changes.push({
+          start: node.start,
+          end: node.end,
+          replacement: newCode,
+        });
+      }
+    }
+  });
+
+  return changes;
 }
 
 function renameIdentifier(ast, oldName, newName, defNode) {
@@ -270,6 +314,62 @@ function renameCssClassName(ast, oldName, newName) {
       }
     },
   });
+  return changes;
+}
+
+function removeImportSpecifier(ast, name) {
+  let names = name;
+  if (typeof name === 'string') {
+    names = [name];
+  }
+  const changes = [];
+  traverse(ast, {
+    ImportDeclaration(path) {
+      const node = path.node;
+      if (!node.specifiers) return;
+      const newSpecifiers = node.specifiers.filter(s => !names.includes(s.local.name));
+      if (newSpecifiers.length === 0) {
+        // no specifiers, should delete the import statement
+        changes.push({
+          start: node.start,
+          end: node.end,
+          replacement: '',
+        });
+      } else if (newSpecifiers.length !== node.specifiers.length) {
+        // remove the specifier import
+        const newNode = Object.assign({}, node, { specifiers: newSpecifiers });
+        const newCode = generate(newNode, {}).code;
+        changes.push({
+          start: node.start,
+          end: node.end,
+          replacement: newCode,
+        });
+      }
+    }
+  });
+  
+  return changes;
+}
+
+function removeImportBySource(ast, moduleSource) {
+  const changes = [];
+
+  function removeBySource(path) {
+    const node = path.node;
+    if (!node.source) return;
+    if (node.source.value === moduleSource) {
+      changes.push({
+        start: node.start,
+        end: node.end,
+        replacement: '',
+      });
+    }
+  }
+  traverse(ast, {
+    ExportNamedDeclaration: removeBySource,
+    ImportDeclaration: removeBySource,
+  });
+
   return changes;
 }
 
@@ -784,20 +884,25 @@ module.exports = {
   // getIndexEntry,
   getEntryData,
 
-  renameClassName,
-  renameFunctionName,
-  renameImportSpecifier,
-  renameExportSpecifier,
-  renameObjectProperty,
-  renameCssClassName,
-  renameStringLiteral,
+  addImport: acceptFilePathForAst(addImport),
+
+  renameClassName: acceptFilePathForAst(renameClassName),
+  renameFunctionName: acceptFilePathForAst(renameFunctionName),
+  renameImportSpecifier: acceptFilePathForAst(renameImportSpecifier),
+  renameExportSpecifier: acceptFilePathForAst(renameExportSpecifier),
+  renameObjectProperty: acceptFilePathForAst(renameObjectProperty),
+  renameCssClassName: acceptFilePathForAst(renameCssClassName),
+  renameStringLiteral: acceptFilePathForAst(renameStringLiteral),
+  renameModuleSource: acceptFilePathForAst(renameModuleSource),
+
+  removeImportSpecifier: acceptFilePathForAst(removeImportSpecifier),
+  removeImportBySource: acceptFilePathForAst(removeImportBySource),
+
   updateSourceCode,
   updateFile,
-  renameModuleSource: acceptFilePathForAst(renameModuleSource),
   getRekitProps,
   getFeatures,
   getFeatureStructure,
-
   getDeps,
 
   lineIndex,

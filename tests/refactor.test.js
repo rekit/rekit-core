@@ -3,6 +3,14 @@
 const expect = require('chai').expect;
 const vio = require('../core/vio');
 const refactor = require('../core/refactor');
+const helpers = require('./helpers');
+
+const expectFile = helpers.expectFile;
+const expectFiles = helpers.expectFiles;
+const expectNoFile = helpers.expectNoFile;
+const expectNoFiles = helpers.expectNoFiles;
+const expectLines = helpers.expectLines;
+const expectNoLines = helpers.expectNoLines;
 
 const V_FILE = '/vio-temp-file';
 
@@ -54,6 +62,41 @@ describe('reafctor tests', function() { // eslint-disable-line
       vio.put(V_FILE, CODE_1);
       refactor.removeExportFromLine(V_FILE, './e');
       expect(vio.getContent(V_FILE)).to.equal(CODE_1);
+    });
+  });
+
+  describe('removeNamedImport', () => {
+    const code = `import A from './A';
+import { C, D, Z } from './D';
+import { E } from './E';
+import F from './F';
+`;
+    it('should remove give import specifier', () => {
+      vio.put(V_FILE, code);
+      refactor.removeImportSpecifier(V_FILE, ['E', 'D']);
+      expectLines(V_FILE, [
+        "import { C, Z } from './D';",
+      ]);
+      expectNoLines(V_FILE, [
+        "import { E } from './E';",
+      ]);
+    });
+  });
+
+  describe('removeImportBySource', () => {
+    const code = `import A from './A';
+import { C, D, Z } from './D';
+import { E } from './E';
+import F from './F';
+`;
+    it('should remove import statement by given source', () => {
+      vio.put(V_FILE, code);
+      refactor.removeImportBySource(V_FILE, './A');
+      refactor.removeImportBySource(V_FILE, './D');
+      expectNoLines(V_FILE, [
+        "import A from './A';",
+        "import { C, D, Z } from './D';",
+      ]);
     });
   });
 });

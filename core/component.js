@@ -13,6 +13,9 @@ function add(feature, component, args) {
   assert.notEmpty(component, 'component name');
   assert.featureExist(feature);
 
+  feature = _.kebabCase(feature);
+  component = _.pascalCase(component);
+
   // create component from template
   args = args || {};
   template.generate(utils.mapComponent(feature, component) + '.js', Object.assign({}, args, {
@@ -28,6 +31,9 @@ function remove(feature, component) {
   assert.notEmpty(feature, 'feature');
   assert.notEmpty(component, 'component name');
   assert.featureExist(feature);
+
+  feature = _.kebabCase(feature);
+  component = _.pascalCase(component);
 
   vio.del(utils.mapComponent(feature, component) + '.js');
   entry.removeFromIndex(feature, component);
@@ -45,18 +51,21 @@ function move(source, dest) {
   const destPath = utils.mapComponent(dest.feature, dest.name) + '.js';
   vio.move(srcPath, destPath);
 
-  const oldCssClass = `${_.kebabCase(source.feature)}-${_.kebabCase(source.name)}`;
-  const newCssClass = `${_.kebabCase(dest.feature)}-${_.kebabCase(dest.name)}`;
+  const oldCssClass = `${source.feature}-${source.name}`;
+  const newCssClass = `${dest.feature}-${dest.name}`;
 
-  const ast = vio.getAst(destPath);
-  const changes = [].concat(
-    refactor.renameClassName(ast, source.name, dest.name),
-    refactor.renameCssClassName(ast, oldCssClass, newCssClass)
-  );
+  refactor.renameClassName(destPath, source.name, dest.name);
+  refactor.renameCssClassName(destPath, oldCssClass, newCssClass);
 
-  let code = vio.getContent(destPath);
-  code = refactor.updateSourceCode(code, changes);
-  vio.save(destPath, code);
+  // const ast = vio.getAst(destPath);
+  // const changes = [].concat(
+  //   refactor.renameClassName(ast, source.name, dest.name),
+  //   refactor.renameCssClassName(ast, oldCssClass, newCssClass)
+  // );
+
+  // let code = vio.getContent(destPath);
+  // code = refactor.updateSourceCode(code, changes);
+  // vio.save(destPath, code);
 
   if (source.feature === dest.feature) {
     entry.renameInIndex(source.feature, source.name, dest.name);

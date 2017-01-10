@@ -12,7 +12,7 @@ const assert = require('./assert');
 
 module.exports = {
   addToIndex(feature, name) {
-    name = _.pascalCase(name);
+    // name = _.pascalCase(name);
     const targetPath = utils.mapFeatureFile(feature, 'index.js');
     const lines = vio.getLines(targetPath);
     const i = refactor.lastLineIndex(lines, /^export .* from /);
@@ -21,7 +21,7 @@ module.exports = {
   },
 
   removeFromIndex(feature, name) {
-    name = _.pascalCase(name);
+    // name = _.pascalCase(name);
     const targetPath = utils.mapFeatureFile(feature, 'index.js');
     const lines = vio.getLines(targetPath);
     refactor.removeLines(lines, `export ${name} from './${name}';`);
@@ -30,34 +30,29 @@ module.exports = {
 
   renameInIndex(feature, oldName, newName) {
     // Rename export xxx from './xxx'
-    oldName = _.pascalCase(oldName);
-    newName = _.pascalCase(newName);
+    // oldName = _.pascalCase(oldName);
+    // newName = _.pascalCase(newName);
     const targetPath = utils.mapFeatureFile(feature, 'index.js');
-    const lines = vio.getLines(targetPath);
-    const i = refactor.lineIndex(lines, new RegExp(`export +${oldName} +from '\\.\\/${oldName}'`));
-    if (i >= 0) {
-      lines[i] = `export ${newName} from './${newName}';`;
-    }
-
-    vio.save(targetPath, lines);
+    refactor.renameExportSpecifier(targetPath, oldName, newName);
+    refactor.renameModuleSource(targetPath, `./${oldName}`, `./${newName}`);
   },
 
   addToStyle(feature, name) {
     const targetPath = utils.mapFeatureFile(feature, 'style.' + utils.getCssExt());
     const lines = vio.getLines(targetPath);
     const i = refactor.lastLineIndex(lines, '@import ');
-    lines.splice(i + 1, 0, `@import './${_.pascalCase(name)}.${utils.getCssExt()}';`);
+    lines.splice(i + 1, 0, `@import './${name}.${utils.getCssExt()}';`);
     vio.save(targetPath, lines);
   },
 
   removeFromStyle(feature, name) {
     const targetPath = utils.mapFeatureFile(feature, 'style.' + utils.getCssExt());
-    refactor.removeStyleImport(targetPath, `./${_.pascalCase(name)}.${utils.getCssExt()}`);
+    refactor.removeStyleImport(targetPath, `./${name}.${utils.getCssExt()}`);
   },
 
   renameInStyle(feature, oldName, newName) {
     const targetPath = utils.mapFeatureFile(feature, 'style.' + utils.getCssExt());
-    refactor.renameStyleModuleSource(targetPath, `./${_.pascalCase(oldName)}.${utils.getCssExt()}`, `./${_.pascalCase(newName)}.${utils.getCssExt()}`);
+    refactor.renameStyleModuleSource(targetPath, `./${oldName}.${utils.getCssExt()}`, `./${newName}.${utils.getCssExt()}`);
   },
 
   addToRoute(feature, component, args) {
@@ -132,8 +127,10 @@ module.exports = {
   },
 
   addToActions(feature, name, actionFile) {
+    feature = _.kebabCase(feature);
     name = _.camelCase(name);
     actionFile = _.camelCase(actionFile || name);
+
     const targetPath = utils.mapReduxFile(feature, 'actions');
     const lines = vio.getLines(targetPath);
     let i = refactor.lineIndex(lines, ` from './${actionFile}'`);

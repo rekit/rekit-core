@@ -20,6 +20,9 @@ const plugin = require('./plugin');
 const injectExtensionPoints = plugin.injectExtensionPoints;
 
 function addComponent(feature, name, args) {
+  feature = _.kebabCase(feature);
+  name = _.pascalCase(name);
+
   args = args || {};
   component.add(feature, name, {
     templateFile: args.connect ? 'ConnectedComponent.js' : 'Component.js',
@@ -35,20 +38,30 @@ function addComponent(feature, name, args) {
 }
 
 function removeComponent(feature, name) {
+  feature = _.kebabCase(feature);
+  name = _.pascalCase(name);
   component.remove(feature, name);
   route.remove(feature, name);
   style.remove(feature, name);
   test.remove(feature, name);
 }
 
-function moveComponent(source, dest) {
-  component.move(source, dest);
-  test.move(source, dest);
-  style.move(source, dest);
-  route.move(source, dest);
+function moveComponent(source, target) {
+  source.feature = _.kebabCase(source.feature);
+  source.name = _.pascalCase(source.name);
+  target.feature = _.kebabCase(target.feature);
+  target.name = _.pascalCase(target.name);
+
+  component.move(source, target);
+  test.move(source, target);
+  style.move(source, target);
+  route.move(source, target);
 }
 
 function addPage(feature, name, args) {
+  feature = _.kebabCase(feature);
+  name = _.pascalCase(name);
+
   component.add(feature, name, { templateFile: 'ConnectedComponent.js' });
   entry.addToRoute(feature, name, args);
   style.add(feature, name);
