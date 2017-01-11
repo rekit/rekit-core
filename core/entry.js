@@ -132,50 +132,55 @@ module.exports = {
     actionFile = _.camelCase(actionFile || name);
 
     const targetPath = utils.mapReduxFile(feature, 'actions');
-    const lines = vio.getLines(targetPath);
-    let i = refactor.lineIndex(lines, ` from './${actionFile}'`);
-    if (i >= 0) {
-      // if action already exists
-      const line = lines[i];
-      const m = /^export \{([^}]+)\}/.exec(line);
-      const arr = m[1].split(',').map(s => s.trim());
-      if (!_.includes(arr, name)) {
-        arr.push(name);
-        lines[i] = line.replace(/\{[^}]+\}/, `{ ${arr.join(', ')} }`);
-      }
-    } else {
-      i = refactor.lastLineIndex(lines, /^export .* from /);
-      lines.splice(i + 1, 0, `export { ${name} } from './${actionFile}';`);
-    }
+    refactor.addExportFrom(targetPath, `./${actionFile}`, null, name);
 
-    vio.save(targetPath, lines);
+    // const lines = vio.getLines(targetPath);
+    // let i = refactor.lineIndex(lines, ` from './${actionFile}'`);
+    // if (i >= 0) {
+    //   // if action already exists
+    //   const line = lines[i];
+    //   const m = /^export \{([^}]+)\}/.exec(line);
+    //   const arr = m[1].split(',').map(s => s.trim());
+    //   if (!_.includes(arr, name)) {
+    //     arr.push(name);
+    //     lines[i] = line.replace(/\{[^}]+\}/, `{ ${arr.join(', ')} }`);
+    //   }
+    // } else {
+    //   i = refactor.lastLineIndex(lines, /^export .* from /);
+    //   lines.splice(i + 1, 0, `export { ${name} } from './${actionFile}';`);
+    // }
+
+    // vio.save(targetPath, lines);
   },
 
   removeFromActions(feature, name, actionFile) {
     name = _.camelCase(name);
     actionFile = _.camelCase(actionFile || name);
     const targetPath = utils.mapReduxFile(feature, 'actions');
-    const lines = vio.getLines(targetPath);
-    if (!name) {
-      // Remove all imports from the action
-      refactor.removeLines(lines, `from './${actionFile}`);
-    } else {
-      const i = refactor.lineIndex(lines, ` from './${actionFile}'`);
-      if (i >= 0) {
-        const line = lines[i];
-        const m = /^export \{([^}]+)\}/.exec(line);
-        const arr = m[1].split(',').map(s => s.trim());
-        _.pull(arr, name);
 
-        if (arr.length > 0) {
-          lines[i] = line.replace(/\{[^}]+\}/, `{ ${arr.join(', ')} }`);
-        } else {
-          lines.splice(i, 1);
-        }
-      }
-    }
+    refactor.removeImportBySource(targetPath, `./${actionFile}`);
 
-    vio.save(targetPath, lines);
+    // const lines = vio.getLines(targetPath);
+    // if (!name) {
+    //   // Remove all imports from the action
+    //   refactor.removeLines(lines, `from './${actionFile}`);
+    // } else {
+    //   const i = refactor.lineIndex(lines, ` from './${actionFile}'`);
+    //   if (i >= 0) {
+    //     const line = lines[i];
+    //     const m = /^export \{([^}]+)\}/.exec(line);
+    //     const arr = m[1].split(',').map(s => s.trim());
+    //     _.pull(arr, name);
+
+    //     if (arr.length > 0) {
+    //       lines[i] = line.replace(/\{[^}]+\}/, `{ ${arr.join(', ')} }`);
+    //     } else {
+    //       lines.splice(i, 1);
+    //     }
+    //   }
+    // }
+
+    // vio.save(targetPath, lines);
   },
 
   renameInActions(feature, oldName, newName) {
@@ -183,14 +188,16 @@ module.exports = {
     oldName = _.camelCase(oldName);
     newName = _.camelCase(newName);
     const targetPath = utils.mapReduxFile(feature, 'actions');
-    const ast = vio.getAst(targetPath);
-    const changes = [].concat(
-      refactor.renameExportSpecifier(ast, oldName, newName)
-    );
-    let code = vio.getContent(targetPath);
-    code = refactor.updateSourceCode(code, changes);
+    refactor.renameExportSpecifier(targetPath, oldName, newName);
 
-    vio.save(targetPath, code);
+    // const ast = vio.getAst(targetPath);
+    // const changes = [].concat(
+    //   refactor.renameExportSpecifier(ast, oldName, newName)
+    // );
+    // let code = vio.getContent(targetPath);
+    // code = refactor.updateSourceCode(code, changes);
+
+    // vio.save(targetPath, code);
   },
 
   addToReducer(feature, action) {

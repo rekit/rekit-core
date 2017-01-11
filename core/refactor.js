@@ -6,7 +6,7 @@
 const _ = require('lodash');
 const mPath = require('path');
 const shell = require('shelljs');
-const babel = require('babel-core');
+const babelTypes = require('babel-types');
 const traverse = require('babel-traverse').default;
 const generate = require('babel-generator').default;
 const vio = require('./vio');
@@ -73,7 +73,15 @@ function updateFile(filePath, changes) {
   vio.save(filePath, code);
 }
 
-function addImport(ast, moduleSource, defaultImport, namedImport) {
+function batchUpdate(filePath, callback) {
+  const ast = vio.getAst(filePath);
+  const changes = callback(ast);
+  let code = vio.getContent(filePath);
+  code = updateSourceCode(code, changes);
+  vio.save(filePath, code);
+}
+
+function addImportFrom(ast, moduleSource, defaultImport, namedImport) {
   // Summary:
   //  Add import from source module. Such as import { xxx } from './x';
   let names = [];
@@ -87,7 +95,7 @@ function addImport(ast, moduleSource, defaultImport, namedImport) {
   }
 
   const changes = [];
-  const t = babel.types;
+  const t = babelTypes;
 
   let targetImportPos = 0;
   let sourceExisted = false;
@@ -146,6 +154,86 @@ function addImport(ast, moduleSource, defaultImport, namedImport) {
     changes.push({
       start: targetImportPos,
       end: targetImportPos + 1,
+      replacement: `${code}\n`,
+    });
+  }
+
+  return changes;
+}
+
+function addExportFrom(ast, moduleSource, defaultExport, namedExport) {
+  // Summary:
+  //  Add export from source module. Such as export { xxx } from './x';
+  let names = [];
+
+  if (namedExport) {
+    if (typeof namedExport === 'string') {
+      names.push(namedExport);
+    } else {
+      names = names.concat(namedExport);
+    }
+  }
+
+  const changes = [];
+  const t = babelTypes;
+
+  let targetExportPos = 0;
+  let sourceExisted = false;
+  traverse(ast, {
+    ExportNamedDeclaration(path) {
+      const node = path.node;
+      targetExportPos = path.node.end + 2;
+      if (!node.specifiers || !node.source || node.source.value !== moduleSource) return;
+      sourceExisted = true;
+      let newNames = [];
+      const alreadyHaveDefaultExport = !!_.find(node.specifiers, s => _.get(s, 'local.name') === 'default');
+      if (defaultExport && !alreadyHaveDefaultExport) newNames.push(defaultExport);
+
+      newNames = newNames.concat(names);
+
+      // only add names which don't exist
+      newNames = newNames.filter(n => !_.find(node.specifiers, s => (_.get(s, 'exported.name') || _.get(s, 'local.name')) === n));
+
+      if (newNames.length > 0) {
+        const newSpecifiers = [].concat(node.specifiers);
+        newNames.forEach((n) => {
+          const local = t.identifier(n);
+          const exported = local; // TODO: doesn't support local alias.
+          if (n === defaultExport) {
+            newSpecifiers.unshift(t.exportSpecifier(t.identifier('default'), exported));
+          } else {
+            newSpecifiers.push(t.exportSpecifier(local, exported));
+          }
+        });
+
+        const newNode = Object.assign({}, node, { specifiers: newSpecifiers });
+        const newCode = generate(newNode, babelGeneratorOptions).code;
+        changes.push({
+          start: node.start,
+          end: node.end,
+          replacement: newCode,
+        });
+      }
+    }
+  });
+
+  if (changes.length === 0 && !sourceExisted) {
+    const specifiers = [];
+    if (defaultExport) {
+      specifiers.push(t.exportSpecifier(t.identifier('default'), t.identifier(defaultExport)));
+    }
+
+    names.forEach((n) => {
+      const local = t.identifier(n);
+      const exported = local;
+      specifiers.push(t.exportSpecifier(local, exported));
+    });
+
+    const node = t.ExportNamedDeclaration(null, specifiers, t.stringLiteral(moduleSource));
+    const code = generate(node, babelGeneratorOptions).code;
+    changes.push({
+      start: targetExportPos,
+      end: targetExportPos + 1,
       replacement: `${code}\n`,
     });
   }
@@ -227,12 +315,12 @@ function renameImportSpecifier(ast, oldName, newName) {
   // Find the definition node of the class
   traverse(ast, {
     ImportDefaultSpecifier(path) {
-      if (path.node.local.name === oldName) {
+      if (_.get(path, 'node.local.name') === oldName) {
         defNode = path.node.local;
       }
     },
     ImportSpecifier(path) {
-      if (path.node.local.name === oldName) {
+      if (_.get(path, 'node.local.name') === oldName) {
         defNode = path.node.local;
       }
     }
@@ -246,20 +334,26 @@ function renameImportSpecifier(ast, oldName, newName) {
 function renameExportSpecifier(ast, oldName, newName) {
   const changes = [];
   traverse(ast, {
-    ExportDefaultSpecifier(path) {
-      if (path.node.exported.name === oldName) {
-        changes.push({
-          start: path.node.exported.start,
-          end: path.node.exported.end,
-          replacement: newName,
-        });
-      }
-    },
+    // ExportDefaultSpecifier(path) {
+    //   if (path.node.exported.name === oldName) {
+    //     changes.push({
+    //       start: path.node.exported.start,
+    //       end: path.node.exported.end,
+    //       replacement: newName,
+    //     });
+    //   }
+    // },
     ExportSpecifier(path) {
-      if (path.node.local.name === oldName) {
+      if (_.get(path, 'node.local.name') === oldName) {
         changes.push({
           start: path.node.local.start,
           end: path.node.local.end,
+          replacement: newName,
+        });
+      } else if (_.get(path, 'node.exported.name') === oldName) {
+        changes.push({
+          start: path.node.exported.start,
+          end: path.node.exported.end,
           replacement: newName,
         });
       }
@@ -930,7 +1024,8 @@ module.exports = {
   // getIndexEntry,
   getEntryData,
 
-  addImport: acceptFilePathForAst(addImport),
+  addImportFrom: acceptFilePathForAst(addImportFrom),
+  addExportFrom: acceptFilePathForAst(addExportFrom),
 
   renameClassName: acceptFilePathForAst(renameClassName),
   renameFunctionName: acceptFilePathForAst(renameFunctionName),
@@ -946,6 +1041,8 @@ module.exports = {
 
   updateSourceCode,
   updateFile,
+  batchUpdate,
+
   getRekitProps,
   getFeatures,
   getFeatureStructure,
