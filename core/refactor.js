@@ -674,6 +674,7 @@ function getFeatureStructure(feature) {
       noneMisc[file.replace('.js', '.less')] = true;
       noneMisc[file.replace('.js', '.scss')] = true;
       return Object.assign({
+        feature,
         name: mPath.basename(file).replace('.js', ''),
         type: 'component',
         file,
@@ -687,6 +688,7 @@ function getFeatureStructure(feature) {
     if (props && props.action) {
       noneMisc[file] = true;
       return Object.assign({
+        feature,
         name: mPath.basename(file).replace('.js', ''),
         type: 'action',
         file,
@@ -702,6 +704,7 @@ function getFeatureStructure(feature) {
       if (shell.test('-d', fullPath)) {
         // is directory
         arr.push({
+          feature,
           name: mPath.basename(fullPath),
           type: 'misc',
           file: fullPath,
@@ -709,6 +712,7 @@ function getFeatureStructure(feature) {
         });
       } else if (!noneMisc[fullPath]) {
         arr.push({
+          feature,
           type: 'misc',
           name: mPath.basename(fullPath).replace('.js', ''),
           file: fullPath,
