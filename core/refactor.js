@@ -6,10 +6,15 @@
 const _ = require('lodash');
 const mPath = require('path');
 const shell = require('shelljs');
+const babel = require('babel-core');
 const traverse = require('babel-traverse').default;
 const generate = require('babel-generator').default;
 const vio = require('./vio');
 const utils = require('./utils');
+
+const babelGeneratorOptions = {
+  quotes: 'single',
+};
 
 function isStringMatch(str, match) {
   if (_.isString(match)) {
@@ -68,33 +73,53 @@ function updateFile(filePath, changes) {
   vio.save(filePath, code);
 }
 
-function addImport(ast, name, moduleSource) {
+function addImport(ast, moduleSource, defaultImport, namedImport) {
   // Summary:
   //  Add import from source module. Such as import { xxx } from './x';
-  let names = name;
-  if (typeof name === 'string') {
-    names = [name];
+  let names = [];
+
+  if (namedImport) {
+    if (typeof namedImport === 'string') {
+      names.push(namedImport);
+    } else {
+      names = names.concat(namedImport);
+    }
   }
+
   const changes = [];
+  const t = babel.types;
+
   let targetImportPos = 0;
+  let sourceExisted = false;
   traverse(ast, {
     ImportDeclaration(path) {
       const node = path.node;
       targetImportPos = path.node.end + 2;
       if (!node.specifiers || !node.source || node.source.value !== moduleSource) return;
+      sourceExisted = true;
+      let newNames = [];
+      const alreadyHaveDefaultImport = !!_.find(node.specifiers, { type: 'ImportDefaultSpecifier' });
+      if (defaultImport && !alreadyHaveDefaultImport) newNames.push(defaultImport);
 
-      const newSpecifiers = node.specifiers.filter(s => !names.includes(s.local.name));
-      if (newSpecifiers.length === 0) {
-        // no specifiers, should delete the import statement
-        changes.push({
-          start: node.start,
-          end: node.end,
-          replacement: '',
+      newNames = newNames.concat(names);
+
+      // only add names which don't exist
+      newNames = newNames.filter(n => !_.find(node.specifiers, s => s.local.name === n));
+
+      if (newNames.length > 0) {
+        const newSpecifiers = [].concat(node.specifiers);
+        newNames.forEach((n) => {
+          const local = t.identifier(n);
+          const imported = local; // TODO: doesn't support local alias.
+          if (n === defaultImport) {
+            newSpecifiers.unshift(t.importDefaultSpecifier(local));
+          } else {
+            newSpecifiers.push(t.importSpecifier(local, imported));
+          }
         });
-      } else if (newSpecifiers.length !== node.specifiers.length) {
-        // remove the specifier import
+
         const newNode = Object.assign({}, node, { specifiers: newSpecifiers });
-        const newCode = generate(newNode, {}).code;
+        const newCode = generate(newNode, babelGeneratorOptions).code;
         changes.push({
           start: node.start,
           end: node.end,
@@ -103,6 +128,27 @@ function addImport(ast, name, moduleSource) {
       }
     }
   });
+
+  if (changes.length === 0 && !sourceExisted) {
+    const specifiers = [];
+    if (defaultImport) {
+      specifiers.push(t.importDefaultSpecifier(t.identifier(defaultImport)));
+    }
+
+    names.forEach((n) => {
+      const local = t.identifier(n);
+      const imported = local;
+      specifiers.push(t.importSpecifier(local, imported));
+    });
+
+    const node = t.importDeclaration(specifiers, t.stringLiteral(moduleSource));
+    const code = generate(node, babelGeneratorOptions).code;
+    changes.push({
+      start: targetImportPos,
+      end: targetImportPos + 1,
+      replacement: `${code}\n`,
+    });
+  }
 
   return changes;
 }

@@ -26,6 +26,13 @@ const CODE_2 = `\
 const v = 1;
 `;
 
+const CODE_3 = `\
+import A from './A';
+import { C, D, Z } from './D';
+import { E } from './E';
+import F from './F';
+`;
+
 describe('reafctor tests', function() { // eslint-disable-line
   before(() => {
     vio.reset();
@@ -65,14 +72,52 @@ describe('reafctor tests', function() { // eslint-disable-line
     });
   });
 
+  describe('addImport', () => {
+    it('should add import line when no module source exist', () => {
+      vio.put(V_FILE, CODE_3);
+      refactor.addImport(V_FILE, './K', 'K');
+      refactor.addImport(V_FILE, './L', 'L', 'L1');
+      refactor.addImport(V_FILE, './M', '', 'M1');
+      refactor.addImport(V_FILE, './N', 'N', ['N1', 'N2']);
+
+      expectLines(V_FILE, [
+        "import K from './K';",
+        "import L, { L1 } from './L';",
+        "import { M1 } from './M';",
+        "import N, { N1, N2 } from './N';",
+      ]);
+    });
+
+    it('should add import specifier(s) when module exist', () => {
+      vio.put(V_FILE, CODE_3);
+      refactor.addImport(V_FILE, './A', 'AA', 'A1');
+      refactor.addImport(V_FILE, './D', 'W', 'Y');
+      refactor.addImport(V_FILE, './E', '', ['E', 'E1']);
+      refactor.addImport(V_FILE, './F', 'F');
+      expectLines(V_FILE, [
+        "import A, { A1 } from './A';",
+        "import W, { C, D, Z, Y } from './D';",
+        "import { E, E1 } from './E';",
+      ]);
+    });
+  });
+
   describe('removeNamedImport', () => {
-    const code = `import A from './A';
-import { C, D, Z } from './D';
-import { E } from './E';
-import F from './F';
-`;
     it('should remove give import specifier', () => {
-      vio.put(V_FILE, code);
+      vio.put(V_FILE, CODE_3);
+      refactor.removeImportSpecifier(V_FILE, ['E', 'D']);
+      expectLines(V_FILE, [
+        "import { C, Z } from './D';",
+      ]);
+      expectNoLines(V_FILE, [
+        "import { E } from './E';",
+      ]);
+    });
+  });
+
+  describe('removeNamedImport', () => {
+    it('should remove give import specifier', () => {
+      vio.put(V_FILE, CODE_3);
       refactor.removeImportSpecifier(V_FILE, ['E', 'D']);
       expectLines(V_FILE, [
         "import { C, Z } from './D';",
@@ -84,13 +129,8 @@ import F from './F';
   });
 
   describe('removeImportBySource', () => {
-    const code = `import A from './A';
-import { C, D, Z } from './D';
-import { E } from './E';
-import F from './F';
-`;
     it('should remove import statement by given source', () => {
-      vio.put(V_FILE, code);
+      vio.put(V_FILE, CODE_3);
       refactor.removeImportBySource(V_FILE, './A');
       refactor.removeImportBySource(V_FILE, './D');
       expectNoLines(V_FILE, [
