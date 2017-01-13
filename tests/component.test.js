@@ -40,7 +40,7 @@ describe('cli: component tests', function() { // eslint-disable-line
       '@import \'./TestComponent.less\';'
     ]);
     expectLines(mapFeatureFile('index.js'), [
-      'export TestComponent from \'./TestComponent\';',
+      'export { default as TestComponent } from \'./TestComponent\';',
     ]);
     expectFiles([
       'TestComponent.test.js',

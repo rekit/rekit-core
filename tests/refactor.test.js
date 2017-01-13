@@ -78,6 +78,8 @@ import A from './A';
 import { C, D, Z } from './D';
 import { E } from './E';
 import F from './F';
+
+const otherCode = 1;
 `;
     it('should add import line when no module source exist', () => {
       vio.put(V_FILE, CODE);
@@ -85,7 +87,6 @@ import F from './F';
       refactor.addImportFrom(V_FILE, './L', 'L', 'L1');
       refactor.addImportFrom(V_FILE, './M', '', 'M1');
       refactor.addImportFrom(V_FILE, './N', 'N', ['N1', 'N2']);
-
       expectLines(V_FILE, [
         "import K from './K';",
         "import L, { L1 } from './L';",
@@ -114,6 +115,8 @@ export { default as A } from './A';
 export { C, D, Z } from './D';
 export { E } from './E';
 export { default as F } from './F';
+
+const otherCode = 1;
 `;
     it('should add export line when no module source exist', () => {
       vio.put(V_FILE, CODE);
@@ -146,24 +149,41 @@ export { default as F } from './F';
 
   describe('renameImportSpecifier', () => {
     const CODE = `\
-import A  from './A';
+import A from './A';
 import { C, D, Z as ZZ } from './D';
 import { E } from './E';
+import { E as EE } from './EE';
 import F from './F';
 const a = A;
 const d = D;
+const e = E;
 `;
     it('should rename imported specifiers correctly', () => {
       vio.put(V_FILE, CODE);
       refactor.renameImportSpecifier(V_FILE, 'A', 'A1');
       refactor.renameImportSpecifier(V_FILE, 'D', 'D1');
       refactor.renameImportSpecifier(V_FILE, 'Z', 'Z1');
-console.log(vio.getContent(V_FILE));
+      refactor.renameImportSpecifier(V_FILE, 'E', 'E1');
+
       expectLines(V_FILE, [
         "import A1 from './A';",
-        "import { C, D1, Z } from './D';",
+        "import { C, D1, Z1 as ZZ } from './D';",
+        "import { E1 } from './E';",
+        "import { E1 as EE } from './EE';",
         'const a = A1;',
         'const d = D1;',
+      ]);
+    });
+
+    it('should rename imported specifiers correctly with specified module source', () => {
+      vio.put(V_FILE, CODE);
+      refactor.renameImportSpecifier(V_FILE, 'E', 'E1', './E');
+      refactor.renameImportSpecifier(V_FILE, 'E', 'E2', './EE');
+
+      expectLines(V_FILE, [
+        "import { E1 } from './E';",
+        "import { E2 as EE } from './EE';",
+        'const e = E1;',
       ]);
     });
   });
@@ -175,13 +195,23 @@ export { C, D, Z } from './D';
 export { E } from './E';
 export { default as F } from './F';
 `;
-    it('just works', () => {
+    it('renames export specifier when module source not specified', () => {
       vio.put(V_FILE, CODE);
       refactor.renameExportSpecifier(V_FILE, 'A', 'A1');
       refactor.renameExportSpecifier(V_FILE, 'D', 'D1');
       expectLines(V_FILE, [
         "export { default as A1 } from './A';",
         "export { C, D1, Z } from './D';",
+      ]);
+    });
+
+    it('renames export specifier when module source is specified', () => {
+      vio.put(V_FILE, CODE);
+      refactor.renameExportSpecifier(V_FILE, 'A', 'A1', './A');
+      refactor.renameExportSpecifier(V_FILE, 'E', 'E1', './C');
+      expectLines(V_FILE, [
+        "export { default as A1 } from './A';",
+        "export { E } from './E';",
       ]);
     });
   });

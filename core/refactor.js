@@ -25,17 +25,6 @@ function isStringMatch(str, match) {
   return match.test(str);
 }
 
-function getDefNode(name, scope) {
-  // Summary:
-  //  Get the definition node for an identifier
-
-  while (scope) {
-    if (scope.bindings[name]) return scope.bindings[name].identifier;
-    scope = scope.parent;
-  }
-  return null;
-}
-
 function updateSourceCode(code, changes) {
   // Summary:
   //  This must be called before code is changed some places else rather than ast
@@ -102,7 +91,8 @@ function addImportFrom(ast, moduleSource, defaultImport, namedImport) {
   traverse(ast, {
     ImportDeclaration(path) {
       const node = path.node;
-      targetImportPos = path.node.end + 2;
+      targetImportPos = path.node.end + 1;
+
       if (!node.specifiers || !node.source || node.source.value !== moduleSource) return;
       sourceExisted = true;
       let newNames = [];
@@ -153,7 +143,7 @@ function addImportFrom(ast, moduleSource, defaultImport, namedImport) {
     const code = generate(node, babelGeneratorOptions).code;
     changes.push({
       start: targetImportPos,
-      end: targetImportPos + 1,
+      end: targetImportPos,
       replacement: `${code}\n`,
     });
   }
@@ -182,7 +172,7 @@ function addExportFrom(ast, moduleSource, defaultExport, namedExport) {
   traverse(ast, {
     ExportNamedDeclaration(path) {
       const node = path.node;
-      targetExportPos = path.node.end + 2;
+      targetExportPos = path.node.end + 1;
       if (!node.specifiers || !node.source || node.source.value !== moduleSource) return;
       sourceExisted = true;
       let newNames = [];
@@ -233,7 +223,7 @@ function addExportFrom(ast, moduleSource, defaultExport, namedExport) {
     const code = generate(node, babelGeneratorOptions).code;
     changes.push({
       start: targetExportPos,
-      end: targetExportPos + 1,
+      end: targetExportPos,
       replacement: `${code}\n`,
     });
   }
@@ -241,12 +231,26 @@ function addExportFrom(ast, moduleSource, defaultExport, namedExport) {
   return changes;
 }
 
+function getDefNode(name, scope) {
+  // Summary:
+  //  Get the definition node for an identifier
+
+  while (scope) {
+    if (scope.bindings[name]) return scope.bindings[name].identifier;
+    scope = scope.parent;
+  }
+  return null;
+}
+
 function renameIdentifier(ast, oldName, newName, defNode) {
   // Summary:
   //  Rename identifiers with oldName in ast
   const changes = [];
   function rename(path) {
-    if (path.node.name === oldName && getDefNode(path.node.name, path.scope) === defNode) {
+    if (
+      path.node.name === oldName
+      && path.key !== 'imported'// it should NOT be imported specifier
+      && getDefNode(path.node.name, path.scope) === defNode) {
       path.node.name = newName;
       changes.push({
         start: path.node.start,
@@ -305,55 +309,67 @@ function renameFunctionName(ast, oldName, newName) {
   return [];
 }
 
-function renameImportSpecifier(ast, oldName, newName) {
+function renameImportSpecifier(ast, oldName, newName, moduleSource) {
   // Summary:
   //  Rename the import(default, named) variable name and their reference.
   //  The simple example is to rename a component
+  //  NOTE: only rename imported name!
+  //  eg: import { A as A1 } from './A'; A -> B  import { B as A1 } from './A';
+  //  import fetchList from './action';
+  //  import { fetchList as fetchTopicList } from '../topic/action';
 
   let defNode = null;
+  let changes = [];
 
-  // Find the definition node of the class
   traverse(ast, {
-    ImportDefaultSpecifier(path) {
-      if (_.get(path, 'node.local.name') === oldName) {
-        defNode = path.node.local;
-      }
-    },
-    ImportSpecifier(path) {
-      if (_.get(path, 'node.local.name') === oldName) {
-        defNode = path.node.local;
-      }
+    ImportDeclaration(path) {
+      const node = path.node;
+      if (moduleSource && _.get(node, 'source.value') !== moduleSource) return;
+      // console.log(_.get(node, 'source.value'), moduleSource);
+      node.specifiers.forEach((specifier) => {
+        if (specifier.type === 'ImportDefaultSpecifier' && _.get(specifier, 'local.name') === oldName) {
+          defNode = specifier.local;
+        }
+
+        // only rename imported specifier
+        if (specifier.type === 'ImportSpecifier' && _.get(specifier, 'imported.name') === oldName) {
+          if (_.get(specifier, 'local.name') === oldName) {
+            defNode = specifier.local;
+          } else {
+            changes.push({
+              start: specifier.imported.start,
+              end: specifier.imported.end,
+              replacement: newName,
+            });
+          }
+        }
+      });
     }
   });
   if (defNode) {
-    return renameIdentifier(ast, oldName, newName, defNode);
+    changes = changes.concat(renameIdentifier(ast, oldName, newName, defNode));
   }
-  return [];
+  return changes;
 }
 
-function renameExportSpecifier(ast, oldName, newName) {
+function renameExportSpecifier(ast, oldName, newName, moduleSource) {
+  // It only rename export specifier but not references.
   const changes = [];
   traverse(ast, {
-    // ExportDefaultSpecifier(path) {
-    //   if (path.node.exported.name === oldName) {
-    //     changes.push({
-    //       start: path.node.exported.start,
-    //       end: path.node.exported.end,
-    //       replacement: newName,
-    //     });
-    //   }
-    // },
     ExportSpecifier(path) {
-      if (_.get(path, 'node.local.name') === oldName) {
+      const node = path.node;
+      if (moduleSource && _.get(path.parentPath.node, 'source.value') !== moduleSource) return;
+
+      if (_.get(node, 'local.name') === oldName) {
         changes.push({
-          start: path.node.local.start,
-          end: path.node.local.end,
+          start: node.local.start,
+          end: node.local.end,
           replacement: newName,
         });
-      } else if (_.get(path, 'node.exported.name') === oldName) {
+      } else if (_.get(node, 'exported.name') === oldName) {
         changes.push({
-          start: path.node.exported.start,
-          end: path.node.exported.end,
+          start: node.exported.start,
+          end: node.exported.end,
           replacement: newName,
         });
       }
@@ -1041,6 +1057,7 @@ module.exports = {
   renameModuleSource: acceptFilePathForAst(renameModuleSource),
 
   removeImportSpecifier: acceptFilePathForAst(removeImportSpecifier),
+  // removeExportSpecifier: acceptFilePathForAst(removeExportSpecifier),
   removeImportBySource: acceptFilePathForAst(removeImportBySource),
 
   updateSourceCode,

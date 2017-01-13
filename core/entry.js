@@ -12,29 +12,21 @@ const assert = require('./assert');
 
 module.exports = {
   addToIndex(feature, name) {
-    // name = _.pascalCase(name);
     const targetPath = utils.mapFeatureFile(feature, 'index.js');
-    const lines = vio.getLines(targetPath);
-    const i = refactor.lastLineIndex(lines, /^export .* from /);
-    lines.splice(i + 1, 0, `export ${name} from './${name}';`);
-    vio.save(targetPath, lines);
+    refactor.addExportFrom(targetPath, `./${name}`, name);
   },
 
   removeFromIndex(feature, name) {
-    // name = _.pascalCase(name);
     const targetPath = utils.mapFeatureFile(feature, 'index.js');
-    const lines = vio.getLines(targetPath);
-    refactor.removeLines(lines, `export ${name} from './${name}';`);
-    vio.save(targetPath, lines);
+    refactor.removeImportBySource(targetPath, `./${name}`);
   },
 
   renameInIndex(feature, oldName, newName) {
-    // Rename export xxx from './xxx'
-    // oldName = _.pascalCase(oldName);
-    // newName = _.pascalCase(newName);
     const targetPath = utils.mapFeatureFile(feature, 'index.js');
-    refactor.renameExportSpecifier(targetPath, oldName, newName);
-    refactor.renameModuleSource(targetPath, `./${oldName}`, `./${newName}`);
+    refactor.batchUpdate(targetPath, ast => [].concat(
+      refactor.renameExportSpecifier(ast, oldName, newName, `./${oldName}`),
+      refactor.renameModuleSource(ast, `./${oldName}`, `./${newName}`)
+    ));
   },
 
   addToStyle(feature, name) {
@@ -133,24 +125,6 @@ module.exports = {
 
     const targetPath = utils.mapReduxFile(feature, 'actions');
     refactor.addExportFrom(targetPath, `./${actionFile}`, null, name);
-
-    // const lines = vio.getLines(targetPath);
-    // let i = refactor.lineIndex(lines, ` from './${actionFile}'`);
-    // if (i >= 0) {
-    //   // if action already exists
-    //   const line = lines[i];
-    //   const m = /^export \{([^}]+)\}/.exec(line);
-    //   const arr = m[1].split(',').map(s => s.trim());
-    //   if (!_.includes(arr, name)) {
-    //     arr.push(name);
-    //     lines[i] = line.replace(/\{[^}]+\}/, `{ ${arr.join(', ')} }`);
-    //   }
-    // } else {
-    //   i = refactor.lastLineIndex(lines, /^export .* from /);
-    //   lines.splice(i + 1, 0, `export { ${name} } from './${actionFile}';`);
-    // }
-
-    // vio.save(targetPath, lines);
   },
 
   removeFromActions(feature, name, actionFile) {
@@ -159,28 +133,6 @@ module.exports = {
     const targetPath = utils.mapReduxFile(feature, 'actions');
 
     refactor.removeImportBySource(targetPath, `./${actionFile}`);
-
-    // const lines = vio.getLines(targetPath);
-    // if (!name) {
-    //   // Remove all imports from the action
-    //   refactor.removeLines(lines, `from './${actionFile}`);
-    // } else {
-    //   const i = refactor.lineIndex(lines, ` from './${actionFile}'`);
-    //   if (i >= 0) {
-    //     const line = lines[i];
-    //     const m = /^export \{([^}]+)\}/.exec(line);
-    //     const arr = m[1].split(',').map(s => s.trim());
-    //     _.pull(arr, name);
-
-    //     if (arr.length > 0) {
-    //       lines[i] = line.replace(/\{[^}]+\}/, `{ ${arr.join(', ')} }`);
-    //     } else {
-    //       lines.splice(i, 1);
-    //     }
-    //   }
-    // }
-
-    // vio.save(targetPath, lines);
   },
 
   renameInActions(feature, oldName, newName) {
@@ -188,27 +140,23 @@ module.exports = {
     oldName = _.camelCase(oldName);
     newName = _.camelCase(newName);
     const targetPath = utils.mapReduxFile(feature, 'actions');
-    refactor.renameExportSpecifier(targetPath, oldName, newName);
-
-    // const ast = vio.getAst(targetPath);
-    // const changes = [].concat(
-    //   refactor.renameExportSpecifier(ast, oldName, newName)
-    // );
-    // let code = vio.getContent(targetPath);
-    // code = refactor.updateSourceCode(code, changes);
-
-    // vio.save(targetPath, code);
+    refactor.batchUpdate(targetPath, ast => [].concat(
+      refactor.renameExportSpecifier(ast, oldName, newName, `./${oldName}`),
+      refactor.renameModuleSource(ast, `./${oldName}`, `./${newName}`)
+    ));
   },
 
   addToReducer(feature, action) {
     const targetPath = utils.mapReduxFile(feature, 'reducer');
     const lines = vio.getLines(targetPath);
     const camelActionName = _.camelCase(action);
-    refactor.addImportLine(lines, `import { reducer as ${camelActionName} } from './${camelActionName}';`);
-    const i = refactor.lineIndex(lines, /^];/, refactor.lineIndex(lines, 'const reducers = ['));
-    lines.splice(i, 0, `  ${camelActionName},`);
+    refactor.addImportFrom(targetPath, `./${camelActionName}`, '', `${camelActionName}Reducer`);
 
-    vio.save(targetPath, lines);
+    // refactor.addImportLine(lines, `import { reducer as ${camelActionName} } from './${camelActionName}';`);
+    // const i = refactor.lineIndex(lines, /^];/, refactor.lineIndex(lines, 'const reducers = ['));
+    // lines.splice(i, 0, `  ${camelActionName},`);
+
+    // vio.save(targetPath, lines);
   },
 
   removeFromReducer(feature, action) {
