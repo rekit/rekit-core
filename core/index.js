@@ -185,16 +185,24 @@ function handleCommand(args) {
   const params = [];
   switch (args.commandName) {
     case 'add':
-    case 'remove':
-      params.push(splitName(args.name).feature);
-      params.push(splitName(args.name).name);
+    case 'remove': {
+      if (args.type === 'feature') params.push(args.name);
+      else {
+        params.push(splitName(args.name).feature);
+        params.push(splitName(args.name).name);
+      }
       break;
-
-    case 'move':
-      params.push(splitName(args.source));
-      params.push(splitName(args.target));
+    }
+    case 'move': {
+      if (args.type === 'feature') {
+        params.push(args.source);
+        params.push(args.target);
+      } else {
+        params.push(splitName(args.source));
+        params.push(splitName(args.target));
+      }
       break;
-
+    }
     default:
       break;
   }
