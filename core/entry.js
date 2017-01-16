@@ -29,24 +29,6 @@ module.exports = {
     ));
   },
 
-  addToStyle(feature, name) {
-    const targetPath = utils.mapFeatureFile(feature, 'style.' + utils.getCssExt());
-    const lines = vio.getLines(targetPath);
-    const i = refactor.lastLineIndex(lines, '@import ');
-    lines.splice(i + 1, 0, `@import './${name}.${utils.getCssExt()}';`);
-    vio.save(targetPath, lines);
-  },
-
-  removeFromStyle(feature, name) {
-    const targetPath = utils.mapFeatureFile(feature, 'style.' + utils.getCssExt());
-    refactor.removeStyleImport(targetPath, `./${name}.${utils.getCssExt()}`);
-  },
-
-  renameInStyle(feature, oldName, newName) {
-    const targetPath = utils.mapFeatureFile(feature, 'style.' + utils.getCssExt());
-    refactor.renameStyleModuleSource(targetPath, `./${oldName}.${utils.getCssExt()}`, `./${newName}.${utils.getCssExt()}`);
-  },
-
   addToRoute(feature, component, args) {
     assert.notEmpty(feature, 'feature');
     assert.notEmpty(component, 'component name');
@@ -191,7 +173,7 @@ module.exports = {
   },
 
   addToRootReducer(feature) {
-    const targetPath = path.join(utils.getProjectRoot(), 'src/common/rootReducer.js');
+    const targetPath = utils.mapSrcFile('common/rootReducer.js');
     refactor.updateFile(targetPath, ast => [].concat(
       refactor.addImportFrom(ast, `../features/${_.kebabCase(feature)}/redux/reducer`, `${_.camelCase(feature)}Reducer`),
       refactor.addObjectProperty(ast, 'reducerMap', _.camelCase(feature), `${_.camelCase(feature)}Reducer`)
@@ -199,7 +181,7 @@ module.exports = {
   },
 
   renameInRootReducer(oldFeature, newFeature) {
-    const targetPath = path.join(utils.getProjectRoot(), 'src/common/rootReducer.js');
+    const targetPath = utils.mapSrcFile('common/rootReducer.js');
     refactor.updateFile(targetPath, ast => [].concat(
       refactor.renameImportSpecifier(ast, `${_.camelCase(oldFeature)}Reducer`, `${_.camelCase(newFeature)}Reducer`),
       refactor.renameObjectProperty(ast, 'reducerMap', _.camelCase(oldFeature), _.camelCase(newFeature)),
@@ -209,7 +191,7 @@ module.exports = {
 
   removeFromRootReducer(feature) {
     // NOTE: currently only used by feature
-    const targetPath = path.join(utils.getProjectRoot(), 'src/common/rootReducer.js');
+    const targetPath = utils.mapSrcFile('common/rootReducer.js');
     refactor.updateFile(targetPath, ast => [].concat(
       refactor.removeImportBySource(ast, `../features/${_.kebabCase(feature)}/redux/reducer`),
       refactor.removeObjectProperty(ast, 'reducerMap', _.camelCase(feature))
@@ -217,46 +199,60 @@ module.exports = {
   },
 
   addToRouteConfig(feature) {
-    const targetPath = path.join(utils.getProjectRoot(), 'src/common/routeConfig.js');
-    refactor.addImportLine(targetPath, `import ${_.camelCase(feature)}Route from '../features/${_.kebabCase(feature)}/route';`);
-    const lines = vio.getLines(targetPath);
-    let i = refactor.lineIndex(lines, 'path: \'*\'');
-    // istanbul ignore if
-    if (i === -1) {
-      i = refactor.lastLineIndex(lines, /^ {2}]/);
-    }
-    lines.splice(i, 0, `    ${_.camelCase(feature)}Route,`);
-
-    vio.save(targetPath, lines);
+    const targetPath = utils.mapSrcFile('common/routeConfig.js');
+    refactor.updateFile(targetPath, ast => [].concat(
+      refactor.addImportFrom(ast, `../features/${_.kebabCase(feature)}/route`, `${_.camelCase(feature)}Route`),
+      refactor.addToArray(ast, 'childRoutes', `${_.camelCase(feature)}Route`)
+    ));
   },
 
-  renameInRouteConfig(oldName, newName) {
-    this.removeFromRouteConfig(oldName);
-    this.addToRouteConfig(newName);
+  renameInRouteConfig(oldFeature, newFeature) {
+    const targetPath = utils.mapSrcFile('common/routeConfig.js');
+    refactor.updateFile(targetPath, ast => [].concat(
+      refactor.renameImportSpecifier(ast, `${_.camelCase(oldFeature)}Route`, `${_.camelCase(newFeature)}Route`),
+      refactor.renameModuleSource(ast, `../features/${_.kebabCase(oldFeature)}/route`, `../features/${_.kebabCase(newFeature)}/route`)
+    ));
   },
 
   removeFromRouteConfig(feature) {
-    const targetPath = path.join(utils.getProjectRoot(), 'src/common/routeConfig.js');
-    refactor.removeImportLine(targetPath, `../features/${_.kebabCase(feature)}/route`);
-    refactor.removeLines(targetPath, `    ${_.camelCase(feature)}Route,`);
+    const targetPath = utils.mapSrcFile('common/routeConfig.js');
+    refactor.updateFile(targetPath, ast => [].concat(
+      refactor.removeImportBySource(ast, `../features/${_.kebabCase(feature)}/route`),
+      refactor.removeFromArray(ast, 'childRoutes', `${_.camelCase(feature)}Route`)
+    ));
+  },
+
+  addToStyle(feature, name) {
+    const targetPath = utils.mapFeatureFile(feature, 'style.' + utils.getCssExt());
+    refactor.addStyleImport(targetPath, `./${name}.${utils.getCssExt()}`);
+  },
+
+  removeFromStyle(feature, name) {
+    const targetPath = utils.mapFeatureFile(feature, 'style.' + utils.getCssExt());
+    refactor.removeStyleImport(targetPath, `./${name}.${utils.getCssExt()}`);
+  },
+
+  renameInStyle(feature, oldName, newName) {
+    const targetPath = utils.mapFeatureFile(feature, 'style.' + utils.getCssExt());
+    refactor.renameStyleModuleSource(targetPath, `./${oldName}.${utils.getCssExt()}`, `./${newName}.${utils.getCssExt()}`);
   },
 
   addToRootStyle(feature) {
-    const targetPath = path.join(utils.getProjectRoot(), 'src/styles/index.' + utils.getCssExt());
+    const targetPath = utils.mapSrcFile('styles/index.' + utils.getCssExt());
     refactor.addStyleImport(targetPath, `../features/${_.kebabCase(feature)}/style.${utils.getCssExt()}`);
   },
 
   removeFromRootStyle(feature) {
-    const targetPath = path.join(utils.getProjectRoot(), 'src/styles/index.' + utils.getCssExt());
+    const targetPath = utils.mapSrcFile('styles/index.' + utils.getCssExt());
     refactor.removeStyleImport(targetPath, `../features/${_.kebabCase(feature)}/style.${utils.getCssExt()}`);
   },
 
-  renameInRootStyle(oldName, newName) {
-    const targetPath = path.join(utils.getProjectRoot(), 'src/styles/index.' + utils.getCssExt());
+  renameInRootStyle(oldFeature, newFeature) {
+    const targetPath = utils.mapSrcFile('styles/index.' + utils.getCssExt());
     refactor.renameStyleModuleSource(
       targetPath,
-      `../features/${_.kebabCase(oldName)}/style.${utils.getCssExt()}`,
-      `../features/${_.kebabCase(newName)}/style.${utils.getCssExt()}`
+      `../features/${_.kebabCase(oldFeature)}/style.${utils.getCssExt()}`,
+      `../features/${_.kebabCase(newFeature)}/style.${utils.getCssExt()}`
     );
   },
 };

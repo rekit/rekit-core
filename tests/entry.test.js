@@ -1,7 +1,6 @@
 'use strict';
 
 const _ = require('lodash');
-const expect = require('chai').expect;
 const helpers = require('./helpers');
 const core = require('../core');
 
@@ -9,16 +8,11 @@ const vio = core.vio;
 const utils = core.utils;
 const entry = core.entry;
 
-const expectFile = helpers.expectFile;
-const expectFiles = helpers.expectFiles;
-const expectNoFile = helpers.expectNoFile;
-const expectNoFiles = helpers.expectNoFiles;
 const expectLines = helpers.expectLines;
 const expectNoLines = helpers.expectNoLines;
 const TEST_FEATURE_NAME = helpers.TEST_FEATURE_NAME;
 
 const mapFeatureFile = _.partial(utils.mapFeatureFile, TEST_FEATURE_NAME);
-const mapTestFile = _.partial(utils.mapTestFile, TEST_FEATURE_NAME);
 
 describe('entry tests', function() { // eslint-disable-line
   before(() => {
@@ -169,29 +163,112 @@ export default combineReducers(reducerMap);
     });
   });
 
+  describe('handles: common/routeConfig.js', () => {
+    const targetPath = utils.mapSrcFile('common/routeConfig.js');
+
+    it('addToRouteConfig should import feature route and combine it', () => {
+      vio.put(targetPath, `
+import App from '../containers/App';
+import { PageNotFound } from '../features/common';
+import homeRoute from '../features/home/route';
+import commonRoute from '../features/common/route';
+
+const childRoutes = [
+  homeRoute,
+  commonRoute,
+];
+
+const routes = [{
+  path: '/',
+  component: App,
+  childRoutes: [
+    ...childRoutes,
+    { path: '*', name: 'Page not found', component: PageNotFound },
+  ].filter(r => r.component || (r.childRoutes && r.childRoutes.length > 0)),
+}];
+
+export default routes;
+    `);
+      entry.addToRouteConfig('new-feature');
+      expectLines(targetPath, [
+        "import newFeatureRoute from '../features/new-feature/route';",
+        '  newFeatureRoute,',
+      ]);
+    });
+
+    it('renameInRouteConfig should rename entry and rename in routes array', () => {
+      entry.renameInRouteConfig('new-feature', 'renamed-new-feature');
+      expectLines(targetPath, [
+        "import renamedNewFeatureRoute from '../features/renamed-new-feature/route';",
+        '  renamedNewFeatureRoute,',
+      ]);
+    });
+    it('removeFromRouteConfig should rename entry and rename in routes array', () => {
+      entry.removeFromRouteConfig('renamed-new-feature');
+      expectNoLines(targetPath, [
+        "import renamedNewFeatureRoute from '../features/renamed-new-feature/route';",
+        '  renamedNewFeatureRoute,',
+      ]);
+    });
+  });
+
   describe('handles: style.less', () => {
-    // style.less
+    const targetPath = mapFeatureFile('style.less');
     it('addToStyle should add style import correctly', () => {
       entry.addToStyle(TEST_FEATURE_NAME, 'TestEntry');
-      expectLines(mapFeatureFile('style.less'), [
+      expectLines(targetPath, [
         "@import './TestEntry.less';",
       ]);
     });
 
     it('renameInStyle should rename style import correctly', () => {
       entry.renameInStyle(TEST_FEATURE_NAME, 'TestEntry', 'newName');
-      expectNoLines(mapFeatureFile('style.less'), [
+      expectNoLines(targetPath, [
         "@import './TestEntry.less';",
       ]);
-      expectLines(mapFeatureFile('style.less'), [
+      expectLines(targetPath, [
         "@import './newName.less';",
       ]);
     });
 
     it('removeFromStyle should remove style import correctly', () => {
       entry.removeFromStyle(TEST_FEATURE_NAME, 'newName');
-      expectNoLines(mapFeatureFile('style.less'), [
+      expectNoLines(targetPath, [
         "@import './newName.less';",
+      ]);
+    });
+  });
+
+  describe('handles: styles/index.less', () => {
+    const targetPath = utils.mapSrcFile('styles/index.less');
+    vio.put(targetPath, `
+@import './reset.css';
+@import './global.less';
+@import '../containers/style.less';
+@import '../features/home/style.less';
+@import '../features/common/style.less';
+    `);
+    it('addToRootStyle should add style import correctly', () => {
+      entry.addToRootStyle('new-feature');
+      expectLines(targetPath, [
+        "@import '../features/new-feature/style.less';",
+      ]);
+    });
+
+    it('renameInRootStyle should rename style import correctly', () => {
+      entry.renameInRootStyle('new-feature', 'renamed-new-feature');
+      expectNoLines(targetPath, [
+        "@import '../features/new-feature/style.less';",
+      ]);
+      expectLines(targetPath, [
+        "@import '../features/renamed-new-feature/style.less';",
+      ]);
+    });
+
+    it('removeFromRootStyle should remove style import correctly', () => {
+      entry.removeFromRootStyle('renamed-new-feature');
+      expectNoLines(targetPath, [
+        "@import '../features/renamed-new-feature/style.less';",
       ]);
     });
   });
