@@ -82,16 +82,90 @@ describe('entry tests', function() { // eslint-disable-line
   });
 
   describe('handles: redux/reducer.js', () => {
-    // redux/actions.js
     const targetPath = mapFeatureFile('redux/reducer.js');
-    it('addToReducer should add export from correctly', () => {
-      console.log(targetPath);
-      console.log(vio.getContent(targetPath));
-      // entry.addToReducer(TEST_FEATURE_NAME, 'testAction');
-      // console.log(vio.getContent(targetPath));
-      // expectLines(targetPath, [
-      //   "export { reducer as testActionReducer } from './testAction';",
-      // ]);
+    it('addToReducer should import entry and insert to reducers array', () => {
+      entry.addToReducer(TEST_FEATURE_NAME, 'testAction');
+      expectLines(targetPath, [
+        "import { reducer as testActionReducer } from './testAction';",
+        '  testActionReducer,',
+      ]);
+    });
+    it('renameInReducer should rename entry and rename in reducers array', () => {
+      entry.renameInReducer(TEST_FEATURE_NAME, 'testAction', 'newAction');
+      expectLines(targetPath, [
+        "import { reducer as newActionReducer } from './newAction';",
+        '  newActionReducer,',
+      ]);
+    });
+    it('removeFromReducer should remove entry and remove from reducers array', () => {
+      entry.removeFromReducer(TEST_FEATURE_NAME, 'testAction');
+      expectNoLines(targetPath, [
+        "import { reducer as testActionReducer } from './testAction';",
+        '  testActionReducer,',
+      ]);
+    });
+  });
+
+  describe('handles: redux/initialState.js', () => {
+    const targetPath = mapFeatureFile('redux/initialState.js');
+    it('addToInitialState should add initial state property', () => {
+      entry.addToInitialState(TEST_FEATURE_NAME, 'someState', 'false');
+      expectLines(targetPath, [
+        '  someState: false,',
+      ]);
+    });
+    it('renameInInitialState should rename state name', () => {
+      entry.renameInInitialState(TEST_FEATURE_NAME, 'someState', 'newState');
+      expectLines(targetPath, [
+        '  newState: false,',
+      ]);
+    });
+
+    it('removeFromInitialState should remove the state property', () => {
+      entry.removeFromInitialState(TEST_FEATURE_NAME, 'newState');
+      expectNoLines(targetPath, [
+        '  newState: false,',
+      ]);
+    });
+  });
+
+  describe('handles: common/rootReducer.js', () => {
+    const targetPath = utils.mapSrcFile('common/rootReducer.js');
+
+    it('addToRootReducer should import feature reducer and combine it', () => {
+      vio.put(targetPath, `
+import { combineReducers } from 'redux';
+import { routerReducer } from 'react-router-redux';
+import homeReducer from '../features/home/redux/reducer';
+import commonReducer from '../features/common/redux/reducer';
+
+const reducerMap = {
+  routing: routerReducer,
+  home: homeReducer,
+  common: commonReducer,
+};
+
+export default combineReducers(reducerMap);
+    `);
+      entry.addToRootReducer('new-feature');
+      expectLines(targetPath, [
+        "import newFeatureReducer from '../features/new-feature/redux/reducer';",
+        '  newFeature: newFeatureReducer,',
+      ]);
+    });
+    it('renameInRootReducer should rename entry and rename in reducers array', () => {
+      entry.renameInRootReducer('new-feature', 'renamed-new-feature');
+      expectLines(targetPath, [
+        "import renamedNewFeatureReducer from '../features/renamed-new-feature/redux/reducer';",
+        '  renamedNewFeature: renamedNewFeatureReducer,',
+      ]);
+    });
+    it('removeFromRootReducer should rename entry and rename in reducers array', () => {
+      entry.removeFromRootReducer('renamed-new-feature');
+      expectNoLines(targetPath, [
+        "import renamedNewFeatureReducer from '../features/renamed-new-feature/redux/reducer';",
+        '  renamedNewFeature: renamedNewFeatureReducer,',
+      ]);
     });
   });
 

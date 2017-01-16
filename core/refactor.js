@@ -231,6 +231,221 @@ function addExportFrom(ast, moduleSource, defaultExport, namedExport) {
   return changes;
 }
 
+function addToArray(ast, varName, identifierName) {
+  // Summary:
+  //  Add an element to an array expression
+  //  eg: const arr = [a, b, c];
+  //  Added 'd' => [a, b, c, d];
+  //  It only works for an array with identifier as elements.
+  //  It only adds to the first matched array.
+
+  const changes = [];
+  traverse(ast, {
+    VariableDeclarator(path) {
+      const node = path.node;
+      if (_.get(node, 'id.name') !== varName || _.get(node, 'init.type') !== 'ArrayExpression') return;
+      const elements = _.get(node, 'init.elements');
+      if (!elements.every(ele => ele.type === 'Identifier')) {
+        utils.fatalError('Add to array only supports array with identifiers as elements.');
+        return;
+      }
+
+      const multilines = node.loc.start.line !== node.loc.end.line;
+      let names = elements.map(ele => ele.name);
+      names.push(identifierName);
+
+      const arrExpression = _.get(node, 'init');
+      let newStr;
+      if (multilines) {
+        const indent = _.repeat(' ', arrExpression.loc.end.column - 1);
+        names = names.map(name => `${indent}  ${name},\n`);
+        newStr = `[\n${names.join('')}]`;
+      } else {
+        newStr = `[${names.join(', ')}]`;
+      }
+
+      changes.push({
+        start: arrExpression.start,
+        end: arrExpression.end,
+        replacement: newStr,
+      });
+      path.stop();
+    }
+  });
+  return changes;
+}
+
+function removeFromArray(ast, varName, identifierName) {
+  const changes = [];
+  traverse(ast, {
+    VariableDeclarator(path) {
+      const node = path.node;
+      if (_.get(node, 'id.name') !== varName || _.get(node, 'init.type') !== 'ArrayExpression') return;
+      const elements = _.get(node, 'init.elements');
+      if (!elements.every(ele => ele.type === 'Identifier')) {
+        utils.fatalError('Remove from array only supports array with identifiers as elements.');
+        return;
+      }
+
+      const multilines = node.loc.start.line !== node.loc.end.line;
+      let names = elements.map(ele => ele.name);
+      if (!_.includes(names, identifierName)) return;
+      _.pull(names, identifierName);
+
+      const arrExpression = _.get(node, 'init');
+      let newStr;
+      if (multilines) {
+        const indent = _.repeat(' ', arrExpression.loc.end.column - 1);
+        names = names.map(name => `${indent}  ${name},\n`);
+        newStr = `[\n${names.join('')}]`;
+      } else {
+        newStr = `[${names.join(', ')}]`;
+      }
+
+      changes.push({
+        start: arrExpression.start,
+        end: arrExpression.end,
+        replacement: newStr,
+      });
+      path.stop();
+    }
+  });
+  return changes;
+}
+
+function addObjectProperty(ast, varName, propName, propValue) {
+  const changes = [];
+  traverse(ast, {
+    VariableDeclarator(path) {
+      const node = path.node;
+      if ((varName && _.get(node, 'id.name') !== varName) || _.get(node, 'init.type') !== 'ObjectExpression') return;
+      const props = _.get(node, 'init.properties');
+
+      const multilines = node.loc.start.line !== node.loc.end.line;
+      // Check if it exists
+      const targetPropNode = _.find(props, p =>
+        _.get(p, 'key.type') === 'Identifier'
+        && _.get(p, 'key.name') === propName
+        && !p.computed);
+
+      if (!targetPropNode) {
+        const targetPos = node.end - 1;
+        if (multilines) {
+          const indent = _.repeat(' ', node.loc.end.column - 1);
+          changes.push({
+            start: targetPos,
+            end: targetPos,
+            replacement: `${indent}  ${propName}: ${propValue},\n`,
+          });
+        } else {
+          changes.push({
+            start: targetPos,
+            end: targetPos,
+            replacement: `${props.length ? ', ' : ' '}${propName}: ${propValue} `,
+          });
+        }
+      } else {
+        utils.warn(`Property name '${propName}' already exists for ${varName}.`);
+      }
+    },
+  });
+  return changes;
+}
+
+function setObjectProperty(ast, varName, propName, propValue) {
+  const changes = [];
+  traverse(ast, {
+    VariableDeclarator(path) {
+      const node = path.node;
+      if ((varName && _.get(node, 'id.name') !== varName) || _.get(node, 'init.type') !== 'ObjectExpression') return;
+      const props = _.get(node, 'init.properties');
+
+      // Check if it exists
+      const targetPropNode = _.find(props, p =>
+        _.get(p, 'key.type') === 'Identifier'
+        && _.get(p, 'key.name') === propName
+        && !p.computed);
+
+      if (targetPropNode) {
+        changes.push({
+          start: targetPropNode.value.start,
+          end: targetPropNode.value.end,
+          replacement: propValue,
+        });
+      }
+    },
+  });
+  return changes;
+}
+
+function renameObjectProperty(ast, varName, oldName, newName) {
+  // Summary:
+  //  Rename the object property and only for non-computed identifier property
+  // Return:
+  //  All changes needed.
+
+  const changes = [];
+  traverse(ast, {
+    VariableDeclarator(path) {
+      const node = path.node;
+      if ((varName && _.get(node, 'id.name') !== varName) || _.get(node, 'init.type') !== 'ObjectExpression') return;
+      const props = _.get(node, 'init.properties');
+
+      // const multilines = node.loc.start.line !== node.loc.end.line;
+      const targetPropNode = _.find(props, p =>
+        _.get(p, 'key.type') === 'Identifier'
+        && _.get(p, 'key.name') === oldName
+        && !p.computed);
+
+      if (targetPropNode) {
+        changes.push({
+          start: targetPropNode.key.start,
+          end: targetPropNode.key.end,
+          replacement: newName,
+        });
+      }
+    },
+  });
+  return changes;
+}
+
+function removeObjectProperty(ast, varName, propName) {
+  const changes = [];
+  traverse(ast, {
+    VariableDeclarator(path) {
+      const node = path.node;
+      if ((varName && _.get(node, 'id.name') !== varName) || _.get(node, 'init.type') !== 'ObjectExpression') return;
+      const props = _.get(node, 'init.properties');
+
+      const multilines = node.loc.start.line !== node.loc.end.line;
+
+      const targetPropNode = _.find(props, p =>
+        _.get(p, 'key.type') === 'Identifier'
+        && _.get(p, 'key.name') === propName
+        && !p.computed);
+
+      if (targetPropNode) {
+        const targetIndex = _.indexOf(props, targetPropNode);
+        let startIndex;
+        let endIndex;
+        if (targetIndex > 0) {
+          startIndex = props[targetIndex - 1].end;
+          endIndex = targetPropNode.end;
+        } else {
+          startIndex = node.init.start + 1;
+          endIndex = targetPropNode.end + (multilines || targetIndex < props.length - 1 ? 1 : 0);
+        }
+        changes.push({
+          start: startIndex,
+          end: endIndex,
+          replacement: '',
+        });
+      }
+    },
+  });
+  return changes;
+}
+
 function getDefNode(name, scope) {
   // Summary:
   //  Get the definition node for an identifier
@@ -307,6 +522,23 @@ function renameFunctionName(ast, oldName, newName) {
     return renameIdentifier(ast, oldName, newName, defNode);
   }
   return [];
+}
+
+function renameImportAsSpecifier(ast, oldName, newName) {
+  let defNode = null;
+  let changes = [];
+
+  traverse(ast, {
+    ImportSpecifier(path) {
+      if (_.get(path.node, 'local.name') === oldName) {
+        defNode = path.node.local;
+      }
+    }
+  });
+  if (defNode) {
+    changes = changes.concat(renameIdentifier(ast, oldName, newName, defNode));
+  }
+  return changes;
 }
 
 function renameImportSpecifier(ast, oldName, newName, moduleSource) {
@@ -404,27 +636,7 @@ function renameModuleSource(ast, oldModuleSource, newModuleSource) {
   return changes;
 }
 
-function renameObjectProperty(ast, oldName, newName) {
-  // Summary:
-  //  Rename the object property and only for non-computed identifier property
-  // Return:
-  //  All changes needed.
 
-  const changes = [];
-  traverse(ast, {
-    ObjectProperty(path) {
-      // Simple replace literal strings
-      if (path.node.key.type === 'Identifier' && path.node.key.name === oldName && !path.node.computed) {
-        changes.push({
-          start: path.node.key.start,
-          end: path.node.key.end,
-          replacement: newName,
-        });
-      }
-    },
-  });
-  return changes;
-}
 
 function renameStringLiteral(ast, oldName, newName) {
   // Summary:
@@ -1046,10 +1258,17 @@ module.exports = {
 
   addImportFrom: acceptFilePathForAst(addImportFrom),
   addExportFrom: acceptFilePathForAst(addExportFrom),
+  addToArray: acceptFilePathForAst(addToArray),
+  removeFromArray: acceptFilePathForAst(removeFromArray),
 
+  addObjectProperty: acceptFilePathForAst(addObjectProperty),
+  setObjectProperty: acceptFilePathForAst(setObjectProperty),
+  renameObjectProperty: acceptFilePathForAst(renameObjectProperty),
+  removeObjectProperty: acceptFilePathForAst(removeObjectProperty),
   renameClassName: acceptFilePathForAst(renameClassName),
   renameFunctionName: acceptFilePathForAst(renameFunctionName),
   renameImportSpecifier: acceptFilePathForAst(renameImportSpecifier),
+  renameImportAsSpecifier: acceptFilePathForAst(renameImportAsSpecifier),
   renameExportSpecifier: acceptFilePathForAst(renameExportSpecifier),
   renameObjectProperty: acceptFilePathForAst(renameObjectProperty),
   renameCssClassName: acceptFilePathForAst(renameCssClassName),
@@ -1062,7 +1281,7 @@ module.exports = {
 
   updateSourceCode,
   updateFile,
-  batchUpdate,
+  // batchUpdate,
 
   getRekitProps,
   getFeatures,

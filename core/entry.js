@@ -23,7 +23,7 @@ module.exports = {
 
   renameInIndex(feature, oldName, newName) {
     const targetPath = utils.mapFeatureFile(feature, 'index.js');
-    refactor.batchUpdate(targetPath, ast => [].concat(
+    refactor.updateFile(targetPath, ast => [].concat(
       refactor.renameExportSpecifier(ast, oldName, newName, `./${oldName}`),
       refactor.renameModuleSource(ast, `./${oldName}`, `./${newName}`)
     ));
@@ -140,7 +140,7 @@ module.exports = {
     oldName = _.camelCase(oldName);
     newName = _.camelCase(newName);
     const targetPath = utils.mapReduxFile(feature, 'actions');
-    refactor.batchUpdate(targetPath, ast => [].concat(
+    refactor.updateFile(targetPath, ast => [].concat(
       refactor.renameExportSpecifier(ast, oldName, newName, `./${oldName}`),
       refactor.renameModuleSource(ast, `./${oldName}`, `./${newName}`)
     ));
@@ -148,55 +148,38 @@ module.exports = {
 
   addToReducer(feature, action) {
     const targetPath = utils.mapReduxFile(feature, 'reducer');
-    const lines = vio.getLines(targetPath);
     const camelActionName = _.camelCase(action);
-    refactor.addImportFrom(targetPath, `./${camelActionName}`, '', `${camelActionName}Reducer`);
-
-    // refactor.addImportLine(lines, `import { reducer as ${camelActionName} } from './${camelActionName}';`);
-    // const i = refactor.lineIndex(lines, /^];/, refactor.lineIndex(lines, 'const reducers = ['));
-    // lines.splice(i, 0, `  ${camelActionName},`);
-
-    // vio.save(targetPath, lines);
-  },
-
-  removeFromReducer(feature, action) {
-    const targetPath = utils.mapReduxFile(feature, 'reducer');
-    const lines = vio.getLines(targetPath);
-    const camelActionName = _.camelCase(action);
-    refactor.removeLines(lines, `from './${camelActionName}'`);
-    refactor.removeLines(lines, `  ${camelActionName},`, refactor.lineIndex(lines, 'const reducers = ['));
-
-    vio.save(targetPath, lines);
+    refactor.updateFile(targetPath, ast => [].concat(
+      refactor.addImportFrom(ast, `./${camelActionName}`, '', `reducer as ${camelActionName}Reducer`),
+      refactor.addToArray(ast, 'reducers', `${camelActionName}Reducer`)
+    ));
   },
 
   renameInReducer(feature, oldName, newName) {
     const targetPath = utils.mapReduxFile(feature, 'reducer');
-    const ast = vio.getAst(targetPath);
-    oldName = _.camelCase(oldName);
-    newName = _.camelCase(newName);
-    const changes = [].concat(
-      refactor.renameImportSpecifier(ast, oldName, newName),
-      refactor.renameStringLiteral(ast, `./${oldName}`, `./${newName}`)
-    );
-    const code = refactor.updateSourceCode(vio.getContent(targetPath), changes);
-    vio.save(targetPath, code);
+    refactor.updateFile(targetPath, ast => [].concat(
+      refactor.renameImportAsSpecifier(ast, `${oldName}Reducer`, `${newName}Reducer`),
+      refactor.renameModuleSource(ast, `./${oldName}`, `./${newName}`)
+    ));
+  },
+
+  removeFromReducer(feature, action) {
+    const targetPath = utils.mapReduxFile(feature, 'reducer');
+    const camelActionName = _.camelCase(action);
+    refactor.updateFile(targetPath, ast => [].concat(
+      refactor.removeImportBySource(ast, `./${camelActionName}`),
+      refactor.removeFromArray(ast, 'reducers', `${camelActionName}Reducer`)
+    ));
   },
 
   addToInitialState(feature, name, value) {
     const targetPath = utils.mapReduxFile(feature, 'initialState');
-    const lines = vio.getLines(targetPath);
-    const i = refactor.lastLineIndex(lines, /^\};/);
-    lines.splice(i, 0, `  ${name}: ${value},`);
-
-    vio.save(targetPath, lines);
+    refactor.addObjectProperty(targetPath, 'initialState', name, value);
   },
 
   removeFromInitialState(feature, name) {
-    // TODO: currently only supports to remove one line state.
     const targetPath = utils.mapReduxFile(feature, 'initialState');
-    const lines = vio.getLines(targetPath);
-    refactor.removeLines(lines, `  ${name}: `);
-    vio.save(targetPath, lines);
+    refactor.removeObjectProperty(targetPath, 'initialState', name);
   },
 
   renameInInitialState(feature, oldName, newName) {
@@ -204,29 +187,33 @@ module.exports = {
     //  Rename initial state property name.
 
     const targetPath = utils.mapReduxFile(feature, 'initialState');
-    utils.refactorCode(targetPath, _.partialRight(refactor.renameObjectProperty, oldName, newName));
+    refactor.renameObjectProperty(targetPath, 'initialState', oldName, newName);
   },
 
   addToRootReducer(feature) {
     const targetPath = path.join(utils.getProjectRoot(), 'src/common/rootReducer.js');
-    refactor.addImportLine(targetPath, `import ${_.camelCase(feature)}Reducer from '../features/${_.kebabCase(feature)}/redux/reducer';`);
-    const lines = vio.getLines(targetPath);
-    const i = refactor.lineIndex(lines, /^\}\);/, 'const rootReducer = combineReducers({');
-    lines.splice(i, 0, `  ${_.camelCase(feature)}: ${_.camelCase(feature)}Reducer,`);
+    refactor.updateFile(targetPath, ast => [].concat(
+      refactor.addImportFrom(ast, `../features/${_.kebabCase(feature)}/redux/reducer`, `${_.camelCase(feature)}Reducer`),
+      refactor.addObjectProperty(ast, 'reducerMap', _.camelCase(feature), `${_.camelCase(feature)}Reducer`)
+    ));
+  },
 
-    vio.save(targetPath, lines);
+  renameInRootReducer(oldFeature, newFeature) {
+    const targetPath = path.join(utils.getProjectRoot(), 'src/common/rootReducer.js');
+    refactor.updateFile(targetPath, ast => [].concat(
+      refactor.renameImportSpecifier(ast, `${_.camelCase(oldFeature)}Reducer`, `${_.camelCase(newFeature)}Reducer`),
+      refactor.renameObjectProperty(ast, 'reducerMap', _.camelCase(oldFeature), _.camelCase(newFeature)),
+      refactor.renameModuleSource(ast, `../features/${_.kebabCase(oldFeature)}/redux/reducer`, `../features/${_.kebabCase(newFeature)}/redux/reducer`)
+    ));
   },
 
   removeFromRootReducer(feature) {
     // NOTE: currently only used by feature
     const targetPath = path.join(utils.getProjectRoot(), 'src/common/rootReducer.js');
-    refactor.removeImportLine(targetPath, `../features/${_.kebabCase(feature)}/redux/reducer`);
-    refactor.removeLines(targetPath, `: ${_.camelCase(feature)}Reducer,`);
-  },
-
-  renameInRootReducer(oldName, newName) {
-    this.removeFromRootReducer(oldName);
-    this.addToRootReducer(newName);
+    refactor.updateFile(targetPath, ast => [].concat(
+      refactor.removeImportBySource(ast, `../features/${_.kebabCase(feature)}/redux/reducer`),
+      refactor.removeObjectProperty(ast, 'reducerMap', _.camelCase(feature))
+    ));
   },
 
   addToRouteConfig(feature) {
