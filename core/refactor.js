@@ -891,6 +891,69 @@ function getFeatures() {
   return _.toArray(shell.ls(mPath.join(utils.getProjectRoot(), 'src/features')));
 }
 
+function getRootRoutePath() {
+  const targetPath = utils.mapSrcFile('common/routeConfig.js');
+  const ast = vio.getAst(targetPath);
+  let rootPath = '';
+  traverse(ast, {
+    ObjectExpression(path) {
+      const node = path.node;
+      const props = node.properties;
+      if (!props.length) return;
+      const obj = {};
+      props.forEach((p) => {
+        if (_.has(p, 'key.name') && !p.computed) {
+          obj[p.key.name] = p;
+        }
+      });
+      if (obj.path && obj.childRoutes && !rootPath) {
+        rootPath = _.get(obj.path, 'value.value');
+      }
+    }
+  });
+  return rootPath;
+}
+
+function getFeatureRoutes(feature) {
+  const targetPath = utils.mapFeatureFile(feature, 'route.js');
+  const ast = vio.getAst(targetPath);
+  const arr = [];
+  let rootPath = '';
+  traverse(ast, {
+    ObjectExpression(path) {
+      const node = path.node;
+      const props = node.properties;
+      if (!props.length) return;
+      const obj = {};
+      props.forEach((p) => {
+        if (_.has(p, 'key.name') && !p.computed) {
+          obj[p.key.name] = p;
+        }
+      });
+      if (obj.path && obj.component) {
+        // in a route config, if an object expression has both 'path' and 'component' property, then it's a route config
+        arr.push({
+          path: _.get(obj.path, 'value.value'), // only string literal supported
+          component: _.get(obj.component, 'value.name'), // only identifier supported
+        });
+      }
+      if (obj.path && obj.childRoutes && !rootPath) {
+        rootPath = _.get(obj.path, 'value.value');
+        if (!rootPath) rootPath = '$none'; // only find the first rootPath
+      }
+    }
+  });
+  const prjRootPath = getRootRoutePath();
+  if (rootPath === '$none') rootPath = prjRootPath;
+  else if (!/^\//.test(rootPath)) rootPath = prjRootPath + '/' + rootPath;
+  arr.forEach((item) => {
+    if (!/^\//.test(item.path)) {
+      item.path = (rootPath + '/' + item.path).replace(/\/+/, '/');
+    }
+  });
+  return arr;
+}
+
 function getFeatureStructure(feature) {
   const dir = mPath.join(utils.getProjectRoot(), 'src/features', feature);
   const noneMisc = {};
@@ -957,6 +1020,7 @@ function getFeatureStructure(feature) {
   return {
     actions,
     components,
+    routes: getFeatureRoutes(feature),
     misc: getMiscFiles(dir),
   };
 }
@@ -1265,12 +1329,12 @@ module.exports = {
   setObjectProperty: acceptFilePathForAst(setObjectProperty),
   renameObjectProperty: acceptFilePathForAst(renameObjectProperty),
   removeObjectProperty: acceptFilePathForAst(removeObjectProperty),
+
   renameClassName: acceptFilePathForAst(renameClassName),
   renameFunctionName: acceptFilePathForAst(renameFunctionName),
   renameImportSpecifier: acceptFilePathForAst(renameImportSpecifier),
   renameImportAsSpecifier: acceptFilePathForAst(renameImportAsSpecifier),
   renameExportSpecifier: acceptFilePathForAst(renameExportSpecifier),
-  renameObjectProperty: acceptFilePathForAst(renameObjectProperty),
   renameCssClassName: acceptFilePathForAst(renameCssClassName),
   renameStringLiteral: acceptFilePathForAst(renameStringLiteral),
   renameModuleSource: acceptFilePathForAst(renameModuleSource),
