@@ -34,7 +34,7 @@ import { E } from './E';
 import F from './F';
 `;
 
-describe('reafctor tests', function() { // eslint-disable-line
+describe('reafctor', function() { // eslint-disable-line
   before(() => {
     vio.reset();
   });
@@ -343,5 +343,57 @@ const c = obj.p1;
       ]);
     });
   });
-});
 
+  describe('renameClassName', () => {
+    const CODE = `\
+import React, { PureComponent } from 'react';
+
+export class Hello extends PureComponent {
+  render() {
+    return (
+      <h1 className="home-hello">
+       Welcome to your Rekit project!
+      </h1>
+    );
+  }
+}
+
+export default Hello;
+`;
+    it('rename es6 class name', () => {
+      vio.put(V_FILE, CODE);
+      refactor.renameClassName(V_FILE, 'Hello', 'NewHello');
+      expectLines(V_FILE, [
+        "export class NewHello extends PureComponent {",
+        "export default NewHello;",
+      ]);
+    });
+  });
+
+  describe('renameCssClassName', () => {
+    const CODE = `\
+import React, { PureComponent } from 'react';
+
+export class Hello extends PureComponent {
+  render() {
+    return (
+      <h1 className="home-hello">
+        <label className="home-hello-label">Label</label>
+        Welcome to your Rekit project!
+      </h1>
+    );
+  }
+}
+
+export default Hello;
+`;
+    it('rename className property', () => {
+      vio.put(V_FILE, CODE);
+      refactor.renameCssClassName(V_FILE, 'home-hello', 'home-new-hello');
+      expectLines(V_FILE, [
+        '      <h1 className="home-new-hello">',
+        '        <label className="home-new-hello-label">Label</label>',
+      ]);
+    });
+  });
+});

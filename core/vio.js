@@ -94,6 +94,10 @@ function fileExists(filePath) {
   return (!!fileLines[filePath] || !!toSave[filePath]) && !toDel[filePath];
 }
 
+function fileNotExists(filePath) {
+  return !fileExists(filePath);
+}
+
 function dirExists(dir) {
   return !!dirs[dir] && !toDel[dir];
 }
@@ -122,12 +126,12 @@ function save(filePath, lines) {
 }
 
 function move(oldPath, newPath) {
-  if (toDel[oldPath] || !shell.test('-e', oldPath)) {
+  if (toDel[oldPath] || (!fileExists(oldPath) && !shell.test('-e', oldPath))) {
     log('Error: no file to move: ', 'red', oldPath);
     throw new Error('No file to move');
   }
 
-  if (shell.test('-e', newPath)) {
+  if (shell.test('-e', newPath) || fileExists(newPath)) {
     log('Error: target file already exists: ', 'red', newPath);
     throw new Error('Target file already exists');
   }
@@ -140,6 +144,15 @@ function move(oldPath, newPath) {
   if (asts[oldPath]) {
     asts[newPath] = asts[oldPath];
     delete asts[oldPath];
+  }
+
+  if (toSave[oldPath]) {
+    toSave[newPath] = true;
+    delete toSave[oldPath];
+  }
+
+  if (toDel[oldPath]) {
+    delete toDel[oldPath];
   }
   // if the file has already been moved
   oldPath = _.findKey(mvs, s => s === oldPath) || oldPath;
@@ -252,6 +265,7 @@ module.exports = {
   getAst,
   saveAst,
   fileExists,
+  fileNotExists,
   dirExists,
   ensurePathDir,
   put,

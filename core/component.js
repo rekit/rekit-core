@@ -39,39 +39,31 @@ function remove(feature, component) {
   entry.removeFromIndex(feature, component);
 }
 
-function move(source, dest) {
-  // 1. Move File.js to the destination
+function move(source, target) {
+  // 1. Move File.js to the targetination
   // 2. Rename module name
   source.feature = _.kebabCase(source.feature);
   source.name = _.pascalCase(source.name);
-  dest.feature = _.kebabCase(dest.feature);
-  dest.name = _.pascalCase(dest.name);
+  target.feature = _.kebabCase(target.feature);
+  target.name = _.pascalCase(target.name);
 
   const srcPath = utils.mapComponent(source.feature, source.name) + '.js';
-  const destPath = utils.mapComponent(dest.feature, dest.name) + '.js';
-  vio.move(srcPath, destPath);
+  const targetPath = utils.mapComponent(target.feature, target.name) + '.js';
+  vio.move(srcPath, targetPath);
 
-  const oldCssClass = `${source.feature}-${source.name}`;
-  const newCssClass = `${dest.feature}-${dest.name}`;
+  const oldCssClass = `${source.feature}-${_.kebabCase(source.name)}`;
+  const newCssClass = `${target.feature}-${_.kebabCase(target.name)}`;
 
-  refactor.renameClassName(destPath, source.name, dest.name);
-  refactor.renameCssClassName(destPath, oldCssClass, newCssClass);
+  refactor.updateFile(targetPath, ast => [].concat(
+    refactor.renameClassName(ast, source.name, target.name),
+    refactor.renameCssClassName(ast, oldCssClass, newCssClass)
+  ));
 
-  // const ast = vio.getAst(destPath);
-  // const changes = [].concat(
-  //   refactor.renameClassName(ast, source.name, dest.name),
-  //   refactor.renameCssClassName(ast, oldCssClass, newCssClass)
-  // );
-
-  // let code = vio.getContent(destPath);
-  // code = refactor.updateSourceCode(code, changes);
-  // vio.save(destPath, code);
-
-  if (source.feature === dest.feature) {
-    entry.renameInIndex(source.feature, source.name, dest.name);
+  if (source.feature === target.feature) {
+    entry.renameInIndex(source.feature, source.name, target.name);
   } else {
     entry.removeFromIndex(source.feature, source.name);
-    entry.addToIndex(dest.feature, dest.name);
+    entry.addToIndex(target.feature, target.name);
   }
 }
 

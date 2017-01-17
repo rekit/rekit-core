@@ -54,7 +54,7 @@ function expectError(cmd) {
 }
 
 function expectFile(file) {
-  expect(vio.fileExists(file)).to.be.true;
+  expect(file).to.satisfy(vio.fileExists);
 }
 
 function expectFiles(files) {
@@ -62,7 +62,7 @@ function expectFiles(files) {
 }
 
 function expectNoFile(file) {
-  expect(vio.fileExists('-e', file)).to.be.false;
+  expect(file).to.satisfy(vio.fileNotExists);
 }
 
 function expectNoFiles(files) {
@@ -75,7 +75,7 @@ function getLines(file) {
 
 function expectLine(file, line) {
   const lines = getLines(file);
-  expect(_.includes(lines, line)).to.be.true;
+  expect(line).to.be.oneOf(lines);
 }
 
 function expectLines(file, lines) {
@@ -84,7 +84,7 @@ function expectLines(file, lines) {
 
 function expectNoLine(file, line) {
   const lines = getLines(file);
-  expect(_.includes(lines, line)).to.be.false;
+  expect(_.find(lines, l => l.indexOf(line) >= 0)).to.not.exist;
 }
 
 function expectNoLines(file, lines) {

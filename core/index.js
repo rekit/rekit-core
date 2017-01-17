@@ -16,6 +16,7 @@ const entry = require('./entry');
 const route = require('./route');
 const template = require('./template');
 const plugin = require('./plugin');
+const constant = require('./constant');
 
 const injectExtensionPoints = plugin.injectExtensionPoints;
 
@@ -224,12 +225,14 @@ module.exports = Object.assign({
   refactor,
   utils,
   component,
+  constant,
   style,
   test,
   action,
   template,
   feature: featureMgr,
   entry,
+  route,
 
   handleCommand,
 }, coreCommands);

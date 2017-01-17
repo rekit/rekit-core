@@ -14,7 +14,7 @@ const TEST_FEATURE_NAME = helpers.TEST_FEATURE_NAME;
 
 const mapFeatureFile = _.partial(utils.mapFeatureFile, TEST_FEATURE_NAME);
 
-describe('entry tests', function() { // eslint-disable-line
+describe('entry', function() { // eslint-disable-line
   before(() => {
     vio.reset();
     core.addFeature(TEST_FEATURE_NAME);

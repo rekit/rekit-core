@@ -9,17 +9,9 @@ function add(feature, name) {
   name = _.upperSnakeCase(name);
   const targetPath = utils.mapReduxFile(feature, 'constants');
   const lines = vio.getLines(targetPath);
-  if (lines.length && !lines[lines.length - 1]) lines.pop();
-  lines.push(`export const ${name} = '${name}';`);
-  lines.push('');
-
+  const i = refactor.lastLineIndex(lines, /^export /);
+  lines.splice(i + 1, 0, `export const ${name} = '${name}';`);
   vio.save(targetPath, lines);
-}
-
-function remove(feature, name) {
-  name = _.upperSnakeCase(name);
-  const targetPath = utils.mapReduxFile(feature, 'constants');
-  refactor.removeLines(targetPath, `export const ${name} = '${name}';`);
 }
 
 function rename(feature, oldName, newName) {
@@ -34,6 +26,12 @@ function rename(feature, oldName, newName) {
   }
 
   vio.save(targetPath, lines);
+}
+
+function remove(feature, name) {
+  name = _.upperSnakeCase(name);
+  const targetPath = utils.mapReduxFile(feature, 'constants');
+  refactor.removeLines(targetPath, `export const ${name} = '${name}';`);
 }
 
 module.exports = {

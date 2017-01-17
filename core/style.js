@@ -30,32 +30,32 @@ module.exports = {
     entry.removeFromStyle(feature, component);
   },
 
-  move(source, dest) {
+  move(source, target) {
     // 1. Move File.less to the destination
     // 2. Rename css class name
     // 3. Update references in the style.less
 
     source.feature = _.kebabCase(source.feature);
     source.name = _.pascalCase(source.name);
-    dest.feature = _.kebabCase(dest.feature);
-    dest.name = _.pascalCase(dest.name);
+    target.feature = _.kebabCase(target.feature);
+    target.name = _.pascalCase(target.name);
 
     const srcPath = utils.mapComponent(source.feature, source.name) + '.' + utils.getCssExt();
-    const destPath = utils.mapComponent(dest.feature, dest.name) + '.' + utils.getCssExt();
-    vio.move(srcPath, destPath);
+    const targetPath = utils.mapComponent(target.feature, target.name) + '.' + utils.getCssExt();
+    vio.move(srcPath, targetPath);
 
-    let lines = vio.getLines(destPath);
+    let lines = vio.getLines(targetPath);
     const oldCssClass = `${_.kebabCase(source.feature)}-${_.kebabCase(source.name)}`;
-    const newCssClass = `${_.kebabCase(dest.feature)}-${_.kebabCase(dest.name)}`;
+    const newCssClass = `${_.kebabCase(target.feature)}-${_.kebabCase(target.name)}`;
 
     lines = lines.map(line => line.replace(`.${oldCssClass}`, `.${newCssClass}`));
-    vio.save(destPath, lines);
+    vio.save(targetPath, lines);
 
-    if (source.feature === dest.feature) {
-      entry.renameInStyle(source.feature, source.name, dest.name);
+    if (source.feature === target.feature) {
+      entry.renameInStyle(source.feature, source.name, target.name);
     } else {
       entry.removeFromStyle(source.feature, source.name);
-      entry.addToStyle(dest.feature, dest.name);
+      entry.addToStyle(target.feature, target.name);
     }
   },
 };

@@ -117,15 +117,15 @@ module.exports = {
     refactor.removeImportBySource(targetPath, `./${actionFile}`);
   },
 
-  renameInActions(feature, oldName, newName) {
-    // Rename export { xxx, xxxx } from './xxx'
+  renameInActions(feature, oldName, newName, actionFile) {
+    // Rename export { xxx, xxxx } from './actionFile'
+    // if actionFile is provided, it will be used as moudle source
     oldName = _.camelCase(oldName);
     newName = _.camelCase(newName);
+
     const targetPath = utils.mapReduxFile(feature, 'actions');
-    refactor.updateFile(targetPath, ast => [].concat(
-      refactor.renameExportSpecifier(ast, oldName, newName, `./${oldName}`),
-      refactor.renameModuleSource(ast, `./${oldName}`, `./${newName}`)
-    ));
+    refactor.renameExportSpecifier(targetPath, oldName, newName, `./${_.camelCase(actionFile || oldName)}`);
+    if (!actionFile) refactor.renameModuleSource(targetPath, `./${oldName}`, `./${newName}`);
   },
 
   addToReducer(feature, action) {
