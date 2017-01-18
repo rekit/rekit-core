@@ -27,14 +27,12 @@ describe('route', function() { // eslint-disable-line
 
   it('add route for a component', () => {
     route.add(TEST_FEATURE_NAME, 'test-component');
-    console.log(vio.getContent(targetPath));
     expectLines(targetPath, [
       "  TestComponent,",
       "    { path: 'test-component', name: 'Test component', component: TestComponent },",
     ]);
   });
 
-  return;
   it('add route for a component with custom url path', () => {
     route.add(TEST_FEATURE_NAME, 'test-component-2', { urlPath: 'my-url' });
     expectLines(targetPath, [

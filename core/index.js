@@ -32,7 +32,7 @@ function addComponent(feature, name, args) {
     let urlPath = args.urlPath;
     if (urlPath === '$auto') urlPath = name;
     urlPath = _.kebabCase(urlPath);
-    route.add(feature, name, { urlPath });
+    route.add(feature, name, { urlPath, isIndex: !!args.isIndex });
   }
   style.add(feature, name);
   test.add(feature, name);
@@ -141,7 +141,7 @@ function addFeature(name) {
   entry.addToRootStyle(name);
 
   // Add default page and sample action
-  addPage(name, 'default-page', { isIndex: true });
+  addComponent(name, 'default-page', { isIndex: true, connect: true, urlPath: '$auto' });
   addAction(name, 'sample-action');
 }
 

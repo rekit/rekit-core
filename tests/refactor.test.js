@@ -114,6 +114,26 @@ const otherCode = 1;
       ]);
     });
 
+    it('aaa', () => {
+      const code = `
+import {
+} from './';
+
+export default {
+  path: 'rekit-test-feature',
+  name: 'Rekit test feature',
+  childRoutes: [
+    { path: 'default-page', name: 'Default page', component: DefaultPage, isIndex: true },
+  ],
+};
+      `;
+      vio.put(V_FILE, code);
+      refactor.addImportFrom(V_FILE, './', '', 'A');
+      expectLines(V_FILE, [
+        '  A,',
+      ]);
+    });
+
     it('should add import specifier(s) when module exist', () => {
       vio.put(V_FILE, CODE);
       refactor.addImportFrom(V_FILE, './A', 'AA', 'A1');

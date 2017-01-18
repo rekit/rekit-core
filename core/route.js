@@ -14,9 +14,7 @@ function add(feature, component, args) {
   args = args || {};
   const urlPath = _.kebabCase(args.urlPath || component);
   const targetPath = utils.mapFeatureFile(feature, 'route.js');
-  console.log(vio.getContent(targetPath));
   refactor.addImportFrom(targetPath, './', '', _.pascalCase(component));
-  console.log('added import: ', vio.getContent(targetPath));
 
   const ast = vio.getAst(targetPath);
   let arrNode = null;
@@ -30,7 +28,7 @@ function add(feature, component, args) {
     }
   });
   if (arrNode) {
-    const rule = `{ path: '${urlPath}', name: '${args.pageName || _.upperFirst(_.lowerCase(component))}', component: ${_.pascalCase(component)}${args.isIndex ? ', isIndex: true' : ''} },`;
+    const rule = `{ path: '${urlPath}', name: '${args.pageName || _.upperFirst(_.lowerCase(component))}', component: ${_.pascalCase(component)}${args.isIndex ? ', isIndex: true' : ''} }`;
     const changes = refactor.addToArrayByNode(arrNode, rule);
     const code = refactor.updateSourceCode(vio.getContent(targetPath), changes);
     vio.save(targetPath, code);
