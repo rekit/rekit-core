@@ -25,6 +25,10 @@ function isStringMatch(str, match) {
   return match.test(str);
 }
 
+function isSameModuleSource(s1, s2, context) {
+  
+}
+
 function updateSourceCode(code, changes) {
   // Summary:
   //  This must be called before code is changed some places else rather than ast
@@ -70,6 +74,23 @@ function batchUpdate(filePath, callback) {
   vio.save(filePath, code);
 }
 
+function formatMultilineImport(importCode) {
+  // format import statement to:
+  // import {
+  //   name1,
+  //   name2,
+  // } from './xxx';
+
+  const m = importCode.match(/\{([^}]+)\}/);
+  if (m) {
+    const arr = _.compact(m[1].split(/, */).map(_.trim));
+    if (arr.length) {
+      return importCode.replace(/\{[^}]+\}/, `{\n  ${arr.join(',\n  ')},\n}`);
+    }
+  }
+  return importCode;
+}
+
 function addImportFrom(ast, moduleSource, defaultImport, namedImport) {
   // Summary:
   //  Add import from source module. Such as import { xxx } from './x';
@@ -91,6 +112,8 @@ function addImportFrom(ast, moduleSource, defaultImport, namedImport) {
   traverse(ast, {
     ImportDeclaration(path) {
       const node = path.node;
+      // multilines means whether to separate import specifiers into different lines
+      const multilines = node.loc.start.line !== node.loc.end.line;
       targetImportPos = path.node.end + 1;
 
       if (!node.specifiers || !node.source || node.source.value !== moduleSource) return;
@@ -117,7 +140,11 @@ function addImportFrom(ast, moduleSource, defaultImport, namedImport) {
         });
 
         const newNode = Object.assign({}, node, { specifiers: newSpecifiers });
-        const newCode = generate(newNode, babelGeneratorOptions).code;
+        let newCode = generate(newNode, babelGeneratorOptions).code;
+
+        if (multilines) {
+          newCode = formatMultilineImport(newCode);
+        }
         changes.push({
           start: node.start,
           end: node.end,
@@ -128,6 +155,7 @@ function addImportFrom(ast, moduleSource, defaultImport, namedImport) {
   });
 
   if (changes.length === 0 && !sourceExisted) {
+    // add new import declaration if module source doesn't exist
     const specifiers = [];
     if (defaultImport) {
       specifiers.push(t.importDefaultSpecifier(t.identifier(defaultImport)));
@@ -694,6 +722,7 @@ function removeImportSpecifier(ast, name) {
   traverse(ast, {
     ImportDeclaration(path) {
       const node = path.node;
+      const multilines = node.loc.start.line !== node.loc.end.line;
       if (!node.specifiers) return;
       const newSpecifiers = node.specifiers.filter(s => !names.includes(s.local.name));
       if (newSpecifiers.length === 0) {
@@ -706,7 +735,8 @@ function removeImportSpecifier(ast, name) {
       } else if (newSpecifiers.length !== node.specifiers.length) {
         // remove the specifier import
         const newNode = Object.assign({}, node, { specifiers: newSpecifiers });
-        const newCode = generate(newNode, {}).code;
+        let newCode = generate(newNode, {}).code;
+        if (multilines) newCode = formatMultilineImport(newCode);
         changes.push({
           start: node.start,
           end: node.end,
@@ -715,7 +745,7 @@ function removeImportSpecifier(ast, name) {
       }
     }
   });
-  
+
   return changes;
 }
 

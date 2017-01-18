@@ -32,6 +32,10 @@ import A from './A';
 import { C, D, Z } from './D';
 import { E } from './E';
 import F from './F';
+import {
+  G1,
+  G2,
+} from './G';
 `;
 
 describe('reafctor', function() { // eslint-disable-line
@@ -79,6 +83,11 @@ import A from './A';
 import { C, D, Z } from './D';
 import { E } from './E';
 import F from './F';
+import {
+  G1,
+  G2,
+  G3,
+} from './G';
 
 const otherCode = 1;
 `;
@@ -88,11 +97,15 @@ const otherCode = 1;
       refactor.addImportFrom(V_FILE, './L', 'L', 'L1');
       refactor.addImportFrom(V_FILE, './M', '', 'M1');
       refactor.addImportFrom(V_FILE, './N', 'N', ['N1', 'N2']);
+      refactor.addImportFrom(V_FILE, './G', '', ['G4', 'G5']);
+      console.log(vio.getContent(V_FILE));
       expectLines(V_FILE, [
         "import K from './K';",
         "import L, { L1 } from './L';",
         "import { M1 } from './M';",
         "import N, { N1, N2 } from './N';",
+        "  G4,",
+        "  G5,",
       ]);
     });
 
@@ -155,6 +168,11 @@ import { C, D, Z as ZZ } from './D';
 import { E } from './E';
 import { E as EE } from './EE';
 import F from './F';
+import {
+  G1,
+  G2,
+  G3,
+} from './G';
 const a = A;
 const d = D;
 const e = E;
@@ -165,12 +183,14 @@ const e = E;
       refactor.renameImportSpecifier(V_FILE, 'D', 'D1');
       refactor.renameImportSpecifier(V_FILE, 'Z', 'Z1');
       refactor.renameImportSpecifier(V_FILE, 'E', 'E1');
+      refactor.renameImportSpecifier(V_FILE, 'G1', 'GG1');
 
       expectLines(V_FILE, [
         "import A1 from './A';",
         "import { C, D1, Z1 as ZZ } from './D';",
         "import { E1 } from './E';",
         "import { E1 as EE } from './EE';",
+        '  GG1,',
         'const a = A1;',
         'const d = D1;',
       ]);
@@ -220,12 +240,16 @@ export { default as F } from './F';
   describe('removeNamedImport', () => {
     it('should remove give import specifier', () => {
       vio.put(V_FILE, CODE_3);
-      refactor.removeImportSpecifier(V_FILE, ['E', 'D']);
+      refactor.removeImportSpecifier(V_FILE, ['E', 'D', 'G1']);
       expectLines(V_FILE, [
         "import { C, Z } from './D';",
+        "import {",
+        "  G2,",
+        "} from './G';",
       ]);
       expectNoLines(V_FILE, [
         "import { E } from './E';",
+        "  G1,",
       ]);
     });
   });

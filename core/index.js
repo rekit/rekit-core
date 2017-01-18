@@ -32,7 +32,7 @@ function addComponent(feature, name, args) {
     let urlPath = args.urlPath;
     if (urlPath === '$auto') urlPath = name;
     urlPath = _.kebabCase(urlPath);
-    route.add(feature, name, urlPath);
+    route.add(feature, name, { urlPath });
   }
   style.add(feature, name);
   test.add(feature, name);

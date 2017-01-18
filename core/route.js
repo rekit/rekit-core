@@ -1,6 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
+const traverse = require('babel-traverse').default;
 const refactor = require('./refactor');
 const utils = require('./utils');
 const vio = require('./vio');
@@ -13,15 +14,20 @@ function add(feature, component, args) {
   args = args || {};
   const urlPath = _.kebabCase(args.urlPath || component);
   const targetPath = utils.mapFeatureFile(feature, 'route.js');
-  const lines = vio.getLines(targetPath);
-  let i = refactor.lineIndex(lines, '} from \'./index\';');
-  lines.splice(i, 0, `  ${_.pascalCase(component)},`);
-  i = refactor.lineIndex(lines, 'path: \'*\'');
-  if (i === -1) {
-    i = refactor.lastLineIndex(lines, /^ {2}]/);
-  }
-  lines.splice(i, 0, `    { path: '${urlPath}', name: '${args.pageName || _.upperFirst(_.lowerCase(component))}', component: ${_.pascalCase(component)}${args.isIndex ? ', isIndex: true' : ''} },`);
-  vio.save(targetPath, lines);
+  refactor.addImportFrom(targetPath, './', '', _.pascalCase(component));
+  const ast = vio.getAst(targetPath);
+
+
+
+  // const lines = vio.getLines(targetPath);
+  // let i = refactor.lineIndex(lines, '} from \'./index\';');
+  // lines.splice(i, 0, `  ${_.pascalCase(component)},`);
+  // i = refactor.lineIndex(lines, 'path: \'*\'');
+  // if (i === -1) {
+  //   i = refactor.lastLineIndex(lines, /^ {2}]/);
+  // }
+  // lines.splice(i, 0, `    { path: '${urlPath}', name: '${args.pageName || _.upperFirst(_.lowerCase(component))}', component: ${_.pascalCase(component)}${args.isIndex ? ', isIndex: true' : ''} },`);
+  // vio.save(targetPath, lines);
 }
 
 function remove(feature, component) {

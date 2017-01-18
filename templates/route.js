@@ -1,5 +1,5 @@
 import {
-} from './index';
+} from './';
 
 export default {
   path: '${_.kebabCase(feature)}',

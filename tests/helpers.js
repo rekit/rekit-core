@@ -9,6 +9,7 @@ const utils = require('../core/utils');
 const vio = require('../core/vio');
 
 const TEST_FEATURE_NAME = 'rekit-test-feature';
+const TEST_FEATURE_NAME_2 = 'rekit-test-feature-2';
 
 // For testing, use a fake project root
 utils.setProjectRoot(path.join(__dirname, '..'));
@@ -111,5 +112,6 @@ module.exports = {
   expectLines,
   expectNoLines,
   TEST_FEATURE_NAME,
+  TEST_FEATURE_NAME_2,
   escapeRegExp,
 };
