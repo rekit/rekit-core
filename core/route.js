@@ -14,9 +14,29 @@ function add(feature, component, args) {
   args = args || {};
   const urlPath = _.kebabCase(args.urlPath || component);
   const targetPath = utils.mapFeatureFile(feature, 'route.js');
+  console.log(vio.getContent(targetPath));
   refactor.addImportFrom(targetPath, './', '', _.pascalCase(component));
-  const ast = vio.getAst(targetPath);
+  console.log('added import: ', vio.getContent(targetPath));
 
+  const ast = vio.getAst(targetPath);
+  let arrNode = null;
+  traverse(ast, {
+    ObjectProperty(path) {
+      const node = path.node;
+      if (_.get(node, 'key.name') === 'childRoutes' && _.get(node, 'value.type') === 'ArrayExpression') {
+        arrNode = node.value;
+        path.stop();
+      }
+    }
+  });
+  if (arrNode) {
+    const rule = `{ path: '${urlPath}', name: '${args.pageName || _.upperFirst(_.lowerCase(component))}', component: ${_.pascalCase(component)}${args.isIndex ? ', isIndex: true' : ''} },`;
+    const changes = refactor.addToArrayByNode(arrNode, rule);
+    const code = refactor.updateSourceCode(vio.getContent(targetPath), changes);
+    vio.save(targetPath, code);
+  } else {
+    utils.fatal(`You are adding a route rule, but can't find childRoutes property in 'src/features/${feature}/route.js', please check.`);
+  }
 
 
   // const lines = vio.getLines(targetPath);

@@ -303,6 +303,56 @@ function addToArray(ast, varName, identifierName) {
   return changes;
 }
 
+function addToArrayByNode(node, code) {
+  // node: the arr expression node
+  // code: added as the last element of the array
+  const multilines = node.loc.start.line !== node.loc.end.line;
+  let insertPos = node.start + 1;
+  if (node.elements.length) {
+    const ele = _.last(node.elements);
+    insertPos = multilines ? ele.end + 1 : ele.end;
+  }
+  const changes = [];
+  if (multilines) {
+    const indent = _.repeat(' ', node.loc.end.column - 1);
+    changes.push({
+      start: insertPos,
+      end: insertPos,
+      replacement: `\n${indent}  ${code},`,
+    });
+  } else {
+    changes.push({
+      start: insertPos,
+      end: insertPos,
+      replacement: `${node.elements.length ? ', ' : ''}${code}`,
+    });
+  }
+  return changes;
+}
+
+function removeFromArrayByNode(node, eleNode) {
+  const multilines = node.loc.start.line !== node.loc.end.line;
+  const elements = node.elements;
+  const changes = [];
+  elements.forEach((ele, i) => {
+    if (ele !== eleNode) return;
+    if (multilines) {
+      changes.push({
+        start: eleNode.start - eleNode.loc.start.column,
+        end: eleNode.end + 1,
+        replacement: '',
+      });
+    } else {
+      changes.push({
+        start: eleNode.start - (i > 0 && i === elements.length - 1 ? 2 : 0),  // remove before ', '
+        end: eleNode.end + (i < elements.length - 1 ? 2 : 0), // remove after ', '
+        replacement: '',
+      });
+    }
+  });
+  return changes;
+}
+
 function removeFromArray(ast, varName, identifierName) {
   const changes = [];
   traverse(ast, {
@@ -664,8 +714,6 @@ function renameModuleSource(ast, oldModuleSource, newModuleSource) {
   return changes;
 }
 
-
-
 function renameStringLiteral(ast, oldName, newName) {
   // Summary:
   //  Rename the string literal in ast
@@ -965,6 +1013,10 @@ function getFeatureRoutes(feature) {
         arr.push({
           path: _.get(obj.path, 'value.value'), // only string literal supported
           component: _.get(obj.component, 'value.name'), // only identifier supported
+          node: {
+            start: node.start,
+            end: node.end,
+          },
         });
       }
       if (obj.path && obj.childRoutes && !rootPath) {
@@ -1372,6 +1424,9 @@ module.exports = {
   removeImportSpecifier: acceptFilePathForAst(removeImportSpecifier),
   // removeExportSpecifier: acceptFilePathForAst(removeExportSpecifier),
   removeImportBySource: acceptFilePathForAst(removeImportBySource),
+
+  addToArrayByNode,
+  removeFromArrayByNode,
 
   updateSourceCode,
   updateFile,

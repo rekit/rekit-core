@@ -2,6 +2,7 @@
 'use strict';
 
 const expect = require('chai').expect;
+const traverse = require('babel-traverse').default;
 const vio = require('../core/vio');
 const refactor = require('../core/refactor');
 const helpers = require('./helpers');
@@ -88,6 +89,8 @@ import {
   G2,
   G3,
 } from './G';
+import {
+} from './';
 
 const otherCode = 1;
 `;
@@ -98,7 +101,8 @@ const otherCode = 1;
       refactor.addImportFrom(V_FILE, './M', '', 'M1');
       refactor.addImportFrom(V_FILE, './N', 'N', ['N1', 'N2']);
       refactor.addImportFrom(V_FILE, './G', '', ['G4', 'G5']);
-      console.log(vio.getContent(V_FILE));
+      refactor.addImportFrom(V_FILE, './', '', ['H1']);
+
       expectLines(V_FILE, [
         "import K from './K';",
         "import L, { L1 } from './L';",
@@ -106,6 +110,7 @@ const otherCode = 1;
         "import N, { N1, N2 } from './N';",
         "  G4,",
         "  G5,",
+        "  H1,",
       ]);
     });
 
@@ -417,6 +422,88 @@ export default Hello;
       expectLines(V_FILE, [
         '      <h1 className="home-new-hello">',
         '        <label className="home-new-hello-label">Label</label>',
+      ]);
+    });
+  });
+
+  describe('array manipulation', () => {
+    const CODE = `\
+const arr1 = [];
+const arr2 = [a, b, c];
+const arr3 = [
+];
+const arr4 = [
+  { p1: 1, p2: 2 },
+];
+    `;
+
+    it(`addToArrayByNode`, () => {
+      vio.put(V_FILE, CODE);
+      const ast = vio.getAst(V_FILE);
+      const arrs = {};
+      traverse(ast, {
+        VariableDeclarator(path) {
+          const node = path.node;
+          arrs[node.id.name] = node.init;
+        }
+      });
+
+      const changes = [].concat(
+        refactor.addToArrayByNode(arrs.arr1, '1'),
+        refactor.addToArrayByNode(arrs.arr2, '1'),
+        refactor.addToArrayByNode(arrs.arr3, '1'),
+        refactor.addToArrayByNode(arrs.arr4, '{ p: 1 }')
+      );
+
+      const code = refactor.updateSourceCode(vio.getContent(V_FILE), changes);
+      vio.put(V_FILE, code);
+
+      expectLines(V_FILE, [
+        'const arr1 = [1];',
+        'const arr2 = [a, b, c, 1];',
+        'const arr3 = [',
+        '  1,',
+        '];',
+        'const arr4 = [',
+        '  { p1: 1, p2: 2 },',
+        '  { p: 1 },',
+        '];',
+      ]);
+    });
+
+    it(`removeFromArrayByNode`, () => {
+      const ast = vio.getAst(V_FILE);
+      const arrs = {};
+      traverse(ast, {
+        VariableDeclarator(path) {
+          const node = path.node;
+          arrs[node.id.name] = node.init;
+        }
+      });
+
+      const changes = [].concat(
+        refactor.removeFromArrayByNode(arrs.arr1, arrs.arr1.elements[0]),
+        refactor.removeFromArrayByNode(arrs.arr2, arrs.arr2.elements[3]),
+        refactor.removeFromArrayByNode(arrs.arr3, arrs.arr3.elements[0]),
+        refactor.removeFromArrayByNode(arrs.arr4, arrs.arr4.elements[1])
+      );
+
+      const code = refactor.updateSourceCode(vio.getContent(V_FILE), changes);
+      vio.put(V_FILE, code);
+
+      expectLines(V_FILE, [
+        'const arr1 = [];',
+        'const arr2 = [a, b, c];',
+        'const arr3 = [',
+        '];',
+        'const arr4 = [',
+        '  { p1: 1, p2: 2 },',
+        '];',
+      ]);
+
+      expectNoLines(V_FILE, [
+        '  1,',
+        '  { p: 1 },',
       ]);
     });
   });
