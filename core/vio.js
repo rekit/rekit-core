@@ -77,6 +77,7 @@ function getAst(filePath) {
       });
       if (!ast) utils.fatalError(`Error: failed to parse ${filePath}, please check syntax.`);
       asts[filePath] = ast;
+      ast._filePath = filePath;
     } catch (e) {
       utils.fatalError(`Error: failed to parse ${filePath}, please check syntax.`);
     }

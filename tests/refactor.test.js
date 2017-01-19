@@ -455,6 +455,9 @@ const arr3 = [
 const arr4 = [
   { p1: 1, p2: 2 },
 ];
+const arr5 = [
+  5
+];
     `;
 
     it(`addToArrayByNode`, () => {
@@ -464,6 +467,7 @@ const arr4 = [
       traverse(ast, {
         VariableDeclarator(path) {
           const node = path.node;
+          node.init._filePath = ast._filePath;
           arrs[node.id.name] = node.init;
         }
       });
@@ -472,7 +476,8 @@ const arr4 = [
         refactor.addToArrayByNode(arrs.arr1, '1'),
         refactor.addToArrayByNode(arrs.arr2, '1'),
         refactor.addToArrayByNode(arrs.arr3, '1'),
-        refactor.addToArrayByNode(arrs.arr4, '{ p: 1 }')
+        refactor.addToArrayByNode(arrs.arr4, '{ p: 1 }'),
+        refactor.addToArrayByNode(arrs.arr5, '6')
       );
 
       const code = refactor.updateSourceCode(vio.getContent(V_FILE), changes);
@@ -488,6 +493,10 @@ const arr4 = [
         '  { p1: 1, p2: 2 },',
         '  { p: 1 },',
         '];',
+        'const arr5 = [',
+        '  5,',
+        '  6',
+        '];',
       ]);
     });
 
@@ -497,15 +506,17 @@ const arr4 = [
       traverse(ast, {
         VariableDeclarator(path) {
           const node = path.node;
+          node.init._filePath = ast._filePath;
           arrs[node.id.name] = node.init;
         }
       });
 
       const changes = [].concat(
         refactor.removeFromArrayByNode(arrs.arr1, arrs.arr1.elements[0]),
-        refactor.removeFromArrayByNode(arrs.arr2, arrs.arr2.elements[3]),
+        refactor.removeFromArrayByNode(arrs.arr2, arrs.arr2.elements[2]),
         refactor.removeFromArrayByNode(arrs.arr3, arrs.arr3.elements[0]),
-        refactor.removeFromArrayByNode(arrs.arr4, arrs.arr4.elements[1])
+        refactor.removeFromArrayByNode(arrs.arr4, arrs.arr4.elements[1]),
+        refactor.removeFromArrayByNode(arrs.arr5, arrs.arr5.elements[1])
       );
 
       const code = refactor.updateSourceCode(vio.getContent(V_FILE), changes);
@@ -513,18 +524,63 @@ const arr4 = [
 
       expectLines(V_FILE, [
         'const arr1 = [];',
-        'const arr2 = [a, b, c];',
+        'const arr2 = [a, b, 1];',
         'const arr3 = [',
         '];',
         'const arr4 = [',
         '  { p1: 1, p2: 2 },',
+        '];',
+        'const arr5 = [',
+        '  5',
         '];',
       ]);
 
       expectNoLines(V_FILE, [
         '  1,',
         '  { p: 1 },',
+        '  6',
       ]);
+    });
+
+    it('addToArray', () => {
+      refactor.addToArray(V_FILE, 'arr1', 'x');
+      refactor.addToArray(V_FILE, 'arr2', 'y');
+      refactor.addToArray(V_FILE, 'arr5', 'z');
+      expectLines(V_FILE, [
+        'const arr1 = [x];',
+        'const arr2 = [a, b, 1, y];',
+        '  5,',
+        '  z',
+      ]);
+    });
+    it('removeFromArray', () => {
+      refactor.removeFromArray(V_FILE, 'arr1', 'x');
+      refactor.removeFromArray(V_FILE, 'arr2', 'y');
+      refactor.removeFromArray(V_FILE, 'arr5', 'z');
+      expectLines(V_FILE, [
+        'const arr1 = [];',
+        'const arr2 = [a, b, 1];',
+        '  5',
+      ]);
+    });
+  });
+
+  describe('find near char', () => {
+    const s = '01, \n5 \n, ab]';
+    it('nearestCharBefore', () => {
+      let i = refactor.nearestCharBefore(',', s, 5);
+      expect(i).to.equal(2);
+
+      i = refactor.nearestCharBefore(',', s, 11);
+      expect(i).to.equal(-1);
+    });
+
+    it('nearestCharAfter', () => {
+      let i = refactor.nearestCharAfter(',', s, 5);
+      expect(i).to.equal(8);
+
+      i = refactor.nearestCharAfter(',', s, 0);
+      expect(i).to.equal(-1);
     });
   });
 });

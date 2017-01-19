@@ -33,6 +33,15 @@ describe('route', function() { // eslint-disable-line
     ]);
   });
 
+  it('remove route for a component', () => {
+    route.remove(TEST_FEATURE_NAME, 'test-component');
+    console.log(vio.getContent(targetPath));
+    expectNoLines(targetPath, [
+      "TestComponent",
+      "component: TestComponent },",
+    ]);
+  });
+
   it('add route for a component with custom url path', () => {
     route.add(TEST_FEATURE_NAME, 'test-component-2', { urlPath: 'my-url' });
     expectLines(targetPath, [
@@ -79,7 +88,7 @@ describe('route', function() { // eslint-disable-line
       .replace("name: 'To rename'", "name: 'A new name'")
     );
     route.move(source, target);
-    console.log(vio.getContent(targetPath2));
+    // console.log(vio.getContent(targetPath2));
     expectLines(targetPath2, [
       "  ToRenameDone,",
       "    { path: '/to/rename', name: 'A new name', component: ToRenameDone },",
