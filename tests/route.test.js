@@ -35,7 +35,6 @@ describe('route', function() { // eslint-disable-line
 
   it('remove route for a component', () => {
     route.remove(TEST_FEATURE_NAME, 'test-component');
-    console.log(vio.getContent(targetPath));
     expectNoLines(targetPath, [
       "TestComponent",
       "component: TestComponent },",
@@ -45,18 +44,18 @@ describe('route', function() { // eslint-disable-line
   it('add route for a component with custom url path', () => {
     route.add(TEST_FEATURE_NAME, 'test-component-2', { urlPath: 'my-url' });
     expectLines(targetPath, [
-      "  TestComponent,",
+      "  TestComponent2,",
       "    { path: 'my-url', name: 'Test component 2', component: TestComponent2 },",
     ]);
   });
 
   it('rename route for a component', () => {
-    const source = { feature: TEST_FEATURE_NAME, name: 'test-component' };
+    route.add(TEST_FEATURE_NAME, 'to-rename');
+    const source = { feature: TEST_FEATURE_NAME, name: 'to-rename' };
     const target = { feature: TEST_FEATURE_NAME, name: 'renamed-component' };
     route.move(source, target);
     expectNoLines(targetPath, [
-      "  TestComponent,",
-      "    { path: 'test-component', name: 'Test component', component: TestComponent },",
+      "ToRename",
     ]);
     expectLines(targetPath, [
       "  RenamedComponent,",
@@ -69,29 +68,27 @@ describe('route', function() { // eslint-disable-line
     const target = { feature: TEST_FEATURE_NAME_2, name: 'renamed-component-2' };
     route.move(source, target);
     expectNoLines(targetPath, [
-      "  TestComponent2,",
-      "    { path: 'test-component-2', name: 'Test component 2', component: TestComponent2 },",
+      "TestComponent2",
     ]);
     expectLines(targetPath2, [
       "  RenamedComponent2,",
-      "    { path: 'renamed-component-2', name: 'Renamed component 2', component: RenamedComponent2 },",
+      "    { path: 'my-url', name: 'Renamed component 2', component: RenamedComponent2 },",
     ]);
   });
 
   it('move route to a differnt feature should brings path and name together', () => {
-    route.add(TEST_FEATURE_NAME, 'to-rename');
-    const source = { feature: TEST_FEATURE_NAME, name: 'to-rename' };
-    const target = { feature: TEST_FEATURE_NAME_2, name: 'to-rename-done' };
+    route.add(TEST_FEATURE_NAME, 'to-move');
+    const source = { feature: TEST_FEATURE_NAME, name: 'to-move' };
+    const target = { feature: TEST_FEATURE_NAME_2, name: 'to-move-done' };
     // simulate manually edit route
     vio.put(targetPath, vio.getContent(targetPath)
-      .replace("path: 'to-rename'", "path: '/to/rename'")
-      .replace("name: 'To rename'", "name: 'A new name'")
+      .replace("path: 'to-move'", "path: '/to/move'")
+      .replace("name: 'To move'", "name: 'A new name'")
     );
     route.move(source, target);
-    // console.log(vio.getContent(targetPath2));
     expectLines(targetPath2, [
-      "  ToRenameDone,",
-      "    { path: '/to/rename', name: 'A new name', component: ToRenameDone },",
+      "  ToMoveDone,",
+      "    { path: '/to/move', name: 'A new name', component: ToMoveDone },",
     ]);
   });
 

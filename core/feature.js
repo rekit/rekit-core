@@ -13,15 +13,16 @@ const assert = require('./assert');
 module.exports = {
   add(name) {
     assert.notEmpty(name);
-    const targetDir = path.join(utils.getProjectRoot(), `src/features/${_.kebabCase(name)}`);
+    name = _.kebabCase(name);
+    const targetDir = path.join(utils.getProjectRoot(), `src/features/${name}`);
     if (shell.test('-e', targetDir)) {
-      utils.fatalError(`feature already exists: ${_.kebabCase(name)}`);
+      utils.fatalError(`Feature already exists: ${name}`);
     }
 
     vio.mkdir(targetDir);
     vio.mkdir(path.join(targetDir, 'redux'));
-    vio.mkdir(path.join(utils.getProjectRoot(), 'tests/features', _.kebabCase(name)));
-    vio.mkdir(path.join(utils.getProjectRoot(), 'tests/features', _.kebabCase(name), 'redux'));
+    vio.mkdir(path.join(utils.getProjectRoot(), 'tests/features', name));
+    vio.mkdir(path.join(utils.getProjectRoot(), 'tests/features', name, 'redux'));
 
     // Create files from template
     [
@@ -40,7 +41,7 @@ module.exports = {
     });
 
     // Create wrapper reducer for the feature
-    template.generate(path.join(utils.getProjectRoot(), `tests/features/${_.kebabCase(name)}/redux/reducer.test.js`), {
+    template.generate(path.join(utils.getProjectRoot(), `tests/features/${name}/redux/reducer.test.js`), {
       templateFile: 'reducer.test.js',
       context: { feature: name }
     });
@@ -53,7 +54,7 @@ module.exports = {
 
   move(oldName, newName) {
     // Summary:
-    //  Move or rename a feature. Seems very heavy.
+    //  Rename a feature. Seems very heavy.
     assert.notEmpty(oldName);
     assert.notEmpty(newName);
     assert.featureExist(oldName);

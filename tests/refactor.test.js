@@ -458,6 +458,15 @@ const arr4 = [
 const arr5 = [
   5
 ];
+const arr6 = [
+  a,
+  {
+    abc: 1,
+  },
+  {
+    def: 2,
+  },
+];
     `;
 
     it(`addToArrayByNode`, () => {
@@ -516,7 +525,8 @@ const arr5 = [
         refactor.removeFromArrayByNode(arrs.arr2, arrs.arr2.elements[2]),
         refactor.removeFromArrayByNode(arrs.arr3, arrs.arr3.elements[0]),
         refactor.removeFromArrayByNode(arrs.arr4, arrs.arr4.elements[1]),
-        refactor.removeFromArrayByNode(arrs.arr5, arrs.arr5.elements[1])
+        refactor.removeFromArrayByNode(arrs.arr5, arrs.arr5.elements[1]),
+        refactor.removeFromArrayByNode(arrs.arr6, arrs.arr6.elements[1])
       );
 
       const code = refactor.updateSourceCode(vio.getContent(V_FILE), changes);
@@ -539,6 +549,7 @@ const arr5 = [
         '  1,',
         '  { p: 1 },',
         '  6',
+        '    abc: 1',
       ]);
     });
 

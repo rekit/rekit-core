@@ -64,6 +64,10 @@ function nearestCharAfter(char, str, index) {
   return -1;
 }
 
+function getCodeByNode(node) {
+  return generate(node, babelGeneratorOptions).code;
+}
+
 function updateSourceCode(code, changes) {
   // Summary:
   //  This must be called before code is changed some places else rather than ast
@@ -1435,6 +1439,7 @@ module.exports = {
   addToArrayByNode,
   removeFromArrayByNode,
 
+  getCodeByNode,
   updateSourceCode,
   updateFile,
   objExpToObj,

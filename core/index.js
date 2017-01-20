@@ -59,35 +59,35 @@ function moveComponent(source, target) {
   route.move(source, target);
 }
 
-function addPage(feature, name, args) {
-  feature = _.kebabCase(feature);
-  name = _.pascalCase(name);
+// function addPage(feature, name, args) {
+//   feature = _.kebabCase(feature);
+//   name = _.pascalCase(name);
 
-  component.add(feature, name, { templateFile: 'ConnectedComponent.js' });
-  entry.addToRoute(feature, name, args);
-  style.add(feature, name);
-  test.add(feature, name, { templateFile: 'ConnectedComponent.test.js' });
-}
+//   component.add(feature, name, { templateFile: 'ConnectedComponent.js' });
+//   entry.addToRoute(feature, name, args);
+//   style.add(feature, name);
+//   test.add(feature, name, { templateFile: 'ConnectedComponent.test.js' });
+// }
 
-function removePage(feature, name, args) {
-  feature = _.kebabCase(feature);
-  name = _.pascalCase(name);
+// function removePage(feature, name, args) {
+//   feature = _.kebabCase(feature);
+//   name = _.pascalCase(name);
 
-  component.remove(feature, name);
-  entry.removeFromRoute(feature, name, args);
-  style.remove(feature, name);
-  test.remove(feature, name);
-}
+//   component.remove(feature, name);
+//   entry.removeFromRoute(feature, name, args);
+//   style.remove(feature, name);
+//   test.remove(feature, name);
+// }
 
-function movePage(source, target) {
-  source.feature = _.kebabCase(source.feature);
-  source.name = _.pascalCase(source.name);
-  target.feature = _.kebabCase(target.feature);
-  target.name = _.pascalCase(target.name);
+// function movePage(source, target) {
+//   source.feature = _.kebabCase(source.feature);
+//   source.name = _.pascalCase(source.name);
+//   target.feature = _.kebabCase(target.feature);
+//   target.name = _.pascalCase(target.name);
 
-  moveComponent(source, target);
-  entry.moveRoute(source, target);
-}
+//   moveComponent(source, target);
+//   entry.moveRoute(source, target);
+// }
 
 function addAsyncAction(feature, name) {
   action.addAsync(feature, name);
@@ -160,9 +160,9 @@ const coreCommands = {
   addComponent: injectExtensionPoints(addComponent, 'add', 'component'),
   removeComponent: injectExtensionPoints(removeComponent, 'remove', 'component'),
   moveComponent: injectExtensionPoints(moveComponent, 'move', 'component'),
-  addPage: injectExtensionPoints(addPage, 'add', 'page'),
-  removePage: injectExtensionPoints(removePage, 'remove', 'page'),
-  movePage: injectExtensionPoints(movePage, 'move', 'page'),
+  // addPage: injectExtensionPoints(addPage, 'add', 'page'),
+  // removePage: injectExtensionPoints(removePage, 'remove', 'page'),
+  // movePage: injectExtensionPoints(movePage, 'move', 'page'),
   addAction: injectExtensionPoints(addAction, 'add', 'action'),
   removeAction: injectExtensionPoints(removeAction, 'remove', 'action'),
   moveAction: injectExtensionPoints(moveAction, 'move', 'action'),
