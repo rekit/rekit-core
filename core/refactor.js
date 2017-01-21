@@ -105,14 +105,6 @@ function updateFile(filePath, changes) {
   vio.save(filePath, code);
 }
 
-function batchUpdate(filePath, callback) {
-  const ast = vio.getAst(filePath);
-  const changes = callback(ast);
-  let code = vio.getContent(filePath);
-  code = updateSourceCode(code, changes);
-  vio.save(filePath, code);
-}
-
 function formatMultilineImport(importCode) {
   // format import statement to:
   // import {

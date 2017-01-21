@@ -73,6 +73,13 @@ describe('entry', function() { // eslint-disable-line
         "export { newName } from './newName';",
       ]);
     });
+
+    it('removeFromActions should be empty to produce empty file', () => {
+      entry.removeFromActions(TEST_FEATURE_NAME, 'sample-action');
+      expectNoLines(targetPath, [
+        "sampleAction",
+      ]);
+    });
   });
 
   describe('handles: redux/reducer.js', () => {

@@ -127,6 +127,7 @@ describe('action', function() { // eslint-disable-line
   });
 
   it('remove sync action', () => {
+    core.addAction(TEST_FEATURE_NAME, 'test-action');
     core.removeAction(TEST_FEATURE_NAME, 'test-action');
     const actionType = core.utils.getActionType(TEST_FEATURE_NAME, 'test-action');
     expectNoLines(mapFeatureFile('redux/constants.js'), [

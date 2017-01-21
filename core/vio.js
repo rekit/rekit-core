@@ -120,7 +120,7 @@ function mkdir(dir) {
 }
 
 function save(filePath, lines) {
-  if (lines) {
+  if (_.isString(lines) || _.isArray(lines)) {
     put(filePath, lines);
   }
   toSave[filePath] = true;
