@@ -594,4 +594,35 @@ const arr6 = [
       expect(i).to.equal(-1);
     });
   });
+
+  describe('replaceStringLiteral', () => {
+    const code = `
+const str1 = 'abcdefg';
+const jsx = (
+  <div className="div1">
+    <h2 className="sub-title-2">sub-title</h2>
+  </div>
+);
+
+`;
+    it('should only replace full string when fullMatch === true', () => {
+      vio.put(V_FILE, code);
+      refactor.replaceStringLiteral(V_FILE, 'abcdefg', 'new-str');
+      expectLines(V_FILE, [
+        "const str1 = 'new-str';",
+      ]);
+      refactor.replaceStringLiteral(V_FILE, 'new', 'xxx');
+      expectLines(V_FILE, [
+        "const str1 = 'new-str';",
+      ]);
+    });
+
+    it('should only replace full string when fullMatch === false', () => {
+      vio.put(V_FILE, code);
+      refactor.replaceStringLiteral(V_FILE, 'sub-title', 'second-title', false);
+      expectLines(V_FILE, [
+        '    <h2 className="second-title-2">sub-title</h2>',
+      ]);
+    });
+  });
 });

@@ -1,6 +1,7 @@
 'use strict';
 
 // Virtual IO, create, update and delete files in memory until flush to the disk.
+// NOTE: it only supports text files.
 
 const path = require('path');
 const _ = require('lodash');
@@ -19,6 +20,7 @@ let fileLines = {};
 let dirs = {};
 let asts = {};
 let mvs = {}; // Files to move
+let mvDirs = {}; // Folders to move
 
 function printDiff(diff) {
   diff.forEach((line) => {
@@ -45,6 +47,9 @@ function getLines(filePath) {
   if (!fileLines[filePath]) {
     // if the file is moved, find the real file path
     const realFilePath = _.findKey(mvs, s => s === filePath) || filePath;
+    if (!shell.test('-e', realFilePath)) {
+      utils.fatalError('Can\'t find such file: ' + realFilePath);
+    }
     fileLines[filePath] = shell.cat(realFilePath).split(/\r?\n/);
   }
   return fileLines[filePath];
@@ -85,14 +90,8 @@ function getAst(filePath) {
   return asts[filePath];
 }
 
-function saveAst(filePath, ast) {
-  asts[filePath] = ast;
-  // Update file lines when ast is changed
-  save(filePath, generate(ast).code.split(/\r?\n/));
-}
-
 function fileExists(filePath) {
-  return (!!fileLines[filePath] || !!toSave[filePath]) && !toDel[filePath];
+  return (!!fileLines[filePath] || !!toSave[filePath]) && !toDel[filePath] || shell.test('-e', filePath);
 }
 
 function fileNotExists(filePath) {
@@ -100,7 +99,11 @@ function fileNotExists(filePath) {
 }
 
 function dirExists(dir) {
-  return !!dirs[dir] && !toDel[dir];
+  return !!dirs[dir] && !toDel[dir] || shell.test('-e', dir);
+}
+
+function dirNotExists(dir) {
+  return !dirExists(dir);
 }
 
 function ensurePathDir(fullPath) {
@@ -124,6 +127,12 @@ function save(filePath, lines) {
     put(filePath, lines);
   }
   toSave[filePath] = true;
+}
+
+function saveAst(filePath, ast) {
+  asts[filePath] = ast;
+  // Update file lines when ast is changed
+  save(filePath, generate(ast).code.split(/\r?\n/));
 }
 
 function move(oldPath, newPath) {
@@ -160,6 +169,41 @@ function move(oldPath, newPath) {
   mvs[oldPath] = newPath;
 }
 
+function moveDir(oldPath, newPath) {
+  const updateKeys = (obj) => {
+    _.keys(obj).forEach((key) => {
+      if (_.startsWith(key, oldPath)) {
+        const value = obj[key];
+        delete obj[key];
+        const newKey = newPath + key.slice(oldPath.length);
+        obj[newKey] = value;
+      }
+    });
+  };
+
+  updateKeys(toSave);
+  updateKeys(toDel);
+  updateKeys(fileLines);
+  updateKeys(dirs);
+  updateKeys(asts);
+  updateKeys(mvs);
+
+  const invertedMvs = _.invert(mvs);
+  updateKeys(invertedMvs);
+  mvs = _.invert(invertedMvs);
+
+  mvDirs[oldPath] = newPath;
+}
+
+function ls(folder) {
+  let diskFiles = [];
+  if (shell.test('-e', folder)) {
+    diskFiles = shell.ls(folder).map(f => path.join(folder, f));
+  }
+  const memoFiles = Object.keys(toSave).filter(file => _.startsWith(file, folder) && !toDel[file]);
+  return _.union(diskFiles, memoFiles);
+}
+
 function del(filePath) {
   toDel[filePath] = true;
 }
@@ -171,6 +215,7 @@ function reset() {
   dirs = {};
   asts = {};
   mvs = {};
+  mvDirs = {};
 }
 
 function flush() {
@@ -268,13 +313,16 @@ module.exports = {
   fileExists,
   fileNotExists,
   dirExists,
+  dirNotExists,
   ensurePathDir,
   put,
   mkdir,
+  moveDir,
   save,
   move,
   del,
   reset,
   log,
   flush,
+  ls,
 };

@@ -8,15 +8,13 @@ const _ = require('lodash');
 const utils = require('../core/utils');
 const vio = require('../core/vio');
 
-const TEST_FEATURE_NAME = 'rekit-test-feature';
-const TEST_FEATURE_NAME_2 = 'rekit-test-feature-2';
+const TEST_FEATURE_NAME = 'a-feature';
+const TEST_FEATURE_NAME_2 = 'another-feature';
 
 // For testing, use a fake project root
-utils.setProjectRoot(path.join(__dirname, '..'));
-utils.setSilent(true);
+utils.setProjectRoot(path.join(__dirname, './test-prj'));
 
-// NOTE: don't output errors from apps to test.
-console.error = () => {};
+utils.setSilent(true);
 
 // function mapFile(file) {
 //   return path.join(__dirname, '../../src', file);

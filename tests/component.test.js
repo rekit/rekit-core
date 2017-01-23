@@ -64,7 +64,6 @@ describe('component', function() { // eslint-disable-line
       "    { path: 'route-component', name: 'Route component', component: RouteComponent },",
     ]);
     core.addComponent(TEST_FEATURE_NAME, 'route-component-2', { urlPath: 'my-url' });
-    console.log(vio.getContent(mapFeatureFile('route.js')));
     expectLines(mapFeatureFile('route.js'), [
       "    { path: 'my-url', name: 'Route component 2', component: RouteComponent2 },",
     ]);

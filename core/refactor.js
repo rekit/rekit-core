@@ -739,6 +739,37 @@ function renameStringLiteral(ast, oldName, newName) {
   return changes;
 }
 
+function replaceStringLiteral(ast, oldName, newName, fullMatch = true) {
+  // Summary:
+  //  Replace the string literal in ast
+  // Return:
+  //  All changes needed.
+
+  const changes = [];
+  traverse(ast, {
+    StringLiteral(path) {
+      // Simply replace literal strings
+      if (fullMatch && path.node.value === oldName) {
+        changes.push({
+          start: path.node.start + 1,
+          end: path.node.end - 1,
+          replacement: newName,
+        });
+      } else if (!fullMatch && _.includes(path.node.value, oldName)) {
+        const i = path.node.value.indexOf(oldName);
+        const start = path.node.start + 1 + i;
+        const end = start + oldName.length;
+        changes.push({
+          start,
+          end,
+          replacement: newName,
+        });
+      }
+    },
+  });
+  return changes;
+}
+
 function renameCssClassName(ast, oldName, newName) {
   // Summary:
   //  Rename the css class name in a JSXAttribute
@@ -1423,6 +1454,8 @@ module.exports = {
   renameCssClassName: acceptFilePathForAst(renameCssClassName),
   renameStringLiteral: acceptFilePathForAst(renameStringLiteral),
   renameModuleSource: acceptFilePathForAst(renameModuleSource),
+
+  replaceStringLiteral: acceptFilePathForAst(replaceStringLiteral),
 
   removeImportSpecifier: acceptFilePathForAst(removeImportSpecifier),
   // removeExportSpecifier: acceptFilePathForAst(removeExportSpecifier),
