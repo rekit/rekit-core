@@ -1121,7 +1121,7 @@ function getFeatureStructure(feature) {
         arr.push({
           feature,
           type: 'misc',
-          name: mPath.basename(fullPath).replace('.js', ''),
+          name: mPath.basename(fullPath),
           file: fullPath,
         });
       }
@@ -1340,7 +1340,7 @@ function getDeps(filePath) {
       deps.misc.push({
         feature: utils.getFeatureName(item.file),
         type: 'misc',
-        name: mPath.basename(item.file).replace('.js', ''),
+        name: mPath.basename(item.file),
         file: item.file,
       });
     }
