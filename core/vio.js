@@ -46,7 +46,13 @@ function getLines(filePath) {
 
   if (!fileLines[filePath]) {
     // if the file is moved, find the real file path
-    const realFilePath = _.findKey(mvs, s => s === filePath) || filePath;
+    let realFilePath = _.findKey(mvs, s => s === filePath) || filePath;
+    // if dir is moved, find the original file path
+    Object.keys(mvDirs).forEach((oldDir) => {
+      if (_.startsWith(realFilePath, mvDirs[oldDir])) {
+        realFilePath = realFilePath.replace(mvDirs[oldDir], oldDir);
+      }
+    });
     if (!shell.test('-e', realFilePath)) {
       utils.fatalError('Can\'t find such file: ' + realFilePath);
     }
@@ -231,7 +237,27 @@ function flush() {
     }
   });
 
-  // Delete files first
+  // Move directories
+  console.log('moving dirs: ', mvDirs);
+  Object.keys(mvDirs).forEach((oldDir) => {
+    if (!shell.test('-e', oldDir)) {
+      log('Warning: no dir to move: ', 'yellow', oldDir);
+      res.push({
+        type: 'mv-file-warning',
+        warning: 'no-file',
+        file: oldDir.replace(prjRoot, ''),
+      });
+    } else {
+      shell.mv(oldDir, mvDirs[oldDir]);
+      log('Moved dir: ', 'green', oldDir, mvDirs[oldDir]);
+      res.push({
+        type: 'mv-file',
+        file: oldDir.replace(prjRoot, ''),
+      });
+    }
+  });
+
+  // Delete files
   Object.keys(toDel).forEach((filePath) => {
     if (!shell.test('-e', filePath)) {
       log('Warning: no file to delete: ', 'yellow', filePath);
