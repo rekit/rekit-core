@@ -27,28 +27,23 @@ describe('${_.kebabCase(feature)}/redux/${_.camelCase(action)}', () => {
   it('dispatches success action when ${_.camelCase(action)} succeeds', () => {
     const store = mockStore({});
 
-    const expectedActions = [
-      { type: ${actionTypes.begin} },
-      { type: ${actionTypes.success}, data: {} },
-    ];
-
-    return store.dispatch(${_.camelCase(action)}({ error: false }))
+    return store.dispatch(${_.camelCase(action)}())
       .then(() => {
-        expect(store.getActions()).to.deep.equal(expectedActions);
+        const actions = store.getActions();
+        expect(actions[0]).to.have.property('type', ${actionTypes.begin});
+        expect(actions[1]).to.have.property('type', ${actionTypes.success});
       });
   });
 
   it('dispatches failure action when ${_.camelCase(action)} fails', () => {
     const store = mockStore({});
 
-    const expectedActions = [
-      { type: ${actionTypes.begin} },
-      { type: ${actionTypes.failure}, data: { error: 'some error' } },
-    ];
-
     return store.dispatch(${_.camelCase(action)}({ error: true }))
       .catch(() => {
-        expect(store.getActions()).to.deep.equal(expectedActions);
+        const actions = store.getActions();
+        expect(actions[0]).to.have.property('type', ${actionTypes.begin});
+        expect(actions[1]).to.have.property('type', ${actionTypes.failure});
+        expect(actions[1]).to.have.deep.property('data.error');
       });
   });
 

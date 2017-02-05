@@ -11,10 +11,7 @@ import {
 
 describe('${_.kebabCase(feature)}/redux/${_.camelCase(action)}', () => {
   it('returns correct action by ${_.camelCase(action)}', () => {
-    const expectedAction = {
-      type: ${actionType},
-    };
-    expect(${_.camelCase(action)}()).to.deep.equal(expectedAction);
+    expect(${_.camelCase(action)}()).to.have.property('type', ${actionType});
   });
 
   it('handles action type ${actionType} correctly', () => {
