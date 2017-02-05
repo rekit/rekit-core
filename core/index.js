@@ -35,7 +35,9 @@ function addComponent(feature, name, args) {
     route.add(feature, name, { urlPath, isIndex: !!args.isIndex });
   }
   style.add(feature, name);
-  test.add(feature, name);
+  test.add(feature, name, {
+    templateFile: args.connect ? 'ConnectedComponent.test.js' : 'Component.test.js',
+  });
 }
 
 function removeComponent(feature, name) {
