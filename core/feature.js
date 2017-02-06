@@ -2,10 +2,12 @@
 
 const path = require('path');
 const _ = require('lodash');
+const traverse = require('babel-traverse').default;
 // const shell = require('shelljs');
 const utils = require('./utils');
 const vio = require('./vio');
 const refactor = require('./refactor');
+const constant = require('./constant');
 const entry = require('./entry');
 const template = require('./template');
 const assert = require('./assert');
@@ -100,6 +102,7 @@ module.exports = {
       .filter(f => /^[A-Z]/.test(path.basename(f)))
       .forEach((filePath) => {
         const moduleName = path.basename(filePath).split('.')[0];
+
         if (/\.js$/.test(filePath)) {
           // For components, update the css class name inside
           refactor.updateFile(filePath, ast => [].concat(
@@ -113,6 +116,44 @@ module.exports = {
 
           lines = lines.map(line => line.replace(`.${oldCssClass}`, `.${newCssClass}`));
           vio.save(filePath, lines);
+        }
+      });
+
+    // Rename action constants
+    const reduxFolder = path.join(prjRoot, 'src/features', newName, 'redux');
+    const constantsFile = path.join(reduxFolder, 'constants.js');
+    const constants = [];
+    traverse(vio.getAst(constantsFile), {
+      VariableDeclarator(p) {
+        const name = _.get(p, 'node.id.name');
+        if (name && _.startsWith(name, `${_.upperSnakeCase(oldName)}_`) && name === _.get(p, 'node.init.value')) {
+          constants.push(name);
+        }
+      }
+    });
+
+    constants.forEach((name) => {
+      const oldConstant = name;
+      const newConstant = name.replace(new RegExp(`^${_.upperSnakeCase(oldName)}`), _.upperSnakeCase(newName));
+      constant.rename(newName, oldConstant, newConstant);
+    });
+
+    // Rename actions
+    const reduxTestFolder = path.join(prjRoot, 'tests/features', newName, 'redux');
+    vio.ls(reduxFolder)
+    .concat(vio.ls(reduxTestFolder))
+      // It simply assumes component file name is pascal case
+      .forEach((filePath) => {
+        if (/\.js$/.test(filePath)) {
+          refactor.updateFile(filePath, (ast) => {
+            let changes = [];
+            constants.forEach((name) => {
+              const oldConstant = name;
+              const newConstant = name.replace(new RegExp(`^${_.upperSnakeCase(oldName)}`), _.upperSnakeCase(newName));
+              changes = changes.concat(refactor.renameImportSpecifier(ast, oldConstant, newConstant));
+            });
+            return changes;
+          });
         }
       });
 

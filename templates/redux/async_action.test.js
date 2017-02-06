@@ -43,7 +43,7 @@ describe('${_.kebabCase(feature)}/redux/${_.camelCase(action)}', () => {
         const actions = store.getActions();
         expect(actions[0]).to.have.property('type', ${actionTypes.begin});
         expect(actions[1]).to.have.property('type', ${actionTypes.failure});
-        expect(actions[1]).to.have.deep.property('data.error');
+        expect(actions[1]).to.have.deep.property('data.error').that.exist;
       });
   });
 
@@ -55,7 +55,7 @@ describe('${_.kebabCase(feature)}/redux/${_.camelCase(action)}', () => {
   });
 
   it('handles action type ${actionTypes.begin} correctly', () => {
-    const prevState = { ${_.camelCase(action)}Pending: true };
+    const prevState = { ${_.camelCase(action)}Pending: false };
     const state = reducer(
       prevState,
       { type: ${actionTypes.begin} }

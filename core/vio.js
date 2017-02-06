@@ -38,6 +38,9 @@ function log(label, color, filePath, toFilePath) {
   console.log(colors[color](label + p + (to ? (' to ' + to) : '')));
 }
 
+function mapPathAfterMvDir() {
+
+}
 function getLines(filePath) {
   if (_.isArray(filePath)) {
     // If it's already lines, return the arg.
@@ -202,9 +205,24 @@ function moveDir(oldPath, newPath) {
 }
 
 function ls(folder) {
+  // Summary:
+  //  List files of a folder, should contain both disk files and new created files in memory
+  //  and it should consider mvDir
+
   let diskFiles = [];
-  if (shell.test('-e', folder)) {
-    diskFiles = shell.ls(folder).map(f => path.join(folder, f));
+  let realFolder = folder;
+  if (!shell.test('-e', realFolder)) {
+    // it may be moved
+    _.forOwn(mvDirs, (value, key) => {
+      if (_.startsWith(folder, value)) {
+        realFolder = folder.replace(new RegExp(`^${_.escapeRegExp(value)}`), key);
+        return false;
+      }
+      return true;
+    });
+  }
+  if (shell.test('-e', realFolder)) {
+    diskFiles = shell.ls(realFolder).map(f => path.join(folder, f));
   }
   const memoFiles = Object.keys(toSave).filter(file => _.startsWith(file, folder) && !toDel[file]);
   return _.union(diskFiles, memoFiles);
@@ -238,7 +256,7 @@ function flush() {
   });
 
   // Move directories
-  console.log('moving dirs: ', mvDirs);
+  console.log('mv dirs: ', mvDirs);
   Object.keys(mvDirs).forEach((oldDir) => {
     if (!shell.test('-e', oldDir)) {
       log('Warning: no dir to move: ', 'yellow', oldDir);

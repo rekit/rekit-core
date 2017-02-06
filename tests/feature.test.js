@@ -99,7 +99,7 @@ describe('feature', function() { // eslint-disable-line
 
     // verify test files
     expectLines(mapTestFile2('DefaultPage.test.js'), [
-      `import { DefaultPage } from 'src/features/${TEST_FEATURE_NAME_2}';`,
+      `import { DefaultPage } from 'src/features/${TEST_FEATURE_NAME_2}/DefaultPage';`,
       `describe('${TEST_FEATURE_NAME_2}/DefaultPage', () => {`,
       `      renderedComponent.find('.${TEST_FEATURE_NAME_2}-default-page').node`,
     ]);
