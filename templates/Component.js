@@ -1,6 +1,6 @@
-import React, { PureComponent, PropTypes } from 'react';
+import React, { Component, PropTypes } from 'react';
 
-export default class ${_.pascalCase(component)} extends PureComponent {
+export default class ${_.pascalCase(component)} extends Component {
   static propTypes = {
 
   };

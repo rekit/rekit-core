@@ -256,7 +256,6 @@ function flush() {
   });
 
   // Move directories
-  console.log('mv dirs: ', mvDirs);
   Object.keys(mvDirs).forEach((oldDir) => {
     if (!shell.test('-e', oldDir)) {
       log('Warning: no dir to move: ', 'yellow', oldDir);
