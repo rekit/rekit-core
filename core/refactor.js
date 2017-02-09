@@ -122,7 +122,7 @@ function formatMultilineImport(importCode) {
   return importCode;
 }
 
-function addImportFrom(ast, moduleSource, defaultImport, namedImport) {
+function addImportFrom(ast, moduleSource, defaultImport, namedImport, namespaceImport) {
   // Summary:
   //  Add import from source module. Such as import { xxx } from './x';
   let names = [];

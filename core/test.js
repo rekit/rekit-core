@@ -80,6 +80,11 @@ module.exports = {
     dest.feature = _.kebabCase(dest.feature);
     dest.name = _.camelCase(dest.name);
 
+    const targetPath = utils.mapReduxFile(source.feature, source.name);
+    if (_.get(refactor.getRekitProps(targetPath), 'action.isAsync')) {
+      isAsync = true;
+    }
+
     const srcPath = utils.mapReduxTestFile(source.feature, source.name);
     const destPath = utils.mapReduxTestFile(dest.feature, dest.name);
     vio.move(srcPath, destPath);
@@ -105,8 +110,6 @@ module.exports = {
       refactor.renameStringLiteral(ast, oldDescribe, newDescribe)
     );
 
-    // const oldUpperSnakeName = _.upperSnakeCase(source.name);
-    // const newUpperSnakeName = _.upperSnakeCase(dest.name);
     if (isAsync) {
       const oldActionTypes = utils.getAsyncActionTypes(source.feature, source.name);
       const newActionTypes = utils.getAsyncActionTypes(dest.feature, dest.name);

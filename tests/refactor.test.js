@@ -114,7 +114,7 @@ const otherCode = 1;
       ]);
     });
 
-    it('aaa', () => {
+    it('should add import when empty', () => {
       const code = `
 import {
 } from './';
