@@ -102,15 +102,22 @@ const otherCode = 1;
       refactor.addImportFrom(V_FILE, './N', 'N', ['N1', 'N2']);
       refactor.addImportFrom(V_FILE, './G', '', ['G4', 'G5']);
       refactor.addImportFrom(V_FILE, './', '', ['H1']);
-
+      refactor.addImportFrom(V_FILE, './A', null, null, 'all');
+      refactor.addImportFrom(V_FILE, './X', null, null, 'AllX');
+      refactor.addImportFrom(V_FILE, './Y', 'Y');
+      refactor.addImportFrom(V_FILE, './Z', 'Z');
       expectLines(V_FILE, [
         "import K from './K';",
+        "import Y from './Y';",
+        "import Z from './Z';",
         "import L, { L1 } from './L';",
         "import { M1 } from './M';",
         "import N, { N1, N2 } from './N';",
         "  G4,",
         "  G5,",
         "  H1,",
+        "import A, * as all from './A';",
+        "import * as AllX from './X';",
       ]);
     });
 
@@ -193,6 +200,7 @@ import { C, D, Z as ZZ } from './D';
 import { E } from './E';
 import { E as EE } from './EE';
 import F from './F';
+import * as AllX from './X';
 import {
   G1,
   G2,
@@ -209,12 +217,14 @@ const e = E;
       refactor.renameImportSpecifier(V_FILE, 'Z', 'Z1');
       refactor.renameImportSpecifier(V_FILE, 'E', 'E1');
       refactor.renameImportSpecifier(V_FILE, 'G1', 'GG1');
+      refactor.renameImportSpecifier(V_FILE, 'AllX', 'X');
 
       expectLines(V_FILE, [
         "import A1 from './A';",
         "import { C, D1, Z1 as ZZ } from './D';",
         "import { E1 } from './E';",
         "import { E1 as EE } from './EE';",
+        "import * as X from './X';",
         '  GG1,',
         'const a = A1;',
         'const d = D1;',
@@ -262,10 +272,21 @@ export { default as F } from './F';
     });
   });
 
-  describe('removeNamedImport', () => {
+  describe('removeImportSpecifier', () => {
+    const CODE = `\
+import A from './A';
+import { C, D, Z } from './D';
+import { E } from './E';
+import F from './F';
+import * as AllX from './X';
+import {
+  G1,
+  G2,
+} from './G';
+`;
     it('should remove give import specifier', () => {
-      vio.put(V_FILE, CODE_3);
-      refactor.removeImportSpecifier(V_FILE, ['E', 'D', 'G1']);
+      vio.put(V_FILE, CODE);
+      refactor.removeImportSpecifier(V_FILE, ['E', 'D', 'G1', 'AllX']);
       expectLines(V_FILE, [
         "import { C, Z } from './D';",
         "import {",
@@ -274,6 +295,7 @@ export { default as F } from './F';
       ]);
       expectNoLines(V_FILE, [
         "import { E } from './E';",
+        "AllX",
         "  G1,",
       ]);
     });

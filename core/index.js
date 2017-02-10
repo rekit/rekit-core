@@ -235,6 +235,7 @@ module.exports = Object.assign({
   feature: featureMgr,
   entry,
   route,
+  plugin,
 
   handleCommand,
 }, coreCommands);

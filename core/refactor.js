@@ -74,11 +74,16 @@ function updateSourceCode(code, changes) {
 
   changes.sort((c1, c2) => c2.start - c1.start);
   // Remove same or overlapped changes
-  const newChanges = _.reduce(changes, (prev, curr) => {
-    if (!prev.length || _.last(prev).start > curr.end) {
-      prev.push(curr);
+  const newChanges = _.reduce(changes, (cleanChanges, curr) => {
+    const last = _.last(cleanChanges);
+
+    if (!cleanChanges.length || last.start > curr.end) {
+      cleanChanges.push(curr);
+    } else if (last.start === last.end && last.end === curr.start && curr.start === curr.end) {
+      // insert code at the same position, merge them
+      last.replacement += curr.replacement;
     }
-    return prev;
+    return cleanChanges;
   }, []);
 
   const chars = code.split('');
@@ -151,7 +156,9 @@ function addImportFrom(ast, moduleSource, defaultImport, namedImport, namespaceI
       sourceExisted = true;
       let newNames = [];
       const alreadyHaveDefaultImport = !!_.find(node.specifiers, { type: 'ImportDefaultSpecifier' });
+      const alreadyHaveNamespaceImport = !!_.find(node.specifiers, { type: 'ImportNamespaceSpecifier' });
       if (defaultImport && !alreadyHaveDefaultImport) newNames.push(defaultImport);
+      if (namespaceImport && !alreadyHaveNamespaceImport) newNames.push(namespaceImport);
 
       newNames = newNames.concat(names);
 
@@ -165,6 +172,8 @@ function addImportFrom(ast, moduleSource, defaultImport, namedImport, namespaceI
           const imported = local; // TODO: doesn't support local alias.
           if (n === defaultImport) {
             newSpecifiers.unshift(t.importDefaultSpecifier(local));
+          } else if (n === namespaceImport) {
+            newSpecifiers.push(t.importNamespaceSpecifier(local));
           } else {
             newSpecifiers.push(t.importSpecifier(local, imported));
           }
@@ -190,6 +199,9 @@ function addImportFrom(ast, moduleSource, defaultImport, namedImport, namespaceI
     const specifiers = [];
     if (defaultImport) {
       specifiers.push(t.importDefaultSpecifier(t.identifier(defaultImport)));
+    }
+    if (namespaceImport) {
+      specifiers.push(t.importNamespaceSpecifier(t.identifier(namespaceImport)));
     }
 
     names.forEach((n) => {
@@ -640,7 +652,10 @@ function renameImportSpecifier(ast, oldName, newName, moduleSource) {
       if (moduleSource && _.get(node, 'source.value') !== moduleSource) return;
       // console.log(_.get(node, 'source.value'), moduleSource);
       node.specifiers.forEach((specifier) => {
-        if (specifier.type === 'ImportDefaultSpecifier' && _.get(specifier, 'local.name') === oldName) {
+        if (
+          (specifier.type === 'ImportDefaultSpecifier' || specifier.type === 'ImportNamespaceSpecifier')
+          && _.get(specifier, 'local.name') === oldName
+        ) {
           defNode = specifier.local;
         }
 
@@ -796,6 +811,8 @@ function renameCssClassName(ast, oldName, newName) {
 }
 
 function removeImportSpecifier(ast, name) {
+  // Remove import specifier by local name
+
   let names = name;
   if (typeof name === 'string') {
     names = [name];
