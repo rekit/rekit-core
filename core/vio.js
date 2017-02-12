@@ -56,6 +56,7 @@ function getLines(filePath) {
         realFilePath = realFilePath.replace(mvDirs[oldDir], oldDir);
       }
     });
+// console.log('real file path: ', Object.keys(fileLines), realFilePath);
     if (!shell.test('-e', realFilePath)) {
       utils.fatalError('Can\'t find such file: ' + realFilePath);
     }

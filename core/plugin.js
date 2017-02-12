@@ -70,7 +70,7 @@ function loadPlugins() {
       )
     )); // rekit plugin should be prefixed with 'rekit-plugin'.
   }
-console.log('plugins: ', plugins);
+
   // Create plugin instances
   plugins = plugins.map((pluginRoot) => {
     try {

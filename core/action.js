@@ -163,10 +163,10 @@ function remove(feature, name, actionType) {
   assert.featureExist(feature);
 
   const targetPath = utils.mapReduxFile(feature, name);
-  if (_.get(refactor.getRekitProps(targetPath), 'action.isAsync')) {
-    removeAsync(feature, name);
-    return;
-  }
+  // if (_.get(refactor.getRekitProps(targetPath), 'action.isAsync')) {
+  //   removeAsync(feature, name);
+  //   return;
+  // }
 
   feature = _.kebabCase(feature);
   name = _.camelCase(name);
@@ -186,11 +186,11 @@ function move(source, target) {
   assert.notEmpty(target.name, 'action name');
   assert.featureExist(target.feature);
 
-  const targetPath = utils.mapReduxFile(source.feature, source.name);
-  if (_.get(refactor.getRekitProps(targetPath), 'action.isAsync')) {
-    moveAsync(source, target);
-    return;
-  }
+  // const targetPath = utils.mapReduxFile(source.feature, source.name);
+  // if (_.get(refactor.getRekitProps(targetPath), 'action.isAsync')) {
+  //   moveAsync(source, target);
+  //   return;
+  // }
 
   source.feature = _.kebabCase(source.feature);
   source.name = _.camelCase(source.name);

@@ -35,6 +35,7 @@ describe('action', function() { // eslint-disable-line
 
   it('add sync action', () => {
     core.addAction(TEST_FEATURE_NAME, 'test-action');
+
     const actionType = core.utils.getActionType(TEST_FEATURE_NAME, 'test-action');
     expectLines(mapFeatureFile('redux/constants.js'), [
       `export const ${actionType} = '${actionType}';`,
@@ -53,7 +54,9 @@ describe('action', function() { // eslint-disable-line
   it('rename sync action', () => {
     const source = { feature: TEST_FEATURE_NAME, name: 'test-action' };
     const target = { feature: TEST_FEATURE_NAME, name: 'renamed-action' };
+
     core.moveAction(source, target);
+
     const oldActionType = core.utils.getActionType(TEST_FEATURE_NAME, 'test-action');
     const newActionType = core.utils.getActionType(TEST_FEATURE_NAME, 'renamed-action');
     expectNoLines(mapFeatureFile('redux/constants.js'), [

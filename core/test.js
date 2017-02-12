@@ -74,16 +74,12 @@ module.exports = {
     vio.del(utils.mapReduxTestFile(feature, name));
   },
 
-  moveAction(source, dest, isAsync) {
+  moveAction(source, dest, args) {
+    args = args || {};
     source.feature = _.kebabCase(source.feature);
     source.name = _.camelCase(source.name);
     dest.feature = _.kebabCase(dest.feature);
     dest.name = _.camelCase(dest.name);
-
-    const targetPath = utils.mapReduxFile(source.feature, source.name);
-    if (_.get(refactor.getRekitProps(targetPath), 'action.isAsync')) {
-      isAsync = true;
-    }
 
     const srcPath = utils.mapReduxTestFile(source.feature, source.name);
     const destPath = utils.mapReduxTestFile(dest.feature, dest.name);
@@ -110,7 +106,7 @@ module.exports = {
       refactor.renameStringLiteral(ast, oldDescribe, newDescribe)
     );
 
-    if (isAsync) {
+    if (args.isAsync) {
       const oldActionTypes = utils.getAsyncActionTypes(source.feature, source.name);
       const newActionTypes = utils.getAsyncActionTypes(dest.feature, dest.name);
 
