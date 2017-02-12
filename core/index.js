@@ -241,4 +241,4 @@ module.exports = Object.assign({
 }, coreCommands);
 
 // NOTE: plugin.loadPlutins should be executed after module.exports to avoid circular dependency
-plugin.loadPlugins();
+// plugin.loadPlugins();

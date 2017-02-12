@@ -7,13 +7,13 @@ const path = require('path');
 const _ = require('lodash');
 const shell = require('shelljs');
 const utils = require('./utils');
-const template = require('./template');
+// const template = require('./template');
 
 let plugins = null;
-
 function getPlugins() {
   if (!plugins) {
-    utils.fatal('Plugins have not been loaded.');
+    loadPlugins(); // eslint-disable-line
+    // utils.fatal('Plugins have not been loaded.');
   }
   return plugins;
 }
@@ -48,7 +48,7 @@ function loadPlugins() {
 
   const prjPkgJson = require(path.join(prjRoot, 'package.json')); // eslint-disable-line
 
-  // Find local plugins
+  // Find local plugins, all local plugins are loaded
   const localPluginsFolder = path.join(prjRoot, 'tools/plugins');
   plugins = [];
   if (shell.test('-e', localPluginsFolder)) {
@@ -57,13 +57,21 @@ function loadPlugins() {
       .map(d => path.join(prjRoot, 'tools/plugins', d)));
   }
 
-  // Find installed plugins
+  // Find installed plugins, only those defined in package.rekit.plugins are loaded.
   if (prjPkgJson.rekit && prjPkgJson.rekit.plugins) {
-    plugins = plugins.concat(prjPkgJson.rekit.plugins.map(p => path.join(prjRoot, 'node_modules',
-      /^rekit-plugin-/.test(p) ? p : ('rekit-plugin-' + p)))); // rekit plugin should be prefix 'rekit-plugin'.
+    plugins = plugins.concat(prjPkgJson.rekit.plugins.map(p => (
+      path.isAbsolute(p)
+      ? p
+      : path.join(
+          prjRoot,
+          'node_modules',
+          /^rekit-plugin-/.test(p) ? p : ('rekit-plugin-' + p)
+        )
+      )
+    )); // rekit plugin should be prefixed with 'rekit-plugin'.
   }
-
-  // Map to plugin instances
+console.log('plugins: ', plugins);
+  // Create plugin instances
   plugins = plugins.map((pluginRoot) => {
     try {
       const config = require(path.join(pluginRoot, 'config')); // eslint-disable-line
@@ -77,7 +85,7 @@ function loadPlugins() {
         config.accept.forEach(
           (name) => {
             name = _.camelCase(name);
-            const commands = require(path.join(pluginRoot, name)); // eslint-disable-line
+            const commands = require(path.join(pluginRoot, name));
             item.commands[name] = {};
             Object.keys(commands).forEach((key) => {
               item.commands[name][key] = injectExtensionPoints(commands[key], key, name);
@@ -92,7 +100,7 @@ function loadPlugins() {
 
       return item;
     } catch (e) {
-      utils.fatalError(`Failed to load plugin: ${path.basename(pluginRoot)}`);
+      utils.fatalError(`Failed to load plugin: ${path.basename(pluginRoot)}, ${e}`);
     }
 
     return null;
@@ -111,24 +119,24 @@ function getCommand(command, elementName) {
   return null;
 }
 
-function add(name) {
-  // Summary:
-  //  Add a local plugin.
-  name = _.kebabCase(name);
+// function add(name) {
+//   // Summary:
+//   //  Add a local plugin.
+//   name = _.kebabCase(name);
 
-  const pluginDir = path.join(utils.getProjectRoot(), 'tools/plugins', name);
-  shell.mkdir(pluginDir);
-  const configPath = path.join(pluginDir, name, 'config.js');
-  template.generate(configPath, {
-    templateFile: 'plugin/config.js',
-    context: {
-      pluginName: name,
-    },
-  });
-}
+//   const pluginDir = path.join(utils.getProjectRoot(), 'tools/plugins', name);
+//   shell.mkdir(pluginDir);
+//   const configPath = path.join(pluginDir, name, 'config.js');
+//   template.generate(configPath, {
+//     templateFile: 'plugin/config.js',
+//     context: {
+//       pluginName: name,
+//     },
+//   });
+// }
 
 module.exports = {
-  add,
+  // add,
   getCommand,
   loadPlugins,
   getPlugins,
