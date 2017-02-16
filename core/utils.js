@@ -38,7 +38,7 @@ function fatalError(msg) {
 let prjRoot;
 
 function setProjectRoot(root) {
-  prjRoot = root;
+  prjRoot = /\/$/.test(root) ? root : (root + '/');
 }
 
 function getProjectRoot() {
@@ -56,7 +56,20 @@ function getProjectRoot() {
       cwd = path.join(cwd, '..');
     }
   }
-  return prjRoot;
+  return /\/$/.test(prjRoot) ? prjRoot : (prjRoot + '/');
+}
+
+function getRelativePath(fullPath) {
+  // Get rel path relative to project root.
+  const _prjRoot = getProjectRoot();
+  const regExp = new RegExp(`^${_.escapeRegExp(_prjRoot)}`, 'i');
+  return fullPath.replace(regExp, '');
+}
+
+function getFullPath(relPath) {
+  const _prjRoot = getProjectRoot();
+  const regExp = new RegExp(`^${_.escapeRegExp(_prjRoot)}`, 'i');
+  return regExp.test(relPath) ? relPath : path.join(_prjRoot, relPath);
 }
 
 function getActionType(feature, action) {
@@ -130,6 +143,8 @@ module.exports = {
   getCssExt,
   setProjectRoot,
   getProjectRoot,
+  getRelativePath,
+  getFullPath,
   getActionType,
   getAsyncActionTypes,
   mapSrcFile,
