@@ -136,7 +136,13 @@ function resolveModulePath(relativeToFile, modulePath) {
 }
 
 function getFeatureName(filePath) {
-  return filePath.replace(getProjectRoot() + '/', '').split('/')[2];
+  const relPath = getRelativePath(filePath);
+  let name = null;
+
+  if (_.startsWith(relPath, 'src/features')) {
+    name = relPath.split('/')[2];
+  }
+  return name;
 }
 
 module.exports = {

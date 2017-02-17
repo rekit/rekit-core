@@ -1009,6 +1009,10 @@ function getRekitProps(file) {
     }
   };
 
+  if (props.component) props.type = 'component';
+  else if (props.action) props.type = 'action';
+  else props.type = 'misc';
+
   propsCache[file] = {
     content: vio.getContent(file),
     props,
@@ -1234,83 +1238,83 @@ function getDeps(filePath) {
       const depModule = node.source.value;
       const resolvedPath = utils.resolveModulePath(filePath, depModule);
 
-      if (utils.isLocalModule(depModule)) {
+      // Only show deps of local modules
+      if (!utils.isLocalModule(depModule)) return;
+
+      if (isFeatureIndex(resolvedPath)) {
         // Import from feature index
+        let indexFile = resolvedPath;
+        if (!/index$/.test(indexFile)) {
+          indexFile += '/index';
+        }
+        indexFile += '.js';
 
-        if (isFeatureIndex(resolvedPath)) {
-          let indexFile = resolvedPath;
-          if (!/index$/.test(indexFile)) {
-            indexFile += '/index';
+        const indexEntry = getEntryData(indexFile);
+        node.specifiers.forEach((specifier) => {
+          if (specifier.type === 'ImportNamespaceSpecifier') {
+            namespaceIndex[specifier.local.name] = indexEntry;
+            return;
           }
-          indexFile += '.js';
 
-          const indexEntry = getEntryData(indexFile);
-          node.specifiers.forEach((specifier) => {
-            if (specifier.type === 'ImportNamespaceSpecifier') {
-              namespaceIndex[specifier.local.name] = indexEntry;
-              return;
-            }
+          const importedName = specifier.imported.name;
+          if (!indexEntry.exported[importedName]) {
+            utils.warn(`Warning: can't find '${importedName}' from '${indexFile}'`);
+            return;
+          }
 
-            const importedName = specifier.imported.name;
-            if (!indexEntry.exported[importedName]) {
-              utils.warn(`Warning: can't find '${importedName}' from '${indexFile}'`);
-              return;
-            }
-
-            depFiles.push({
-              name: importedName,
-              file: indexEntry.exported[importedName],
-            });
+          depFiles.push({
+            name: importedName,
+            file: indexEntry.exported[importedName],
           });
-          return;
-        }
-
-        const fullPath = resolvedPath + '.js';
-        if (!shell.test('-e', fullPath)) return;  // only depends on js modules, no json or other support
-
-        // Import from actions
-        if (isActionEntry(fullPath)) {
-          const actionEntry = getEntryData(fullPath);// getActionEntry(utils.getFeatureName(fullPath));
-
-          node.specifiers.forEach((specifier) => {
-            if (specifier.type === 'ImportNamespaceSpecifier') {
-              namespaceActions[specifier.local.name] = actionEntry;
-              return;
-            }
-
-            const importedName = specifier.imported.name;
-            if (!actionEntry.exported[importedName]) {
-              utils.warn(`Warning: can't find '${importedName}' from '${fullPath}'`);
-              return;
-            }
-
-            pushDep('actions', {
-              feature: actionEntry.feature,
-              type: 'action',
-              name: importedName,
-              file: actionEntry.exported[importedName],
-            });
-          });
-          return;
-        }
-
-        if (isConstantEntry(fullPath)) {
-          node.specifiers.forEach((specifier) => {
-            deps.constants.push({
-              name: specifier.imported.name,
-              feature: utils.getFeatureName(fullPath),
-              file: fullPath,
-              type: 'constant',
-            });
-          });
-          return;
-        }
-
-        depFiles.push({
-          name: mPath.basename(resolvedPath),
-          file: resolvedPath + '.js',
         });
+        return;
       }
+
+      const fullPath = resolvedPath + '.js';
+      if (!shell.test('-e', fullPath)) return;  // only depends on js modules, no json or other support
+
+      // Import from actions
+      if (isActionEntry(fullPath)) {
+        const actionEntry = getEntryData(fullPath);// getActionEntry(utils.getFeatureName(fullPath));
+
+        node.specifiers.forEach((specifier) => {
+          if (specifier.type === 'ImportNamespaceSpecifier') {
+            namespaceActions[specifier.local.name] = actionEntry;
+            return;
+          }
+
+          const importedName = specifier.imported.name;
+          if (!actionEntry.exported[importedName]) {
+            utils.warn(`Warning: can't find '${importedName}' from '${fullPath}'`);
+            return;
+          }
+
+          pushDep('actions', {
+            feature: actionEntry.feature,
+            type: 'action',
+            name: importedName,
+            file: actionEntry.exported[importedName],
+          });
+        });
+        return;
+      }
+
+      if (isConstantEntry(fullPath)) {
+        node.specifiers.forEach((specifier) => {
+          deps.constants.push({
+            name: specifier.imported.name,
+            feature: utils.getFeatureName(fullPath),
+            file: fullPath,
+            type: 'constant',
+          });
+        });
+        return;
+      }
+
+      depFiles.push({
+        name: mPath.basename(resolvedPath),
+        file: resolvedPath + '.js',
+      });
     },
 
     MemberExpression(path) {
@@ -1319,7 +1323,7 @@ function getDeps(filePath) {
       const objName = _.get(node, 'object.property.name') || _.get(node, 'object.name'); // this.props.'actions'.fetchNavTree
       const propName = _.get(node, 'property.name'); // this.props.actions.'fetchNavTree'
       if (!objName || !propName) return;
-      if (namespaceActions[objName]) {
+      if (_.has(namespaceActions, objName)) {
         const actionEntry = namespaceActions[objName];
         if (!actionEntry.exported[propName]) return;
 
@@ -1329,7 +1333,7 @@ function getDeps(filePath) {
           name: propName,
           file: actionEntry.exported[propName],
         });
-      } else if (namespaceIndex[objName]) {
+      } else if (_.has(namespaceIndex, objName)) {
         const indexEntry = namespaceIndex[objName];
         if (!indexEntry.exported[propName]) return;
         depFiles.push({
@@ -1355,7 +1359,7 @@ function getDeps(filePath) {
       }
     } else {
       deps.misc.push({
-        feature: utils.getFeatureName(item.file),
+        feature: utils.getFeatureName(item.file) || null,
         type: 'misc',
         name: mPath.basename(item.file),
         file: item.file,
@@ -1368,6 +1372,46 @@ function getDeps(filePath) {
     deps,
   };
   return deps;
+}
+
+function getSrcFiles(dir) {
+  // Summary
+  //  Get files under src exclues features folder
+  const prjRoot = utils.getProjectRoot();
+  if (!dir) dir = mPath.join(prjRoot, 'src');
+
+  return _.toArray(shell.ls(dir))
+    .filter(file => mPath.join(prjRoot, 'src/features') !== mPath.join(dir, file)) // exclude features folder
+    .map((file) => {
+      file = mPath.join(dir, file);
+      if (shell.test('-d', file)) {
+        return {
+          name: mPath.basename(file),
+          type: 'misc',
+          feature: null,
+          file,
+          children: getSrcFiles(file),
+        };
+      }
+      let rekitProps = {};
+      let deps = null;
+      if (/\.js$/.test(file)) {
+        rekitProps = getRekitProps(file);
+        deps = getDeps(file);
+      }
+      return {
+        name: mPath.basename(file),
+        type: rekitProps.component ? 'component' : 'misc',
+        feature: null,
+        deps,
+        file,
+      };
+    })
+    .sort((a, b) => {
+      if (a.children && !b.children) return -1;
+      else if (!a.children && b.children) return 1;
+      return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
+    });
 }
 
 // function renameExportFrom(file, oldName, newName, oldModulePath, newModulePath) {
@@ -1491,6 +1535,7 @@ module.exports = {
   getFeatures,
   getFeatureStructure,
   getDeps,
+  getSrcFiles,
 
   nearestCharBefore,
   nearestCharAfter,
