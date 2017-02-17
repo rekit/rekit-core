@@ -1233,6 +1233,18 @@ function getDeps(filePath) {
   const depFiles = [];
 
   traverse(ast, {
+    ExportNamedDeclaration(path) {
+      const depModule = _.get(path, 'node.source.value');
+      if (!depModule) return;
+      const resolvedPath = utils.resolveModulePath(filePath, depModule);
+      if (!utils.isLocalModule(depModule)) return;
+      const fullPath = resolvedPath + '.js';
+      if (!shell.test('-e', fullPath)) return;  // only depends on js modules, no json or other support
+      depFiles.push({
+        name: mPath.basename(resolvedPath),
+        file: resolvedPath + '.js',
+      });
+    },
     ImportDeclaration(path) {
       const node = path.node;
       const depModule = node.source.value;
