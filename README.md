@@ -6,3 +6,9 @@ The core functions of Rekit.
 [![Dependency Status](https://david-dm.org/supnate/rekit-core.svg?style=flat-square)](https://david-dm.org/supnate/rekit-core)
 [![Coverage Status](https://img.shields.io/codecov/c/github/supnate/rekit-core/master.svg)](https://codecov.io/github/supnate/rekit-core)
 [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
+
+# Prerequisites
+node 6+
+
+# LICENSE
+MIT
