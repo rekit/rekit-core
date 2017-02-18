@@ -754,11 +754,13 @@ function renameStringLiteral(ast, oldName, newName) {
   return changes;
 }
 
-function replaceStringLiteral(ast, oldName, newName, fullMatch = true) {
+function replaceStringLiteral(ast, oldName, newName, fullMatch) {
   // Summary:
   //  Replace the string literal in ast
   // Return:
   //  All changes needed.
+
+  if (typeof fullMatch === 'undefined') fullMatch = true;
 
   const changes = [];
   traverse(ast, {
