@@ -1052,6 +1052,8 @@ function getFeatureRoutes(feature) {
   const ast = vio.getAst(targetPath);
   const arr = [];
   let rootPath = '';
+  let indexRoute = null;
+
   traverse(ast, {
     ObjectExpression(path) {
       const node = path.node;
@@ -1068,11 +1070,18 @@ function getFeatureRoutes(feature) {
         arr.push({
           path: _.get(obj.path, 'value.value'), // only string literal supported
           component: _.get(obj.component, 'value.name'), // only identifier supported
+          isIndex: !!obj.isIndex && _.get(obj.isIndex, 'value.value'), // suppose to be boolean
           node: {
             start: node.start,
             end: node.end,
           },
         });
+      }
+      if (obj.isIndex && obj.component && !indexRoute) {
+        // only find the first index route
+        indexRoute = {
+          component: _.get(obj.component, 'value.name'),
+        };
       }
       if (obj.path && obj.childRoutes && !rootPath) {
         rootPath = _.get(obj.path, 'value.value');
@@ -1083,11 +1092,16 @@ function getFeatureRoutes(feature) {
   const prjRootPath = getRootRoutePath();
   if (rootPath === '$none') rootPath = prjRootPath;
   else if (!/^\//.test(rootPath)) rootPath = prjRootPath + '/' + rootPath;
+  rootPath = rootPath.replace(/\/+/, '/');
   arr.forEach((item) => {
     if (!/^\//.test(item.path)) {
       item.path = (rootPath + '/' + item.path).replace(/\/+/, '/');
     }
   });
+  if (indexRoute) {
+    indexRoute.path = rootPath;
+    arr.unshift(indexRoute);
+  }
   return arr;
 }
 
