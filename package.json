@@ -36,24 +36,24 @@
     "instrument": true
   },
   "dependencies": {
-    "babel-generator": "^6.19.0",
-    "babel-traverse": "^6.19.0",
-    "babel-types": "^6.21.0",
-    "babylon": "^6.14.1",
+    "babel-generator": "^6.23.0",
+    "babel-traverse": "^6.23.1",
+    "babel-types": "^6.23.0",
+    "babylon": "^6.15.0",
     "colors": "^1.1.2",
-    "diff": "^3.1.0",
-    "eslint-config-airbnb-base": "^10.0.1",
+    "diff": "^3.2.0",
+    "eslint-config-airbnb-base": "^11.1.0",
     "eslint-plugin-import": "^2.2.0",
-    "lodash": "^4.15.0",
+    "lodash": "^4.17.4",
     "npm-run": "^4.1.0",
-    "shelljs": "^0.7.4",
+    "shelljs": "^0.7.6",
     "trash": "^4.0.0"
   },
   "devDependencies": {
     "chai": "^3.5.0",
     "codecov": "^1.0.1",
-    "eslint": "^3.5.0",
+    "eslint": "^3.15.0",
     "mocha": "^3.0.2",
-    "nyc": "^8.1.0"
+    "nyc": "^10.1.2"
   }
 }
