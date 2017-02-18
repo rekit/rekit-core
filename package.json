@@ -20,7 +20,8 @@
     "url": "https://github.com/supnate/rekit-core/issues"
   },
   "scripts": {
-    "test": "node ./tools/run_test.js"
+    "test": "node ./tools/run_test.js",
+    "codecov": "codecov"
   },
   "nyc": {
     "include": [
