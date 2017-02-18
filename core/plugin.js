@@ -100,7 +100,12 @@ function loadPlugins() {
 
       return item;
     } catch (e) {
-      utils.fatalError(`Failed to load plugin: ${path.basename(pluginRoot)}, ${e}`);
+      const pluginName = path.basename(pluginRoot).replace(/^rekit-plugin-/, '');
+      let err = '';
+      if (/node_modules/.test(pluginRoot) && shell.test('-e', path.join(prjRoot, 'tools/plugins', pluginName))) {
+        err = `\nTip: plugin ${pluginName} seems to be a local plugin, it shouldn't be registered in rekit section of package.json.`;
+      }
+      utils.fatalError(`Failed to load plugin: ${pluginName}, ${e}.${err}`);
     }
 
     return null;
