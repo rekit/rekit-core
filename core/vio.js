@@ -319,12 +319,12 @@ function flush() {
     if (shell.test('-e', filePath)) {
       const oldContent = shell.cat(filePath).split(/\r?\n/).join('\n');
       if (oldContent === newContent) {
-        log('Warning: nothing is changed for: ', 'yellow', filePath);
-        res.push({
-          type: 'update-file-warning',
-          warning: 'no-change',
-          file: filePath.replace(prjRoot, ''),
-        });
+        // log('Warning: nothing is changed for: ', 'yellow', filePath);
+        // res.push({
+        //   type: 'update-file-warning',
+        //   warning: 'no-change',
+        //   file: filePath.replace(prjRoot, ''),
+        // });
         return;
       }
       log('Updated: ', 'cyan', filePath);
