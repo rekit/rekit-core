@@ -9,13 +9,17 @@ const colors = require('colors/safe');
 
 let silent = false;
 
-// NOTE: I just assume helpers is always loaded before lodash is used...
+// NOTE: utils is just assumed to always be loaded before lodash is used...
 _.pascalCase = _.flow(_.camelCase, _.upperFirst);
 _.upperSnakeCase = _.flow(_.snakeCase, _.toUpper);
 
-
 function setSilent(isSilent) {
   silent = isSilent;
+}
+
+function joinPath() {
+  // A consistent and normalized version of path.join cross platforms
+  return path.normalize(path.join.apply(path, arguments)).replace(/\\/g, '/');
 }
 
 function log(msg) {
@@ -39,6 +43,7 @@ let prjRoot;
 
 function setProjectRoot(root) {
   prjRoot = /\/$/.test(root) ? root : (root + '/');
+  prjRoot = joinPath(prjRoot);
 }
 
 function getProjectRoot() {
@@ -47,16 +52,16 @@ function getProjectRoot() {
     let lastDir = null;
     // Traverse above until find the package.json.
     while (cwd && lastDir !== cwd) {
-      const pkgPath = path.join(cwd, 'package.json');
+      const pkgPath = joinPath(cwd, 'package.json');
       if (shell.test('-e', pkgPath) && require(pkgPath).rekit) { // eslint-disable-line
         prjRoot = cwd;
         break;
       }
       lastDir = cwd;
-      cwd = path.join(cwd, '..');
+      cwd = joinPath(cwd, '..');
     }
   }
-  return /\/$/.test(prjRoot) ? prjRoot : (prjRoot + '/');
+  return joinPath(/\/$/.test(prjRoot) ? prjRoot : (prjRoot + '/'));
 }
 
 function getRelativePath(fullPath) {
@@ -69,7 +74,7 @@ function getRelativePath(fullPath) {
 function getFullPath(relPath) {
   const _prjRoot = getProjectRoot();
   const regExp = new RegExp(`^${_.escapeRegExp(_prjRoot)}`, 'i');
-  return regExp.test(relPath) ? relPath : path.join(_prjRoot, relPath);
+  return regExp.test(relPath) ? relPath : joinPath(_prjRoot, relPath);
 }
 
 function getActionType(feature, action) {
@@ -87,15 +92,15 @@ function getAsyncActionTypes(feature, action) {
 }
 
 function mapSrcFile(fileName) {
-  return path.join(getProjectRoot(), 'src', fileName);
+  return joinPath(getProjectRoot(), 'src', fileName);
 }
 
 function mapFeatureFile(feature, fileName) {
-  return path.join(getProjectRoot(), 'src/features', _.kebabCase(feature), fileName);
+  return joinPath(getProjectRoot(), 'src/features', _.kebabCase(feature), fileName);
 }
 
 function mapTestFile(feature, fileName) {
-  return path.join(getProjectRoot(), 'tests/features', _.kebabCase(feature), fileName);
+  return joinPath(getProjectRoot(), 'tests/features', _.kebabCase(feature), fileName);
 }
 
 function mapComponent(feature, name) {
@@ -116,11 +121,11 @@ function mapComponentTestFile(feature, name) {
 }
 
 function getFeatures() {
-  return _.toArray(shell.ls(path.join(getProjectRoot(), 'src/features')));
+  return _.toArray(shell.ls(joinPath(getProjectRoot(), 'src/features')));
 }
 
 function getCssExt() {
-  const pkgPath = path.join(getProjectRoot(), 'package.json');
+  const pkgPath = joinPath(getProjectRoot(), 'package.json');
   const pkg = require(pkgPath); // eslint-disable-line
   return (pkg && pkg.rekit && pkg.rekit.css === 'sass') ? 'scss' : 'less';
 }
@@ -132,7 +137,7 @@ function isLocalModule(modulePath) {
 
 function resolveModulePath(relativeToFile, modulePath) {
   // TODO: handle alias module path
-  return path.resolve(path.dirname(relativeToFile), modulePath);
+  return joinPath(path.dirname(relativeToFile), modulePath);
 }
 
 function getFeatureName(filePath) {
@@ -160,6 +165,7 @@ module.exports = {
   mapFeatureFile,
   mapTestFile,
   mapComponentTestFile,
+  joinPath,
   getFeatures,
   fatalError,
   setSilent,

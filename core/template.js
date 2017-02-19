@@ -11,7 +11,7 @@ _.pascalCase = _.flow(_.camelCase, _.upperFirst);
 _.upperSnakeCase = _.flow(_.snakeCase, _.toUpper);
 
 function readTemplate(file) {
-  file = path.isAbsolute(file) ? file : path.join(__dirname, '../templates', file);
+  file = path.isAbsolute(file) ? file : utils.joinPath(__dirname, '../templates', file);
   if (!shell.test('-e', file) && !vio.fileExists(file)) {
     utils.fatalError('Template file does\'t exist: ', file);
   }

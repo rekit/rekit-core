@@ -26,7 +26,7 @@ function isStringMatch(str, match) {
 }
 
 function isSameModuleSource(s1, s2, context) {
-  
+
 }
 
 function objExpToObj(objExp) {
@@ -1023,7 +1023,7 @@ function getRekitProps(file) {
 }
 
 function getFeatures() {
-  return _.toArray(shell.ls(mPath.join(utils.getProjectRoot(), 'src/features')));
+  return _.toArray(shell.ls(utils.joinPath(utils.getProjectRoot(), 'src/features')));
 }
 
 function getRootRoutePath() {
@@ -1108,7 +1108,7 @@ function getFeatureRoutes(feature) {
 }
 
 function getFeatureStructure(feature) {
-  const dir = mPath.join(utils.getProjectRoot(), 'src/features', feature);
+  const dir = utils.joinPath(utils.getProjectRoot(), 'src/features', feature);
   const noneMisc = {};
 
   const components = shell.ls(dir + '/*.js').map((file) => {
@@ -1144,7 +1144,7 @@ function getFeatureStructure(feature) {
   function getMiscFiles(root) {
     const arr = [];
     shell.ls(root).forEach((file) => {
-      const fullPath = mPath.join(root, file);
+      const fullPath = utils.joinPath(root, file);
       if (shell.test('-d', fullPath)) {
         // is directory
         arr.push({
@@ -1406,12 +1406,12 @@ function getSrcFiles(dir) {
   // Summary
   //  Get files under src exclues features folder
   const prjRoot = utils.getProjectRoot();
-  if (!dir) dir = mPath.join(prjRoot, 'src');
+  if (!dir) dir = utils.joinPath(prjRoot, 'src');
 
   return _.toArray(shell.ls(dir))
-    .filter(file => mPath.join(prjRoot, 'src/features') !== mPath.join(dir, file)) // exclude features folder
+    .filter(file => utils.joinPath(prjRoot, 'src/features') !== utils.joinPath(dir, file)) // exclude features folder
     .map((file) => {
-      file = mPath.join(dir, file);
+      file = utils.joinPath(dir, file);
       if (shell.test('-d', file)) {
         return {
           name: mPath.basename(file),

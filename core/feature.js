@@ -17,16 +17,16 @@ module.exports = {
     assert.notEmpty(name);
     name = _.kebabCase(name);
     assert.featureNotExist(name);
-    const targetDir = path.join(utils.getProjectRoot(), `src/features/${name}`);
+    const targetDir = utils.joinPath(utils.getProjectRoot(), `src/features/${name}`);
 
     // if (vio.dirExists(targetDir)) {
     //   utils.fatalError(`Feature already exists: ${name}`);
     // }
 
     vio.mkdir(targetDir);
-    vio.mkdir(path.join(targetDir, 'redux'));
-    vio.mkdir(path.join(utils.getProjectRoot(), 'tests/features', name));
-    vio.mkdir(path.join(utils.getProjectRoot(), 'tests/features', name, 'redux'));
+    vio.mkdir(utils.joinPath(targetDir, 'redux'));
+    vio.mkdir(utils.joinPath(utils.getProjectRoot(), 'tests/features', name));
+    vio.mkdir(utils.joinPath(utils.getProjectRoot(), 'tests/features', name, 'redux'));
 
     // Create files from template
     [
@@ -38,22 +38,22 @@ module.exports = {
       'redux/constants.js',
       'redux/initialState.js',
     ].forEach((fileName) => {
-      template.generate(path.join(targetDir, fileName), {
+      template.generate(utils.joinPath(targetDir, fileName), {
         templateFile: fileName,
         context: { feature: name }
       });
     });
 
     // Create wrapper reducer for the feature
-    template.generate(path.join(utils.getProjectRoot(), `tests/features/${name}/redux/reducer.test.js`), {
+    template.generate(utils.joinPath(utils.getProjectRoot(), `tests/features/${name}/redux/reducer.test.js`), {
       templateFile: 'reducer.test.js',
       context: { feature: name }
     });
   },
 
   remove(name) {
-    vio.del(path.join(utils.getProjectRoot(), 'src/features', _.kebabCase(name)));
-    vio.del(path.join(utils.getProjectRoot(), 'tests/features', _.kebabCase(name)));
+    vio.del(utils.joinPath(utils.getProjectRoot(), 'src/features', _.kebabCase(name)));
+    vio.del(utils.joinPath(utils.getProjectRoot(), 'tests/features', _.kebabCase(name)));
   },
 
   move(oldName, newName) {
@@ -71,13 +71,13 @@ module.exports = {
     const prjRoot = utils.getProjectRoot();
 
     // Move feature folder
-    const oldFolder = path.join(prjRoot, 'src/features', oldName);
-    const newFolder = path.join(prjRoot, 'src/features', newName);
+    const oldFolder = utils.joinPath(prjRoot, 'src/features', oldName);
+    const newFolder = utils.joinPath(prjRoot, 'src/features', newName);
     vio.moveDir(oldFolder, newFolder);
 
     // Move feature test folder
-    const oldTestFolder = path.join(prjRoot, 'tests/features', oldName);
-    const newTestFolder = path.join(prjRoot, 'tests/features', newName);
+    const oldTestFolder = utils.joinPath(prjRoot, 'tests/features', oldName);
+    const newTestFolder = utils.joinPath(prjRoot, 'tests/features', newName);
     vio.moveDir(oldTestFolder, newTestFolder);
 
     // Update common/routeConfig
@@ -96,7 +96,7 @@ module.exports = {
     ));
 
     // Try to rename css class names for components
-    const folder = path.join(prjRoot, 'src/features', newName);
+    const folder = utils.joinPath(prjRoot, 'src/features', newName);
     vio.ls(folder)
       // It simply assumes component file name is pascal case
       .filter(f => /^[A-Z]/.test(path.basename(f)))
@@ -120,8 +120,8 @@ module.exports = {
       });
 
     // Rename action constants
-    const reduxFolder = path.join(prjRoot, 'src/features', newName, 'redux');
-    const constantsFile = path.join(reduxFolder, 'constants.js');
+    const reduxFolder = utils.joinPath(prjRoot, 'src/features', newName, 'redux');
+    const constantsFile = utils.joinPath(reduxFolder, 'constants.js');
     const constants = [];
     traverse(vio.getAst(constantsFile), {
       VariableDeclarator(p) {
@@ -139,7 +139,7 @@ module.exports = {
     });
 
     // Rename actions
-    const reduxTestFolder = path.join(prjRoot, 'tests/features', newName, 'redux');
+    const reduxTestFolder = utils.joinPath(prjRoot, 'tests/features', newName, 'redux');
     vio.ls(reduxFolder)
     .concat(vio.ls(reduxTestFolder))
       // It simply assumes component file name is pascal case
@@ -158,9 +158,9 @@ module.exports = {
       });
 
     // Try to do a rougth string replacement based on the original generated code structure
-    const testFolder = path.join(prjRoot, 'tests/features', newName);
-    // const files = _.union(vio.ls(testFolder), vio.ls(path.join(testFolder, 'redux'))
-    _.union(vio.ls(testFolder), vio.ls(path.join(testFolder, 'redux')))
+    const testFolder = utils.joinPath(prjRoot, 'tests/features', newName);
+    // const files = _.union(vio.ls(testFolder), vio.ls(utils.joinPath(testFolder, 'redux'))
+    _.union(vio.ls(testFolder), vio.ls(utils.joinPath(testFolder, 'redux')))
       .filter(f => /\.test\.js$/.test(f))
       .forEach((filePath) => {
         const moduleName = path.basename(filePath).replace('.test.js', '');
@@ -190,13 +190,13 @@ module.exports = {
   //   const prjRoot = utils.getProjectRoot();
 
   //   // Move feature folder
-  //   const oldFolder = path.join(prjRoot, 'src/features', oldName);
-  //   const newFolder = path.join(prjRoot, 'src/features', newName);
+  //   const oldFolder = utils.joinPath(prjRoot, 'src/features', oldName);
+  //   const newFolder = utils.joinPath(prjRoot, 'src/features', newName);
   //   shell.mv(oldFolder, newFolder);
 
   //   // Move feature test folder
-  //   const oldTestFolder = path.join(prjRoot, 'tests/features', oldName);
-  //   const newTestFolder = path.join(prjRoot, 'tests/features', newName);
+  //   const oldTestFolder = utils.joinPath(prjRoot, 'tests/features', oldName);
+  //   const newTestFolder = utils.joinPath(prjRoot, 'tests/features', newName);
   //   shell.mv(oldTestFolder, newTestFolder);
 
   //   // Update common/routeConfig
@@ -215,12 +215,12 @@ module.exports = {
   //   ));
 
   //   // Try to rename css class names for components/pages
-  //   const folder = path.join(prjRoot, 'src/features', newName);
+  //   const folder = utils.joinPath(prjRoot, 'src/features', newName);
   //   shell.ls(folder)
   //     .filter(f => /^[A-Z]/.test(path.basename(f)))
   //     .forEach((filePath) => {
   //       const moduleName = path.basename(filePath).split('.')[0];
-  //       const absPath = path.join(folder, filePath);
+  //       const absPath = utils.joinPath(folder, filePath);
   //       if (/\.js$/.test(filePath)) {
   //         // For components, update the css class name inside
   //         refactor.updateFile(absPath, ast => [].concat(
@@ -238,12 +238,12 @@ module.exports = {
   //     });
 
   //   // Try to do a rougth string replacement based on the original generated code structure
-  //   const testFolder = path.join(prjRoot, 'tests/features', newName);
+  //   const testFolder = utils.joinPath(prjRoot, 'tests/features', newName);
   //   shell.ls('-R', testFolder)
   //     .filter(f => /\.test\.js$/.test(f))
   //     .forEach((filePath) => {
   //       const moduleName = path.basename(filePath).replace('.test.js', '');
-  //       refactor.updateFile(path.join(testFolder, filePath), ast => [].concat(
+  //       refactor.updateFile(utils.joinPath(testFolder, filePath), ast => [].concat(
   //         refactor.renameStringLiteral(ast, `src/features/${oldName}`, `src/features/${newName}`), // import module path
   //         refactor.renameStringLiteral(ast, `src/features/${oldName}/${moduleName}`, `src/features/${newName}/${moduleName}`), // import module path
   //         refactor.renameStringLiteral(ast, `src/features/${oldName}/redux/reducer`, `src/features/${newName}/redux/reducer`), // import module path

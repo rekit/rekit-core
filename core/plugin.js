@@ -46,15 +46,15 @@ function injectExtensionPoints(func, command, targetName) {
 function loadPlugins() {
   const prjRoot = utils.getProjectRoot();
 
-  const prjPkgJson = require(path.join(prjRoot, 'package.json')); // eslint-disable-line
+  const prjPkgJson = require(utils.joinPath(prjRoot, 'package.json')); // eslint-disable-line
 
   // Find local plugins, all local plugins are loaded
-  const localPluginsFolder = path.join(prjRoot, 'tools/plugins');
+  const localPluginsFolder = utils.joinPath(prjRoot, 'tools/plugins');
   plugins = [];
   if (shell.test('-e', localPluginsFolder)) {
     plugins = plugins.concat(shell.ls(localPluginsFolder)
-      .filter(d => shell.test('-d', path.join(prjRoot, 'tools/plugins', d)))
-      .map(d => path.join(prjRoot, 'tools/plugins', d)));
+      .filter(d => shell.test('-d', utils.joinPath(prjRoot, 'tools/plugins', d)))
+      .map(d => utils.joinPath(prjRoot, 'tools/plugins', d)));
   }
 
   // Find installed plugins, only those defined in package.rekit.plugins are loaded.
@@ -62,7 +62,7 @@ function loadPlugins() {
     plugins = plugins.concat(prjPkgJson.rekit.plugins.map(p => (
       path.isAbsolute(p)
       ? p
-      : path.join(
+      : utils.joinPath(
           prjRoot,
           'node_modules',
           /^rekit-plugin-/.test(p) ? p : ('rekit-plugin-' + p)
@@ -74,7 +74,7 @@ function loadPlugins() {
   // Create plugin instances
   plugins = plugins.map((pluginRoot) => {
     try {
-      const config = require(path.join(pluginRoot, 'config')); // eslint-disable-line
+      const config = require(utils.joinPath(pluginRoot, 'config')); // eslint-disable-line
       const item = {
         config,
         commands: {},
@@ -85,7 +85,7 @@ function loadPlugins() {
         config.accept.forEach(
           (name) => {
             name = _.camelCase(name);
-            const commands = require(path.join(pluginRoot, name));
+            const commands = require(utils.joinPath(pluginRoot, name));
             item.commands[name] = {};
             Object.keys(commands).forEach((key) => {
               item.commands[name][key] = injectExtensionPoints(commands[key], key, name);
@@ -94,15 +94,15 @@ function loadPlugins() {
         );
       }
 
-      if (shell.test('-e', path.join(pluginRoot, 'hooks.js'))) {
-        item.hooks = require(path.join(pluginRoot, 'hooks')); // eslint-disable-line
+      if (shell.test('-e', utils.joinPath(pluginRoot, 'hooks.js'))) {
+        item.hooks = require(utils.joinPath(pluginRoot, 'hooks')); // eslint-disable-line
       }
 
       return item;
     } catch (e) {
       const pluginName = path.basename(pluginRoot).replace(/^rekit-plugin-/, '');
       let err = '';
-      if (/node_modules/.test(pluginRoot) && shell.test('-e', path.join(prjRoot, 'tools/plugins', pluginName))) {
+      if (/node_modules/.test(pluginRoot) && shell.test('-e', utils.joinPath(prjRoot, 'tools/plugins', pluginName))) {
         err = `\nTip: plugin ${pluginName} seems to be a local plugin, it shouldn't be registered in rekit section of package.json.`;
       }
       utils.fatalError(`Failed to load plugin: ${pluginName}, ${e}.${err}`);
@@ -129,9 +129,9 @@ function getCommand(command, elementName) {
 //   //  Add a local plugin.
 //   name = _.kebabCase(name);
 
-//   const pluginDir = path.join(utils.getProjectRoot(), 'tools/plugins', name);
+//   const pluginDir = utils.joinPath(utils.getProjectRoot(), 'tools/plugins', name);
 //   shell.mkdir(pluginDir);
-//   const configPath = path.join(pluginDir, name, 'config.js');
+//   const configPath = utils.joinPath(pluginDir, name, 'config.js');
 //   template.generate(configPath, {
 //     templateFile: 'plugin/config.js',
 //     context: {

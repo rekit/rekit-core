@@ -13,14 +13,14 @@ function notEmpty(str, name) {
 }
 
 function featureExist(feature) {
-  const p = path.join(utils.getProjectRoot(), 'src/features', _.kebabCase(feature));
+  const p = utils.joinPath(utils.getProjectRoot(), 'src/features', _.kebabCase(feature));
   if (!shell.test('-e', p) && !vio.dirExists(p)) {
     utils.fatalError('Feature doesn\'t exist: ' + feature + ': ' + p);
   }
 }
 
 function featureNotExist(feature) {
-  const p = path.join(utils.getProjectRoot(), 'src/features', _.kebabCase(feature));
+  const p = utils.joinPath(utils.getProjectRoot(), 'src/features', _.kebabCase(feature));
   if (shell.test('-e', p) || vio.dirExists(p)) {
     utils.fatalError('Feature doesn\'t exist: ' + feature + ': ' + p);
   }

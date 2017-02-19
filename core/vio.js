@@ -223,7 +223,7 @@ function ls(folder) {
     });
   }
   if (shell.test('-e', realFolder)) {
-    diskFiles = shell.ls(realFolder).map(f => path.join(folder, f));
+    diskFiles = shell.ls(realFolder).map(f => utils.joinPath(folder, f));
   }
   const memoFiles = Object.keys(toSave).filter(file => _.startsWith(file, folder) && !toDel[file]);
   return _.union(diskFiles, memoFiles);
