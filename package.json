@@ -1,6 +1,6 @@
 {
   "name": "rekit-core",
-  "version": "2.0.0-alpha.8",
+  "version": "2.0.0-beta.1",
   "description": "Rekit core functions.",
   "author": "Nate Wang <supnate@gmail.com>",
   "homepage": "https://github.com/supnate/rekit-core",
