@@ -64,6 +64,21 @@ function getProjectRoot() {
   return joinPath(/\/$/.test(prjRoot) ? prjRoot : (prjRoot + '/'));
 }
 
+let pkgJson = null;
+function getPkgJson() {
+  // Get the project package json
+  if (!pkgJson) {
+    const pkgJsonPath = joinPath(getProjectRoot(), 'package.json');
+    pkgJson = require(pkgJsonPath);
+  }
+  return pkgJson;
+}
+
+function setPkgJson(obj) {
+  // Only used for unit test purpose
+  pkgJson = obj;
+}
+
 function getRelativePath(fullPath) {
   // Get rel path relative to project root.
   const _prjRoot = getProjectRoot();
@@ -130,16 +145,6 @@ function getCssExt() {
   return (pkg && pkg.rekit && pkg.rekit.css === 'sass') ? 'scss' : 'less';
 }
 
-function isLocalModule(modulePath) {
-  // TODO: handle alias module path like src
-  return /^\./.test(modulePath);
-}
-
-function resolveModulePath(relativeToFile, modulePath) {
-  // TODO: handle alias module path
-  return joinPath(path.dirname(relativeToFile), modulePath);
-}
-
 function getFeatureName(filePath) {
   const relPath = getRelativePath(filePath);
   let name = null;
@@ -154,6 +159,8 @@ module.exports = {
   getCssExt,
   setProjectRoot,
   getProjectRoot,
+  getPkgJson,
+  setPkgJson,
   getRelativePath,
   getFullPath,
   getActionType,
@@ -173,7 +180,5 @@ module.exports = {
   warn,
   error,
 
-  isLocalModule,
-  resolveModulePath,
   getFeatureName,
 };

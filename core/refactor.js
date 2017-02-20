@@ -25,8 +25,52 @@ function isStringMatch(str, match) {
   return match.test(str);
 }
 
-function isSameModuleSource(s1, s2, context) {
+function getModuleResolverAlias() {
+  const pkgJson = utils.getPkgJson();
+  const babelPlugins = _.get(pkgJson, 'babel.plugins');
+  let alias = {};
+  if (_.isArray(babelPlugins)) {
+    const moduleResolver = babelPlugins.filter(p => p[0] === 'module-resolver');
+    if (moduleResolver) {
+      alias = moduleResolver[1];
+    }
+  }
+  return alias;
+}
 
+function isLocalModule(modulePath) {
+  // TODO: handle alias module path like src
+  const alias = getModuleResolverAlias();
+  return /^\./.test(modulePath) || _.keys(alias).some(a => _.startsWith(modulePath, a));
+}
+
+function resolveModulePath(relativeToFile, modulePath) {
+  if (!isLocalModule(modulePath)) {
+    return modulePath;
+  }
+
+  const alias = getModuleResolverAlias();
+  const matched = _.find(_.keys(alias), k => _.startsWith(modulePath, k));
+
+  let res = null;
+  if (matched) {
+    const resolveTo = alias[matched];
+    const relativePath = modulePath.replace(matched, '').replace(/^\//, '');
+    res = utils.joinPath(utils.getProjectRoot(), resolveTo, relativePath);
+  } else {
+    res = utils.joinPath(mPath.dirname(relativeToFile), modulePath);
+  }
+
+  if (/src\/features\/[^/]+\/?$/.test(res)) {
+    // if import from a feature folder, then resolve to index.js
+    res = res.replace(/\/$/, '') + '/index';
+  }
+
+  return res;
+}
+
+function isSameModuleSource(s1, s2, contextFilePath) {
+  return resolveModulePath(contextFilePath, s1) === resolveModulePath(contextFilePath, s2);
 }
 
 function objExpToObj(objExp) {
@@ -1183,7 +1227,7 @@ function isActionEntry(modulePath) {
 }
 
 function isFeatureIndex(modulePath) {
-  return /src\/features\/[^/]+(\/index)?$/.test(modulePath);
+  return /src\/features\/[^/]+(\/|\/index)?$/.test(modulePath);
 }
 
 function isConstantEntry(modulePath) {
@@ -1206,7 +1250,7 @@ function getEntryData(filePath) {
     ExportNamedDeclaration(path) {
       const node = path.node;
       if (!node.source || !node.source.value) return;
-      const sourceFile = utils.resolveModulePath(filePath, node.source.value) + '.js'; // from which file
+      const sourceFile = resolveModulePath(filePath, node.source.value) + '.js'; // from which file
       const specifiers = {};
       node.specifiers.forEach((specifier) => {
         specifiers[specifier.exported.name] = specifier.local && specifier.local.name || true;
@@ -1251,9 +1295,9 @@ function getDeps(filePath) {
   traverse(ast, {
     ExportNamedDeclaration(path) {
       const depModule = _.get(path, 'node.source.value');
-      if (!depModule) return;
-      const resolvedPath = utils.resolveModulePath(filePath, depModule);
-      if (!utils.isLocalModule(depModule)) return;
+      if (!depModule || !isLocalModule(depModule)) return;
+      const resolvedPath = resolveModulePath(filePath, depModule);
+      // if (!isLocalModule(depModule)) return;
       const fullPath = resolvedPath + '.js';
       if (!shell.test('-e', fullPath)) return;  // only depends on js modules, no json or other support
       depFiles.push({
@@ -1264,18 +1308,16 @@ function getDeps(filePath) {
     ImportDeclaration(path) {
       const node = path.node;
       const depModule = node.source.value;
-      const resolvedPath = utils.resolveModulePath(filePath, depModule);
-
+      const resolvedPath = resolveModulePath(filePath, depModule);
       // Only show deps of local modules
-      if (!utils.isLocalModule(depModule)) return;
-
+      if (!isLocalModule(depModule)) return;
       if (isFeatureIndex(resolvedPath)) {
         // Import from feature index
-        let indexFile = resolvedPath;
-        if (!/index$/.test(indexFile)) {
-          indexFile += '/index';
-        }
-        indexFile += '.js';
+        const indexFile = resolvedPath + '.js';
+        // if (!/index$/.test(indexFile)) {
+        //   indexFile = utils.joinPath(resolvedPath, 'index');
+        // }
+        // indexFile += '.js';
 
         const indexEntry = getEntryData(indexFile);
         node.specifiers.forEach((specifier) => {
