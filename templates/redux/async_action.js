@@ -5,8 +5,8 @@ import {
   ${actionTypes.dismissError},
 } from './constants';
 
-// Rekit uses redux-thunk for async actions:
-// https://github.com/gaearon/redux-thunk
+// Rekit uses redux-thunk for async actions by default: https://github.com/gaearon/redux-thunk
+// If you prefer redux-saga, you can use rekit-plugin-redux-saga: https://github.com/supnate/rekit-plugin-redux-saga
 export function ${_.camelCase(action)}(args = {}) {
   return (dispatch) => { // optionally you can have getState as the second argument
     dispatch({
@@ -44,6 +44,8 @@ export function ${_.camelCase(action)}(args = {}) {
   };
 }
 
+// Async action saves request error by default, this method is used to dismiss the error info.
+// If you don't want errors to be saved in Redux store, just ignore this method.
 export function dismiss${_.pascalCase(action)}Error() {
   return {
     type: ${actionTypes.dismissError},
@@ -53,6 +55,7 @@ export function dismiss${_.pascalCase(action)}Error() {
 export function reducer(state, action) {
   switch (action.type) {
     case ${actionTypes.begin}:
+      // Just after a request is sent
       return {
         ...state,
         ${_.camelCase(action)}Pending: true,
@@ -60,6 +63,7 @@ export function reducer(state, action) {
       };
 
     case ${actionTypes.success}:
+      // The request is success
       return {
         ...state,
         ${_.camelCase(action)}Pending: false,
@@ -67,6 +71,7 @@ export function reducer(state, action) {
       };
 
     case ${actionTypes.failure}:
+      // The request is failed
       return {
         ...state,
         ${_.camelCase(action)}Pending: false,
@@ -74,6 +79,7 @@ export function reducer(state, action) {
       };
 
     case ${actionTypes.dismissError}:
+      // Dismiss the request failure error
       return {
         ...state,
         ${_.camelCase(action)}Error: null,
