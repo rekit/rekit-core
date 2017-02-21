@@ -1302,7 +1302,20 @@ function getDeps(filePath) {
       if (!shell.test('-e', fullPath)) return;  // only depends on js modules, no json or other support
       depFiles.push({
         name: mPath.basename(resolvedPath),
-        file: resolvedPath + '.js',
+        file: fullPath,
+      });
+    },
+    CallExpression(path) {
+      if (_.get(path, 'node.callee.type') !== 'Import') return;
+      const source = _.get(path, 'node.arguments[0].value');
+      if (!source) return;
+      const resolvedPath = resolveModulePath(filePath, source);
+      const fullPath = resolvedPath + '.js';
+      if (!shell.test('-e', fullPath)) return;  // only depends on js modules, no json or other support
+      depFiles.push({
+        name: mPath.basename(resolvedPath),
+        file: fullPath,
+        dynamic: true,
       });
     },
     ImportDeclaration(path) {
