@@ -1,4 +1,43 @@
-'use strict';
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>refactor/projectData.js - Documentation</title>
+
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-action.html">action</a><ul class='methods'><li data-type='method'><a href="module-action.html#.addAsync">addAsync</a></li></ul></li><li><a href="module-feature.html">feature</a><ul class='methods'><li data-type='method'><a href="module-feature.html#.add">add</a></li></ul></li><li><a href="module-refactor_projectData.html">refactor/projectData</a><ul class='methods'><li data-type='method'><a href="module-refactor_projectData.html#~getFeatureRoutes">getFeatureRoutes</a></li><li data-type='method'><a href="module-refactor_projectData.html#~getFeatures">getFeatures</a></li><li data-type='method'><a href="module-refactor_projectData.html#~getRootRoutePath">getRootRoutePath</a></li></ul></li><li><a href="module-rekit-core.html">rekit-core</a><ul class='methods'><li data-type='method'><a href="module-rekit-core.html#.addComponent">addComponent</a></li><li data-type='method'><a href="module-rekit-core.html#.moveComponent">moveComponent</a></li><li data-type='method'><a href="module-rekit-core.html#.removeComponent">removeComponent</a></li></ul></li></ul>
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">refactor/projectData.js</h1>
+    
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>'use strict';
 
 /**
  * projectData
@@ -35,11 +74,11 @@ function getRootRoutePath() {
       if (!props.length) return;
       const obj = {};
       props.forEach((p) => {
-        if (_.has(p, 'key.name') && !p.computed) {
+        if (_.has(p, 'key.name') &amp;&amp; !p.computed) {
           obj[p.key.name] = p;
         }
       });
-      if (obj.path && obj.childRoutes && !rootPath) {
+      if (obj.path &amp;&amp; obj.childRoutes &amp;&amp; !rootPath) {
         rootPath = _.get(obj.path, 'value.value');
       }
     }
@@ -65,29 +104,29 @@ function getFeatureRoutes(feature) {
       if (!props.length) return;
       const obj = {};
       props.forEach((p) => {
-        if (_.has(p, 'key.name') && !p.computed) {
+        if (_.has(p, 'key.name') &amp;&amp; !p.computed) {
           obj[p.key.name] = p;
         }
       });
-      if (obj.path && obj.component) {
+      if (obj.path &amp;&amp; obj.component) {
         // in a route config, if an object expression has both 'path' and 'component' property, then it's a route config
         arr.push({
           path: _.get(obj.path, 'value.value'), // only string literal supported
           component: _.get(obj.component, 'value.name'), // only identifier supported
-          isIndex: !!obj.isIndex && _.get(obj.isIndex, 'value.value'), // suppose to be boolean
+          isIndex: !!obj.isIndex &amp;&amp; _.get(obj.isIndex, 'value.value'), // suppose to be boolean
           node: {
             start: node.start,
             end: node.end,
           },
         });
       }
-      if (obj.isIndex && obj.component && !indexRoute) {
+      if (obj.isIndex &amp;&amp; obj.component &amp;&amp; !indexRoute) {
         // only find the first index route
         indexRoute = {
           component: _.get(obj.component, 'value.name'),
         };
       }
-      if (obj.path && obj.childRoutes && !rootPath) {
+      if (obj.path &amp;&amp; obj.childRoutes &amp;&amp; !rootPath) {
         rootPath = _.get(obj.path, 'value.value');
         if (!rootPath) rootPath = '$none'; // only find the first rootPath
       }
@@ -115,7 +154,7 @@ function getFeatureStructure(feature) {
 
   const components = shell.ls(dir + '/*.js').map((file) => {
     const props = getRekitProps(file);
-    if (props && props.component) {
+    if (props &amp;&amp; props.component) {
       noneMisc[file] = true;
       noneMisc[file.replace('.js', '.less')] = true;
       noneMisc[file.replace('.js', '.scss')] = true;
@@ -131,7 +170,7 @@ function getFeatureStructure(feature) {
 
   const actions = shell.ls(dir + '/redux/*.js').map((file) => {
     const props = getRekitProps(file);
-    if (props && props.action) {
+    if (props &amp;&amp; props.action) {
       noneMisc[file] = true;
       return Object.assign({
         feature,
@@ -166,8 +205,8 @@ function getFeatureStructure(feature) {
       }
     });
     return arr.sort((a, b) => {
-      if (a.children && !b.children) return -1;
-      if (!a.children && b.children) return 1;
+      if (a.children &amp;&amp; !b.children) return -1;
+      if (!a.children &amp;&amp; b.children) return 1;
       return a.name.localeCompare(b.name);
     });
   }
@@ -211,7 +250,7 @@ function getEntryData(filePath) {
       const sourceFile = resolveModulePath(filePath, node.source.value) + '.js'; // from which file
       const specifiers = {};
       node.specifiers.forEach((specifier) => {
-        specifiers[specifier.exported.name] = specifier.local && specifier.local.name || true;
+        specifiers[specifier.exported.name] = specifier.local &amp;&amp; specifier.local.name || true;
         data.exported[specifier.exported.name] = sourceFile;
       });
       data.bySource[sourceFile] = specifiers;
@@ -224,7 +263,7 @@ function getDeps(filePath) {
   // Summary:
   //   Get dependencies of a module
 
-  if (depsCache[filePath] && depsCache[filePath].content === vio.getContent(filePath)) {
+  if (depsCache[filePath] &amp;&amp; depsCache[filePath].content === vio.getContent(filePath)) {
     return depsCache[filePath].deps;
   }
 
@@ -390,7 +429,7 @@ function getDeps(filePath) {
     // Other files
     if (props.component) {
       const feature = utils.getFeatureName(item.file);
-      if (feature && !_.find(deps.component, { feature, name: item.name })) {
+      if (feature &amp;&amp; !_.find(deps.component, { feature, name: item.name })) {
         deps.components.push({
           feature,
           type: 'component',
@@ -449,8 +488,8 @@ function getSrcFiles(dir) {
       };
     })
     .sort((a, b) => {
-      if (a.children && !b.children) return -1;
-      else if (!a.children && b.children) return 1;
+      if (a.children &amp;&amp; !b.children) return -1;
+      else if (!a.children &amp;&amp; b.children) return 1;
       return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
     });
 }
@@ -461,3 +500,22 @@ module.exports = {
   getDeps,
   getSrcFiles,
 };
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Fri Mar 03 2017 17:43:57 GMT+0800 (CST) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/linenumber.js"></script>
+</body>
+</html>
