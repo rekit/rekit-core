@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * action handler
+ * Action manager. Exports APIs to create/move/rename/remove actions or async actions.
  * @module
 **/
 
@@ -50,6 +50,12 @@ function addAsync(feature, name, args) {
   entry.addToInitialState(feature, `${_.camelCase(name)}Error`, 'null');
 }
 
+/**
+ * Remove an async action
+ * @param {string} feature - The feature name.
+ * @param {string} name - The action name.
+ * @alias module:action.removeAsync
+**/
 function removeAsync(feature, name) {
   assert.notEmpty(feature, 'feature');
   assert.notEmpty(name, 'action name');
@@ -70,6 +76,12 @@ function removeAsync(feature, name) {
   entry.removeFromInitialState(feature, `${_.camelCase(name)}Error`, 'null');
 }
 
+/**
+ * Move/rename an async action
+ * @param {ElementArg} source - Which async action to move.
+ * @param {ElementArg} target - The target place of the async action.
+ * @alias module:action.moveAsync
+**/
 function moveAsync(source, target) {
   assert.notEmpty(source.feature, 'feature');
   assert.notEmpty(source.name, 'action name');
@@ -140,6 +152,13 @@ function moveAsync(source, target) {
   }
 }
 
+/**
+ * Add an action
+ * @param {string} feature - The feature name.
+ * @param {string} name - The action name.
+ * @param {object} args - Other arguments.
+ * @alias module:action.add
+**/
 function add(feature, name, args) {
   assert.notEmpty(feature, 'feature');
   assert.notEmpty(name, 'action name');
@@ -168,6 +187,12 @@ function add(feature, name, args) {
   entry.addToActions(feature, name);
 }
 
+/**
+ * Remove an action
+ * @param {string} feature - The feature name.
+ * @param {string} name - The action name.
+ * @alias module:action.remove
+**/
 function remove(feature, name, actionType) {
   assert.notEmpty(feature, 'feature');
   assert.notEmpty(name, 'action name');
@@ -189,6 +214,12 @@ function remove(feature, name, actionType) {
   entry.removeFromActions(feature, name);
 }
 
+/**
+ * Move/rename an action
+ * @param {ElementArg} source - Which async action to move.
+ * @param {ElementArg} target - The target place of the async action.
+ * @alias module:action.move
+**/
 function move(source, target) {
   assert.notEmpty(source.feature, 'feature');
   assert.notEmpty(source.name, 'action name');

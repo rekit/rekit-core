@@ -1,5 +1,10 @@
 'use strict';
 
+/**
+ * Component manager. Create component boilerplate for React. Note that it only creates React component except style files and unit test.
+ * @module
+**/
+
 const _ = require('lodash');
 const utils = require('./utils');
 const vio = require('./vio');
@@ -8,6 +13,13 @@ const template = require('./template');
 const entry = require('./entry');
 const assert = require('./assert');
 
+/**
+ * Add a component.
+ * @param {string} feature - The feature name.
+ * @param {string} name - The component name.
+ * @param {object} args - Other arguments.
+ * @alias module:component.add
+**/
 function add(feature, component, args) {
   assert.notEmpty(feature, 'feature');
   assert.notEmpty(component, 'component name');
@@ -27,6 +39,13 @@ function add(feature, component, args) {
   entry.addToIndex(feature, component);
 }
 
+/**
+ * Remove a component.
+ * @param {string} feature - The feature name.
+ * @param {string} name - The component name.
+ * @param {object} args - Other arguments.
+ * @alias module:component.remove
+**/
 function remove(feature, component) {
   assert.notEmpty(feature, 'feature');
   assert.notEmpty(component, 'component name');
@@ -39,6 +58,12 @@ function remove(feature, component) {
   entry.removeFromIndex(feature, component);
 }
 
+/**
+ * Move/rename a component.
+ * @param {ElementArg} source - Which component to move/rename.
+ * @param {ElementArg} target - The target of the old component.
+ * @alias module:component.remove
+**/
 function move(source, target) {
   // 1. Move File.js to the targetination
   // 2. Rename module name

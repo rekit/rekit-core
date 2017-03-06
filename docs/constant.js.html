@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>refactor/projectData - Documentation</title>
+    <title>constant.js - Documentation</title>
 
     <script src="scripts/prettify/prettify.js"></script>
     <script src="scripts/prettify/lang-css.js"></script>
@@ -27,434 +27,96 @@
 
 <div id="main">
     
-    <h1 class="page-title">refactor/projectData</h1>
-    
-
-    
-
-
-
-
-<section>
-
-<header>
-    
-        
-            
-        
-    
-</header>
-
-<article>
-    <div class="container-overview">
-    
-        
-            <div class="description"><p>projectData</p></div>
-        
-
-        
-            
-
-
-
-
-<dl class="details">
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="refactor_projectData.js.html">refactor/projectData.js</a>, <a href="refactor_projectData.js.html#line3">line 3</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-    
-    </div>
-
-    
-
-    
-
-    
-
-     
-
-    
-
-    
-
-    
-        <h3 class="subsection-title">Methods</h3>
-
-        
-            
-
-    
-
-    <h4 class="name" id="~getFeatureRoutes"><span class="type-signature">(inner) </span>getFeatureRoutes<span class="signature">(feature)</span><span class="type-signature"></span></h4>
-
-    
-
-
-
-
-<dl class="details">
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="refactor_projectData.js.html">refactor/projectData.js</a>, <a href="refactor_projectData.js.html#line54">line 54</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-<div class="description">
-    <p>Get route rules defined in a feature.</p>
-</div>
-
-
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>feature</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>The feature name.</p></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    <h4 class="name" id="~getFeatures"><span class="type-signature">(inner) </span>getFeatures<span class="signature">()</span><span class="type-signature"></span></h4>
-
-    
-
-
-
-
-<dl class="details">
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="refactor_projectData.js.html">refactor/projectData.js</a>, <a href="refactor_projectData.js.html#line20">line 20</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-<div class="description">
-    <p>Get all features names (folder name).</p>
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    <h4 class="name" id="~getRootRoutePath"><span class="type-signature">(inner) </span>getRootRoutePath<span class="signature">()</span><span class="type-signature"></span></h4>
-
-    
-
-
-
-
-<dl class="details">
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="refactor_projectData.js.html">refactor/projectData.js</a>, <a href="refactor_projectData.js.html#line27">line 27</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-<div class="description">
-    <p>Get root route rules defined in src/common/routeConfig.js.</p>
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-    
-
-    
-
-    
-</article>
-
-</section>
+    <h1 class="page-title">constant.js</h1>
+    
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>'use strict';
+
+/**
+ * Constant manager. It manages all constants of a feature. Constants are very useful for the communication between actions and reducers.
+ * They may be used across features.
+ * This constant manager exports APIs to create/rename/remove constants. Usually used with the action manager as Rekit does.
+ * @module
+**/
+
+const _ = require('lodash');
+const utils = require('./utils');
+const refactor = require('./refactor');
+const vio = require('./vio');
+
+/**
+ * Add a constant definition to a feature's `redux/constants.js` file, it forces UPPER_SNAKE_CASE.
+ * @param {string} feature - The feature name.
+ * @param {string} name - The component name.
+ * @alias module:constant.add
+ *
+ * @example &lt;caption>Add a new constant&lt;/caption>
+ * const constant = require('rekit-core').constant;
+ *
+ * // Define a new constant named 'FETCH_TOPIC_LIST_BEGIN'.
+ * constant.add('home', 'fetch-topic-list-begin');
+ *
+ * // Write the changes to disk. Otherwise only in memory, see more at rekitCore/vio
+ * rekitCore.vio.flush();
+ *
+ * // Result => added a new line `const FETCH_TOPIC_LIST_BEGIN = 'FETCH_TOPIC_LIST_BEGIN';` to `home/redux/constants.js`.
+**/
+function add(feature, name) {
+  name = _.upperSnakeCase(name);
+  const targetPath = utils.mapReduxFile(feature, 'constants');
+  const lines = vio.getLines(targetPath);
+  const i = refactor.lastLineIndex(lines, /^export /);
+  lines.splice(i + 1, 0, `export const ${name} = '${name}';`);
+  vio.save(targetPath, lines);
+}
+
+/**
+ * Rename a constant definition in a feature's `redux/constants.js` file, it forces UPPER_SNAKE_CASE.
+ * @param {string} feature - The feature name.
+ * @param {string} name - The component name.
+ * @alias module:constant.rename
+**/
+function rename(feature, oldName, newName) {
+  oldName = _.upperSnakeCase(oldName);
+  newName = _.upperSnakeCase(newName);
+
+  const targetPath = utils.mapReduxFile(feature, 'constants');
+  const lines = vio.getLines(targetPath);
+  const i = refactor.lineIndex(lines, `export const ${oldName} = '${oldName}';`);
+  if (i >= 0) {
+    lines[i] = `export const ${newName} = '${newName}';`;
+  }
+
+  vio.save(targetPath, lines);
+}
+
+/**
+ * Remove a constant definition from a feature's `redux/constants.js` file, it forces UPPER_SNAKE_CASE.
+ * @param {string} feature - The feature name.
+ * @param {string} name - The component name.
+ * @alias module:constant.remove
+**/
+function remove(feature, name) {
+  name = _.upperSnakeCase(name);
+  const targetPath = utils.mapReduxFile(feature, 'constants');
+  refactor.removeLines(targetPath, `export const ${name} = '${name}';`);
+}
+
+module.exports = {
+  add,
+  remove,
+  rename,
+};
+</code></pre>
+        </article>
+    </section>
 
 
 

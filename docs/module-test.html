@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>action - Documentation</title>
+    <title>test - Documentation</title>
 
     <script src="scripts/prettify/prettify.js"></script>
     <script src="scripts/prettify/lang-css.js"></script>
@@ -27,7 +27,7 @@
 
 <div id="main">
     
-    <h1 class="page-title">action</h1>
+    <h1 class="page-title">test</h1>
     
 
     
@@ -49,7 +49,7 @@
     <div class="container-overview">
     
         
-            <div class="description"><p>Action manager. Exports APIs to create/move/rename/remove actions or async actions.</p></div>
+            <div class="description"><p>Unit test manager. Manages tests for actions/reducers and components. Usually used with action/component manager.</p></div>
         
 
         
@@ -63,7 +63,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="action.js.html">action.js</a>, <a href="action.js.html#line3">line 3</a>
+        <a href="test.js.html">test.js</a>, <a href="test.js.html#line3">line 3</a>
     </li></ul></dd>
     
 
@@ -150,7 +150,7 @@
 
     
 
-    <h4 class="name" id=".add"><span class="type-signature">(static) </span>add<span class="signature">(feature, name, args)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id=".add"><span class="type-signature">(static) </span>add<span class="signature">(feature, name, args<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
 
     
 
@@ -162,7 +162,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="action.js.html">action.js</a>, <a href="action.js.html#line162">line 162</a>
+        <a href="test.js.html">test.js</a>, <a href="test.js.html#line29">line 29</a>
     </li></ul></dd>
     
 
@@ -202,7 +202,7 @@
 
 
 <div class="description">
-    <p>Add an action</p>
+    <p>Add the unit test boilerplate file for a component.</p>
 </div>
 
 
@@ -211,6 +211,14 @@
 
 
 
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>const test = require('rekit-core').test;
+test.add('home', 'Hello');
+
+// Result => Create the unit test boilerplate file at: 'tests/features/home/Hello.test.js'.</code></pre>
 
 
 
@@ -227,6 +235,8 @@
 
         <th>Type</th>
 
+        
+        <th>Attributes</th>
         
 
         
@@ -253,6 +263,14 @@
             </td>
 
             
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
 
             
 
@@ -276,10 +294,18 @@
             </td>
 
             
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
 
             
 
-            <td class="description last"><p>The action name.</p></td>
+            <td class="description last"><p>The component name.</p></td>
         </tr>
 
     
@@ -292,17 +318,96 @@
             <td class="type">
             
                 
-<span class="param-type">object</span>
+<span class="param-type">Object</span>
 
 
             
             </td>
 
             
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
 
             
 
-            <td class="description last"><p>Other arguments.</p></td>
+            <td class="description last"><p>The args passed to rekit-core/template.</p>
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>templateFile</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>Component.test.js</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>The template file to create test file.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
         </tr>
 
     
@@ -329,7 +434,7 @@
 
     
 
-    <h4 class="name" id=".addAsync"><span class="type-signature">(static) </span>addAsync<span class="signature">(feature, name, args)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id=".addAction"><span class="type-signature">(static) </span>addAction<span class="signature">(feature, name, args<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
 
     
 
@@ -341,7 +446,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="action.js.html">action.js</a>, <a href="action.js.html#line24">line 24</a>
+        <a href="test.js.html">test.js</a>, <a href="test.js.html#line111">line 111</a>
     </li></ul></dd>
     
 
@@ -381,7 +486,7 @@
 
 
 <div class="description">
-    <p>Add an async action</p>
+    <p>Add the unit test boilerplate file for an action (using different templates for sync or async).</p>
 </div>
 
 
@@ -390,6 +495,14 @@
 
 
 
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>const test = require('rekit-core').test;
+test.addAction('home', 'doSomething', { isAsync: true });
+
+// Result => Create the unit test boilerplate file at: 'tests/features/home/redux/doSomething.test.js'.</code></pre>
 
 
 
@@ -406,6 +519,8 @@
 
         <th>Type</th>
 
+        
+        <th>Attributes</th>
         
 
         
@@ -432,6 +547,14 @@
             </td>
 
             
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
 
             
 
@@ -455,6 +578,14 @@
             </td>
 
             
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
 
             
 
@@ -471,17 +602,135 @@
             <td class="type">
             
                 
-<span class="param-type">object</span>
+<span class="param-type">Object</span>
 
 
             
             </td>
 
             
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
 
             
 
-            <td class="description last"><p>Other arguments.</p></td>
+            <td class="description last"><p>The args passed to rekit-core/template.</p>
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>templateFile</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>Component.test.js</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>The template file to create test file.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>isAsync</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>false</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>Whether the action is async.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
         </tr>
 
     
@@ -520,7 +769,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="action.js.html">action.js</a>, <a href="action.js.html#line223">line 223</a>
+        <a href="test.js.html">test.js</a>, <a href="test.js.html#line61">line 61</a>
     </li></ul></dd>
     
 
@@ -560,7 +809,7 @@
 
 
 <div class="description">
-    <p>Move/rename an action</p>
+    <p>Move/rename the unit test file for a component.</p>
 </div>
 
 
@@ -614,7 +863,7 @@
 
             
 
-            <td class="description last"><p>Which async action to move.</p></td>
+            <td class="description last"><p>Which component test to move.</p></td>
         </tr>
 
     
@@ -637,7 +886,7 @@
 
             
 
-            <td class="description last"><p>The target place of the async action.</p></td>
+            <td class="description last"><p>The target location of the component test.</p></td>
         </tr>
 
     
@@ -664,7 +913,7 @@
 
     
 
-    <h4 class="name" id=".moveAsync"><span class="type-signature">(static) </span>moveAsync<span class="signature">(source, target)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id=".moveAction"><span class="type-signature">(static) </span>moveAction<span class="signature">(source, target, args<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
 
     
 
@@ -676,7 +925,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="action.js.html">action.js</a>, <a href="action.js.html#line85">line 85</a>
+        <a href="test.js.html">test.js</a>, <a href="test.js.html#line149">line 149</a>
     </li></ul></dd>
     
 
@@ -716,7 +965,7 @@
 
 
 <div class="description">
-    <p>Move/rename an async action</p>
+    <p>Move/rename the unit test file for an action.</p>
 </div>
 
 
@@ -741,6 +990,8 @@
 
         <th>Type</th>
 
+        
+        <th>Attributes</th>
         
 
         
@@ -767,10 +1018,18 @@
             </td>
 
             
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
 
             
 
-            <td class="description last"><p>Which async action to move.</p></td>
+            <td class="description last"><p>Which action test to move.</p></td>
         </tr>
 
     
@@ -790,10 +1049,120 @@
             </td>
 
             
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
 
             
 
-            <td class="description last"><p>The target place of the async action.</p></td>
+            <td class="description last"><p>The target location of the action test.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>args</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last"><p>Only used to indicates if it's async.</p>
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>isAsync</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>false</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>Whether it's an async action.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
         </tr>
 
     
@@ -832,7 +1201,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="action.js.html">action.js</a>, <a href="action.js.html#line196">line 196</a>
+        <a href="test.js.html">test.js</a>, <a href="test.js.html#line50">line 50</a>
     </li></ul></dd>
     
 
@@ -872,7 +1241,7 @@
 
 
 <div class="description">
-    <p>Remove an action</p>
+    <p>Remove the unit test file for a component.</p>
 </div>
 
 
@@ -881,6 +1250,14 @@
 
 
 
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>const test = require('rekit-core').test;
+test.remove('home', 'Hello');
+
+// Result => Delete the test file of: 'tests/features/home/Hello.test.js'.</code></pre>
 
 
 
@@ -949,7 +1326,7 @@
 
             
 
-            <td class="description last"><p>The action name.</p></td>
+            <td class="description last"><p>The component name.</p></td>
         </tr>
 
     
@@ -976,7 +1353,7 @@
 
     
 
-    <h4 class="name" id=".removeAsync"><span class="type-signature">(static) </span>removeAsync<span class="signature">(feature, name)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id=".removeAction"><span class="type-signature">(static) </span>removeAction<span class="signature">(feature, name)</span><span class="type-signature"></span></h4>
 
     
 
@@ -988,7 +1365,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="action.js.html">action.js</a>, <a href="action.js.html#line59">line 59</a>
+        <a href="test.js.html">test.js</a>, <a href="test.js.html#line136">line 136</a>
     </li></ul></dd>
     
 
@@ -1028,7 +1405,7 @@
 
 
 <div class="description">
-    <p>Remove an async action</p>
+    <p>Remove the unit test file for an action (either sync or async).</p>
 </div>
 
 

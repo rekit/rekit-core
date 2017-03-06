@@ -3,20 +3,68 @@
 /**
  * The default module of the rekit-core package. It does two things:
  *
- * 1. Wraps modularized APIs to final Rekit commands.
- * 2. Exports other modules as properties. i.e. `require('rekit-core').component` equals to `require('rekit-core/component')`.
+ * 1. Wraps modularized APIs to Rekit core commands.
+ * 2. Exports other modules. i.e. `require('rekit-core').component` equals to `require('rekit-core/component')`.
  *
  * @module rekit-core
 **/
 
+/**
+ * The combination of feature and name of an element like component.
+ * @typedef {Object} ElementArg
+ * @property {string} feature - The feature of the element.
+ * @property {string} name - The name of the element.
+ * @alias module:rekit-core.ElementArg
+ */
+
 const _ = require('lodash');
+
+/**
+ * Quick access to rekit-core/component.
+ * @alias module:rekit-core.component
+**/
 const component = require('./component');
+
+/**
+ * Quick access to rekit-core/style.
+ * @alias module:rekit-core.style
+**/
 const style = require('./style');
+
+/**
+ * Quick access to rekit-core/test.
+ * @alias module:rekit-core.test
+**/
 const test = require('./test');
+
+/**
+ * Quick access to rekit-core/action.
+ * @alias module:rekit-core.action
+**/
 const action = require('./action');
+
+/**
+ * Quick access to rekit-core/feature.
+ * @alias module:rekit-core.feature
+**/
 const featureMgr = require('./feature');
+
+/**
+ * Quick access to rekit-core/utils.
+ * @alias module:rekit-core.utils
+**/
 const utils = require('./utils');
+
+/**
+ * Quick access to rekit-core/vio.
+ * @alias module:rekit-core.vio
+**/
 const vio = require('./vio');
+
+/**
+ * Quick access to rekit-core/vio.
+ * @alias module:rekit-core.vio
+**/
 const refactor = require('./refactor');
 const entry = require('./entry');
 const route = require('./route');
@@ -116,21 +164,53 @@ function moveComponent(source, target) {
   route.move(source, target);
 }
 
+/**
+ * Add an async action using redux-thunk and its unit test.
+ *
+ * @param {string} feature - the feature where to create the action.
+ * @param {string} name - the action name, will be converted to camel case.
+ * @alias module:rekit-core.addAsyncAction
+ *
+**/
 function addAsyncAction(feature, name) {
   action.addAsync(feature, name);
   test.addAction(feature, name, { isAsync: true });
 }
 
+/**
+ * Remove an async action and its unit test.
+ *
+ * @param {string} feature - the feature of the action.
+ * @param {string} name - the action name, will be converted to camel case.
+ * @alias module:rekit-core.removeAsyncAction
+ *
+**/
 function removeAsyncAction(feature, name) {
   action.removeAsync(feature, name);
   test.removeAction(feature, name);
 }
 
-function moveAsyncAction(source, dest) {
-  action.moveAsync(source, dest);
-  test.moveAction(source, dest, { isAsync: true });
+/**
+ * Move/rename an async action including unit test.
+ *
+ * @param {ElementArg} source - Which action to be moved.
+ * @param {ElementArg} target - Where to move.
+ * @alias module:rekit-core.moveAsyncAction
+ *
+**/
+function moveAsyncAction(source, target) {
+  action.moveAsync(source, target);
+  test.moveAction(source, target, { isAsync: true });
 }
 
+/**
+ * Add an action and its unit test.
+ *
+ * @param {string} feature - the feature where to create the action.
+ * @param {string} name - the action name, will be converted to camel case.
+ * @alias module:rekit-core.addAction
+ *
+**/
 function addAction(feature, name, args) {
   args = args || {};
   if (args.async) {
@@ -141,6 +221,14 @@ function addAction(feature, name, args) {
   test.addAction(feature, name);
 }
 
+/**
+ * Remove an action and its unit test.
+ *
+ * @param {string} feature - the feature of the action.
+ * @param {string} name - the action name, will be converted to camel case.
+ * @alias module:rekit-core.removeAction
+ *
+**/
 function removeAction(feature, name) {
   const targetPath = utils.mapReduxFile(feature, name);
   if (_.get(refactor.getRekitProps(targetPath), 'action.isAsync')) {
@@ -151,6 +239,14 @@ function removeAction(feature, name) {
   test.removeAction(feature, name);
 }
 
+/**
+ * Move/rename an action including unit test.
+ *
+ * @param {object} source - which action to be moved, in form of { name: {string}, feature: {string} }.
+ * @param {object} target - where to move, in form of { name: {string}, feature: {string} }.
+ * @alias module:rekit-core.moveAction
+ *
+**/
 function moveAction(source, target) {
   const targetPath = utils.mapReduxFile(source.feature, source.name);
   if (_.get(refactor.getRekitProps(targetPath), 'action.isAsync')) {
@@ -161,6 +257,14 @@ function moveAction(source, target) {
   test.moveAction(source, target);
 }
 
+/**
+ * Add a feature with one sample component. Besides creating feature folder and files,
+ * it also registers reducer, router config, style to root config of the app.
+ *
+ * @param {string} name - the feature name.
+ * @alias module:rekit-core.addFeature
+ *
+**/
 function addFeature(name) {
   featureMgr.add(name);
   entry.addToRootReducer(name);
@@ -169,9 +273,15 @@ function addFeature(name) {
 
   // Add default page and sample action
   addComponent(name, 'default-page', { isIndex: true, connect: true, urlPath: '$auto' });
-  addAction(name, 'sample-action');
 }
 
+/**
+ * Remove a feature.
+ *
+ * @param {string} name - the feature name.
+ * @alias module:rekit-core.removeFeature
+ *
+**/
 function removeFeature(name) {
   featureMgr.remove(name);
   entry.removeFromRootReducer(name);
@@ -179,6 +289,14 @@ function removeFeature(name) {
   entry.removeFromRootStyle(name);
 }
 
+/**
+ * Rename a feature
+ *
+ * @param {string} oldName - Old name of the feature.
+ * @param {string} newName - New name of the feature.
+ * @alias module:rekit-core.moveFeature
+ *
+**/
 function moveFeature(oldName, newName) {
   featureMgr.move(oldName, newName);
 }
@@ -206,6 +324,10 @@ function splitName(name) {
   };
 }
 
+/**
+ * Handle the parse result of Rekit command, like `rekit add component home/hello`.
+ * @alias module:rekit-core.handleCommand
+**/
 function handleCommand(args) {
   const params = [];
   switch (args.commandName) {

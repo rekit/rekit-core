@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>refactor/projectData - Documentation</title>
+    <title>style.js - Documentation</title>
 
     <script src="scripts/prettify/prettify.js"></script>
     <script src="scripts/prettify/lang-css.js"></script>
@@ -27,434 +27,116 @@
 
 <div id="main">
     
-    <h1 class="page-title">refactor/projectData</h1>
-    
-
-    
-
-
-
-
-<section>
-
-<header>
-    
-        
-            
-        
-    
-</header>
-
-<article>
-    <div class="container-overview">
-    
-        
-            <div class="description"><p>projectData</p></div>
-        
-
-        
-            
-
-
-
-
-<dl class="details">
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="refactor_projectData.js.html">refactor/projectData.js</a>, <a href="refactor_projectData.js.html#line3">line 3</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-    
-    </div>
-
-    
-
-    
-
-    
-
-     
-
-    
-
-    
-
-    
-        <h3 class="subsection-title">Methods</h3>
-
-        
-            
-
-    
-
-    <h4 class="name" id="~getFeatureRoutes"><span class="type-signature">(inner) </span>getFeatureRoutes<span class="signature">(feature)</span><span class="type-signature"></span></h4>
-
-    
-
-
-
-
-<dl class="details">
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="refactor_projectData.js.html">refactor/projectData.js</a>, <a href="refactor_projectData.js.html#line54">line 54</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-<div class="description">
-    <p>Get route rules defined in a feature.</p>
-</div>
-
-
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>feature</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>The feature name.</p></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    <h4 class="name" id="~getFeatures"><span class="type-signature">(inner) </span>getFeatures<span class="signature">()</span><span class="type-signature"></span></h4>
-
-    
-
-
-
-
-<dl class="details">
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="refactor_projectData.js.html">refactor/projectData.js</a>, <a href="refactor_projectData.js.html#line20">line 20</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-<div class="description">
-    <p>Get all features names (folder name).</p>
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    <h4 class="name" id="~getRootRoutePath"><span class="type-signature">(inner) </span>getRootRoutePath<span class="signature">()</span><span class="type-signature"></span></h4>
-
-    
-
-
-
-
-<dl class="details">
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="refactor_projectData.js.html">refactor/projectData.js</a>, <a href="refactor_projectData.js.html#line27">line 27</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-<div class="description">
-    <p>Get root route rules defined in src/common/routeConfig.js.</p>
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-    
-
-    
-
-    
-</article>
-
-</section>
+    <h1 class="page-title">style.js</h1>
+    
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>'use strict';
+
+/**
+ * Style manager. It manage style files for components. Usually used with component manage.
+ * @module
+**/
+
+const _ = require('lodash');
+const utils = require('./utils');
+const vio = require('./vio');
+// const refactor = require('./refactor');
+const template = require('./template');
+const entry = require('./entry');
+
+/**
+ * Add a style file for a component. It create the style file with the extension 'cssExt' configured in 'rekit' section of package.json.
+ * @param {string} feature - The feature name.
+ * @param {string} component - The component name.
+ * @alias module:style.add
+ *
+ * @example
+ * const style = require('rekit-core').style;
+ *
+ * // create a file named 'Hello.less' in feature 'home'.
+ * style.add('home', 'Hello');
+**/
+function add(feature, component, args) {
+  // Create style file for a component
+  args = args || {};
+  template.generate(utils.mapComponent(feature, component) + '.' + utils.getCssExt(), Object.assign({}, args, {
+    templateFile: args.templateFile || 'Component.less',
+    context: Object.assign({
+      feature,
+      component,
+      depth: 2,
+      cssExt: utils.getCssExt(),
+    }, args.context || {}),
+  }));
+
+  entry.addToStyle(feature, component);
+}
+
+/**
+ * Remove a style file for a component.
+ * @param {string} feature - The feature name.
+ * @param {string} component - The component name.
+ * @alias module:style.remove
+ *
+**/
+function remove(feature, component) {
+  // Remove style file of a component
+  vio.del(utils.mapComponent(feature, component) + '.' + utils.getCssExt());
+  entry.removeFromStyle(feature, component);
+}
+
+/**
+ * Move/rename a style file for a component.
+ * @param {string} feature - The feature name.
+ * @param {string} component - The component name.
+ * @alias module:style.remove
+ *
+**/
+function move(source, target) {
+  // 1. Move File.less to the destination
+  // 2. Rename css class name
+  // 3. Update references in the style.less
+
+  source.feature = _.kebabCase(source.feature);
+  source.name = _.pascalCase(source.name);
+  target.feature = _.kebabCase(target.feature);
+  target.name = _.pascalCase(target.name);
+
+  const srcPath = utils.mapComponent(source.feature, source.name) + '.' + utils.getCssExt();
+  const targetPath = utils.mapComponent(target.feature, target.name) + '.' + utils.getCssExt();
+  vio.move(srcPath, targetPath);
+
+  let lines = vio.getLines(targetPath);
+  const oldCssClass = `${_.kebabCase(source.feature)}-${_.kebabCase(source.name)}`;
+  const newCssClass = `${_.kebabCase(target.feature)}-${_.kebabCase(target.name)}`;
+
+  lines = lines.map(line => line.replace(`.${oldCssClass}`, `.${newCssClass}`));
+  vio.save(targetPath, lines);
+
+  if (source.feature === target.feature) {
+    entry.renameInStyle(source.feature, source.name, target.name);
+  } else {
+    entry.removeFromStyle(source.feature, source.name);
+    entry.addToStyle(target.feature, target.name);
+  }
+}
+
+module.exports = {
+  add,
+  move,
+  remove,
+};
+
+</code></pre>
+        </article>
+    </section>
 
 
 
