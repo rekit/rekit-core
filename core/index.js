@@ -20,6 +20,12 @@
 const _ = require('lodash');
 
 /**
+ * Quick access to rekit-core/app.
+ * @alias module:rekit-core.app
+**/
+const app = require('./app');
+
+/**
  * Quick access to rekit-core/component.
  * @alias module:rekit-core.component
 **/
@@ -367,6 +373,7 @@ function handleCommand(args) {
 }
 
 module.exports = Object.assign({
+  app,
   vio,
   refactor,
   utils,
