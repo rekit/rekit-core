@@ -66,6 +66,7 @@ function generate(targetPath, args) {
     content = compiled(args.context || {});
   }
   const lines = content.split(/\r?\n/);
+  console.log('generate: ', targetPath, lines.length);
   vio.save(targetPath, lines);
 }
 
