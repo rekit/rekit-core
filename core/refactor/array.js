@@ -136,6 +136,8 @@ function removeFromArray(ast, varName, identifierName) {
 }
 
 module.exports = {
+  nearestCharBefore, // export only for test purpose
+  nearestCharAfter, // export only for test purpose
   addToArrayByNode,
   removeFromArrayByNode,
   addToArray: common.acceptFilePathForAst(addToArray),

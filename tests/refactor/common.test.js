@@ -3,6 +3,7 @@
 const expect = require('chai').expect;
 const utils = require('../../core/utils');
 const vio = require('../../core/vio');
+const refactor = require('../../core/refactor');
 
 describe('refactor common tests', function() { // eslint-disable-line
   before(() => {
@@ -25,9 +26,9 @@ describe('refactor common tests', function() { // eslint-disable-line
       }
     });
 
-    expect(utils.isLocalModule('../f-2/redux/actions')).to.be.true;
-    expect(utils.isLocalModule('src/common/routeConfig')).to.be.true;
-    expect(utils.isLocalModule('react')).to.be.false;
+    expect(refactor.isLocalModule('../f-2/redux/actions')).to.be.true;
+    expect(refactor.isLocalModule('src/common/routeConfig')).to.be.true;
+    expect(refactor.isLocalModule('react')).to.be.false;
   });
 
   it('resolveModulePath', () => {
@@ -47,11 +48,11 @@ describe('refactor common tests', function() { // eslint-disable-line
     });
 
     const file = utils.mapSrcFile('features/f-1/Test.js');
-    const p1 = utils.resolveModulePath(file, '../f-2/redux/actions');
-    const p2 = utils.resolveModulePath(file, 'src/common/routeConfig');
-    const p3 = utils.resolveModulePath(file, './M1');
-    const p4 = utils.resolveModulePath(file, 'react');
-    const p5 = utils.resolveModulePath(file, '../f-3');
+    const p1 = refactor.resolveModulePath(file, '../f-2/redux/actions');
+    const p2 = refactor.resolveModulePath(file, 'src/common/routeConfig');
+    const p3 = refactor.resolveModulePath(file, './M1');
+    const p4 = refactor.resolveModulePath(file, 'react');
+    const p5 = refactor.resolveModulePath(file, '../f-3');
     expect(p1).to.equal(utils.mapSrcFile('features/f-2/redux/actions'));
     expect(p2).to.equal(utils.mapSrcFile('common/routeConfig'));
     expect(p3).to.equal(utils.mapSrcFile('features/f-1/M1'));
