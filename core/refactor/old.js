@@ -25,49 +25,49 @@ function isStringMatch(str, match) {
   return match.test(str);
 }
 
-function getModuleResolverAlias() {
-  const pkgJson = utils.getPkgJson();
-  const babelPlugins = _.get(pkgJson, 'babel.plugins');
-  let alias = {};
-  if (_.isArray(babelPlugins)) {
-    const moduleResolver = babelPlugins.filter(p => p[0] === 'module-resolver');
-    if (moduleResolver) {
-      alias = moduleResolver[1];
-    }
-  }
-  return alias;
-}
+// function getModuleResolverAlias() {
+//   const pkgJson = utils.getPkgJson();
+//   const babelPlugins = _.get(pkgJson, 'babel.plugins');
+//   let alias = {};
+//   if (_.isArray(babelPlugins)) {
+//     const moduleResolver = babelPlugins.filter(p => p[0] === 'module-resolver');
+//     if (moduleResolver) {
+//       alias = moduleResolver[1];
+//     }
+//   }
+//   return alias;
+// }
 
-function isLocalModule(modulePath) {
-  // TODO: handle alias module path like src
-  const alias = getModuleResolverAlias();
-  return /^\./.test(modulePath) || _.keys(alias).some(a => _.startsWith(modulePath, a));
-}
+// function isLocalModule(modulePath) {
+//   // TODO: handle alias module path like src
+//   const alias = getModuleResolverAlias();
+//   return /^\./.test(modulePath) || _.keys(alias).some(a => _.startsWith(modulePath, a));
+// }
 
-function resolveModulePath(relativeToFile, modulePath) {
-  if (!isLocalModule(modulePath)) {
-    return modulePath;
-  }
+// function resolveModulePath(relativeToFile, modulePath) {
+//   if (!isLocalModule(modulePath)) {
+//     return modulePath;
+//   }
 
-  const alias = getModuleResolverAlias();
-  const matched = _.find(_.keys(alias), k => _.startsWith(modulePath, k));
+//   const alias = getModuleResolverAlias();
+//   const matched = _.find(_.keys(alias), k => _.startsWith(modulePath, k));
 
-  let res = null;
-  if (matched) {
-    const resolveTo = alias[matched];
-    const relativePath = modulePath.replace(matched, '').replace(/^\//, '');
-    res = utils.joinPath(utils.getProjectRoot(), resolveTo, relativePath);
-  } else {
-    res = utils.joinPath(mPath.dirname(relativeToFile), modulePath);
-  }
+//   let res = null;
+//   if (matched) {
+//     const resolveTo = alias[matched];
+//     const relativePath = modulePath.replace(matched, '').replace(/^\//, '');
+//     res = utils.joinPath(utils.getProjectRoot(), resolveTo, relativePath);
+//   } else {
+//     res = utils.joinPath(mPath.dirname(relativeToFile), modulePath);
+//   }
 
-  if (/src\/features\/[^/]+\/?$/.test(res)) {
-    // if import from a feature folder, then resolve to index.js
-    res = res.replace(/\/$/, '') + '/index';
-  }
+//   if (/src\/features\/[^/]+\/?$/.test(res)) {
+//     // if import from a feature folder, then resolve to index.js
+//     res = res.replace(/\/$/, '') + '/index';
+//   }
 
-  return res;
-}
+//   return res;
+// }
 
 function isSameModuleSource(s1, s2, contextFilePath) {
   return resolveModulePath(contextFilePath, s1) === resolveModulePath(contextFilePath, s2);
@@ -83,76 +83,76 @@ function objExpToObj(objExp) {
   return obj;
 }
 
-function nearestCharBefore(char, str, index) {
-  // Find the nearest char index before given index. skip white space strings
-  // If not found, return -1
-  // eg: nearestCharBefore(',', '1,    2, 3', 4) => 1
-  let i = index - 1;
-  while (i >= 0) {
-    if (str.charAt(i) === char) return i;
-    if (!/\s/.test(str.charAt(i))) return -1;
-    i -= 1;
-  }
-  return -1;
-}
+// function nearestCharBefore(char, str, index) {
+//   // Find the nearest char index before given index. skip white space strings
+//   // If not found, return -1
+//   // eg: nearestCharBefore(',', '1,    2, 3', 4) => 1
+//   let i = index - 1;
+//   while (i >= 0) {
+//     if (str.charAt(i) === char) return i;
+//     if (!/\s/.test(str.charAt(i))) return -1;
+//     i -= 1;
+//   }
+//   return -1;
+// }
 
-function nearestCharAfter(char, str, index) {
-  // Find the nearest char index before given index. skip white space strings
-  // If not found, return -1
-  let i = index + 1;
-  while (i < str.length) {
-    if (str.charAt(i) === char) return i;
-    if (!/\s/.test(str.charAt(i))) return -1;
-    i += 1;
-  }
-  return -1;
-}
+// function nearestCharAfter(char, str, index) {
+//   // Find the nearest char index before given index. skip white space strings
+//   // If not found, return -1
+//   let i = index + 1;
+//   while (i < str.length) {
+//     if (str.charAt(i) === char) return i;
+//     if (!/\s/.test(str.charAt(i))) return -1;
+//     i += 1;
+//   }
+//   return -1;
+// }
 
 function getCodeByNode(node) {
   return generate(node, babelGeneratorOptions).code;
 }
 
-function updateSourceCode(code, changes) {
-  // Summary:
-  //  This must be called before code is changed some places else rather than ast
+// function updateSourceCode(code, changes) {
+//   // Summary:
+//   //  This must be called before code is changed some places else rather than ast
 
-  changes.sort((c1, c2) => c2.start - c1.start);
-  // Remove same or overlapped changes
-  const newChanges = _.reduce(changes, (cleanChanges, curr) => {
-    const last = _.last(cleanChanges);
+//   changes.sort((c1, c2) => c2.start - c1.start);
+//   // Remove same or overlapped changes
+//   const newChanges = _.reduce(changes, (cleanChanges, curr) => {
+//     const last = _.last(cleanChanges);
 
-    if (!cleanChanges.length || last.start > curr.end) {
-      cleanChanges.push(curr);
-    } else if (last.start === last.end && last.end === curr.start && curr.start === curr.end) {
-      // insert code at the same position, merge them
-      last.replacement += curr.replacement;
-    }
-    return cleanChanges;
-  }, []);
+//     if (!cleanChanges.length || last.start > curr.end) {
+//       cleanChanges.push(curr);
+//     } else if (last.start === last.end && last.end === curr.start && curr.start === curr.end) {
+//       // insert code at the same position, merge them
+//       last.replacement += curr.replacement;
+//     }
+//     return cleanChanges;
+//   }, []);
 
-  const chars = code.split('');
-  newChanges.forEach((c) => {
-    // Special case: after the change, two empty lines occurs, should delete one line
-    if (c.replacement === '' && (c.start === 0 || chars[c.start - 1] === '\n') && chars[c.end] === '\n') {
-      c.end += 1;
-    }
-    chars.splice(c.start, c.end - c.start, c.replacement);
-  });
-  return chars.join('');
-}
+//   const chars = code.split('');
+//   newChanges.forEach((c) => {
+//     // Special case: after the change, two empty lines occurs, should delete one line
+//     if (c.replacement === '' && (c.start === 0 || chars[c.start - 1] === '\n') && chars[c.end] === '\n') {
+//       c.end += 1;
+//     }
+//     chars.splice(c.start, c.end - c.start, c.replacement);
+//   });
+//   return chars.join('');
+// }
 
-function updateFile(filePath, changes) {
-  // Summary:
-  //  Update the source file by changes.
+// function updateFile(filePath, changes) {
+//   // Summary:
+//   //  Update the source file by changes.
 
-  if (_.isFunction(changes)) {
-    const ast = vio.getAst(filePath);
-    changes = changes(ast);
-  }
-  let code = vio.getContent(filePath);
-  code = updateSourceCode(code, changes);
-  vio.save(filePath, code);
-}
+//   if (_.isFunction(changes)) {
+//     const ast = vio.getAst(filePath);
+//     changes = changes(ast);
+//   }
+//   let code = vio.getContent(filePath);
+//   code = updateSourceCode(code, changes);
+//   vio.save(filePath, code);
+// }
 
 function formatMultilineImport(importCode) {
   // format import statement to:
@@ -346,109 +346,109 @@ function addExportFrom(ast, moduleSource, defaultExport, namedExport) {
   return changes;
 }
 
-function addToArrayByNode(node, code) {
-  // node: the arr expression node
-  // code: added as the last element of the array
+// function addToArrayByNode(node, code) {
+//   // node: the arr expression node
+//   // code: added as the last element of the array
 
-  const multilines = node.loc.start.line !== node.loc.end.line;
-  let insertPos = node.start + 1; // insert after '['
+//   const multilines = node.loc.start.line !== node.loc.end.line;
+//   let insertPos = node.start + 1; // insert after '['
 
-  if (node.elements.length) {
-    const ele = _.last(node.elements);
-    insertPos = ele.end;
-  }
+//   if (node.elements.length) {
+//     const ele = _.last(node.elements);
+//     insertPos = ele.end;
+//   }
 
-  let replacement;
-  if (multilines) {
-    const indent = _.repeat(' ', node.loc.end.column - 1);
-    replacement = `\n${indent}  ${code}`;
-    if (node.elements.length) {
-      replacement = `,${replacement}`;
-    } else {
-      replacement = `${replacement},`;
-    }
-  } else {
-    replacement = code;
-    if (node.elements.length > 0) {
-      replacement = `, ${code}`;
-    }
-  }
-  return [{
-    start: insertPos,
-    end: insertPos,
-    replacement,
-  }];
-}
+//   let replacement;
+//   if (multilines) {
+//     const indent = _.repeat(' ', node.loc.end.column - 1);
+//     replacement = `\n${indent}  ${code}`;
+//     if (node.elements.length) {
+//       replacement = `,${replacement}`;
+//     } else {
+//       replacement = `${replacement},`;
+//     }
+//   } else {
+//     replacement = code;
+//     if (node.elements.length > 0) {
+//       replacement = `, ${code}`;
+//     }
+//   }
+//   return [{
+//     start: insertPos,
+//     end: insertPos,
+//     replacement,
+//   }];
+// }
 
-function removeFromArrayByNode(node, eleNode) {
-  const elements = node.elements;
+// function removeFromArrayByNode(node, eleNode) {
+//   const elements = node.elements;
 
-  if (!elements.includes(eleNode)) {
-    utils.warn('Failed to find element when trying to remove element from array.');
-    return [];
-  }
+//   if (!elements.includes(eleNode)) {
+//     utils.warn('Failed to find element when trying to remove element from array.');
+//     return [];
+//   }
 
-  if (!node._filePath) {
-    utils.fatalError('No _filePath property found on node when removing element from array');
-    return null;
-  }
+//   if (!node._filePath) {
+//     utils.fatalError('No _filePath property found on node when removing element from array');
+//     return null;
+//   }
 
-  const content = vio.getContent(node._filePath);
-  let startPos = nearestCharBefore(',', content, eleNode.start);
-  if (startPos < 0) {
-    // it's the first element
-    startPos = node.start + 1;
-  }
+//   const content = vio.getContent(node._filePath);
+//   let startPos = nearestCharBefore(',', content, eleNode.start);
+//   if (startPos < 0) {
+//     // it's the first element
+//     startPos = node.start + 1;
+//   }
 
-  let endPos = eleNode.end;
+//   let endPos = eleNode.end;
 
-  if (elements.length === 1) {
-    // if the element is the only element, try to remove the trailing comma if exists
-    const nextComma = nearestCharAfter(',', content, endPos - 1);
-    if (nextComma >= 0) endPos = nextComma + 1;
-  }
+//   if (elements.length === 1) {
+//     // if the element is the only element, try to remove the trailing comma if exists
+//     const nextComma = nearestCharAfter(',', content, endPos - 1);
+//     if (nextComma >= 0) endPos = nextComma + 1;
+//   }
 
-  return [{
-    start: startPos,
-    end: endPos,
-    replacement: '',
-  }];
-}
+//   return [{
+//     start: startPos,
+//     end: endPos,
+//     replacement: '',
+//   }];
+// }
 
-function addToArray(ast, varName, identifierName) {
-  // Summary:
-  //  Add an element to a specified array expression
-  //  eg: const arr = [a, b, c];
-  //  Added 'd' => [a, b, c, d];
-  //  It only adds to the first matched array.
+// function addToArray(ast, varName, identifierName) {
+//   // Summary:
+//   //  Add an element to a specified array expression
+//   //  eg: const arr = [a, b, c];
+//   //  Added 'd' => [a, b, c, d];
+//   //  It only adds to the first matched array.
 
-  let changes = [];
-  traverse(ast, {
-    VariableDeclarator(path) {
-      const node = path.node;
-      if (_.get(node, 'id.name') !== varName || _.get(node, 'init.type') !== 'ArrayExpression') return;
-      node.init._filePath = ast._filePath;
-      changes = addToArrayByNode(node.init, identifierName);
-      path.stop();
-    }
-  });
-  return changes;
-}
+//   let changes = [];
+//   traverse(ast, {
+//     VariableDeclarator(path) {
+//       const node = path.node;
+//       if (_.get(node, 'id.name') !== varName || _.get(node, 'init.type') !== 'ArrayExpression') return;
+//       node.init._filePath = ast._filePath;
+//       changes = addToArrayByNode(node.init, identifierName);
+//       path.stop();
+//     }
+//   });
+//   return changes;
+// }
 
-function removeFromArray(ast, varName, identifierName) {
-  let changes = [];
-  traverse(ast, {
-    VariableDeclarator(path) {
-      const node = path.node;
-      if (_.get(node, 'id.name') !== varName || _.get(node, 'init.type') !== 'ArrayExpression') return;
-      node.init._filePath = ast._filePath;
-      const toRemove = _.find(node.init.elements, ele => ele.name === identifierName);
-      changes = removeFromArrayByNode(node.init, toRemove);
-      path.stop();
-    }
-  });
-  return changes;
-}
+// function removeFromArray(ast, varName, identifierName) {
+//   let changes = [];
+//   traverse(ast, {
+//     VariableDeclarator(path) {
+//       const node = path.node;
+//       if (_.get(node, 'id.name') !== varName || _.get(node, 'init.type') !== 'ArrayExpression') return;
+//       node.init._filePath = ast._filePath;
+//       const toRemove = _.find(node.init.elements, ele => ele.name === identifierName);
+//       changes = removeFromArrayByNode(node.init, toRemove);
+//       path.stop();
+//     }
+//   });
+//   return changes;
+// }
 
 function addObjectProperty(ast, varName, propName, propValue) {
   const changes = [];
@@ -1529,48 +1529,48 @@ function getSrcFiles(dir) {
 //   return changes;
 // }
 
-function acceptFilePathForAst(func) {
-  // Summary:
-  //  Wrapper a function that accepts ast also accepts file path.
-  //  If it's file path, then update the file immediately.
+// function acceptFilePathForAst(func) {
+//   // Summary:
+//   //  Wrapper a function that accepts ast also accepts file path.
+//   //  If it's file path, then update the file immediately.
 
-  return function(file) { // eslint-disable-line
-    let ast = file;
-    if (_.isString(file)) {
-      ast = vio.getAst(file);
-    }
-    const args = _.toArray(arguments);
-    args[0] = ast;
+//   return function(file) { // eslint-disable-line
+//     let ast = file;
+//     if (_.isString(file)) {
+//       ast = vio.getAst(file);
+//     }
+//     const args = _.toArray(arguments);
+//     args[0] = ast;
 
-    const changes = func.apply(null, args);
+//     const changes = func.apply(null, args);
 
-    if (_.isString(file)) {
-      updateFile(file, changes);
-    }
+//     if (_.isString(file)) {
+//       updateFile(file, changes);
+//     }
 
-    return changes;
-  };
-}
+//     return changes;
+//   };
+// }
 
-function acceptFilePathForLines(func) {
-  // Summary:
-  //  Wrapper a function that accepts lines also accepts file path.
-  //  If it's file path, then update the file immediately.
+// function acceptFilePathForLines(func) {
+//   // Summary:
+//   //  Wrapper a function that accepts lines also accepts file path.
+//   //  If it's file path, then update the file immediately.
 
-  return function(file) { // eslint-disable-line
-    let lines = file;
-    if (_.isString(file)) {
-      lines = vio.getLines(file);
-    }
-    const args = _.toArray(arguments);
-    args[0] = lines;
-    func.apply(null, args);
+//   return function(file) { // eslint-disable-line
+//     let lines = file;
+//     if (_.isString(file)) {
+//       lines = vio.getLines(file);
+//     }
+//     const args = _.toArray(arguments);
+//     args[0] = lines;
+//     func.apply(null, args);
 
-    if (_.isString(file)) {
-      vio.save(file, lines);
-    }
-  };
-}
+//     if (_.isString(file)) {
+//       vio.save(file, lines);
+//     }
+//   };
+// }
 
 module.exports = {
 

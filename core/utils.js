@@ -251,63 +251,6 @@ function getFeatureName(filePath) {
   return name;
 }
 
-// find module alias
-function getModuleResolverAlias() {
-  const thePkgJson = getPkgJson();
-  const babelPlugins = _.get(thePkgJson, 'babel.plugins');
-  let alias = {};
-  if (_.isArray(babelPlugins)) {
-    const moduleResolver = babelPlugins.filter(p => p[0] === 'module-resolver');
-    if (moduleResolver) {
-      alias = moduleResolver[0][1].alias;
-    }
-  }
-  return alias;
-}
-
-/**
- * Check if a module is local module. It will check alias defined by babel plugin module-resolver.
- * @param {string} modulePath - The module path. i.e.: import * from './abc'; './abc' is the module path.
- * @alias module:utils.isLocalModule
-**/
-function isLocalModule(modulePath) {
-  // TODO: handle alias module path like src
-  const alias = getModuleResolverAlias();
-  return /^\./.test(modulePath) || _.keys(alias).some(a => _.startsWith(modulePath, a));
-}
-
-/**
- * Resolve the module path.
- * @param {string} relativeTo - Relative to which file to resolve. That is the file in which import the module.
- * @param {string} modulePath - The relative module path.
- * @alias module:utils.resolveModulePath
-**/
-function resolveModulePath(relativeToFile, modulePath) {
-  if (!isLocalModule(modulePath)) {
-    return modulePath;
-  }
-
-  const alias = getModuleResolverAlias();
-  const matched = _.find(_.keys(alias), k => _.startsWith(modulePath, k));
-
-  let res = null;
-  if (matched) {
-    const resolveTo = alias[matched];
-
-    const relativePath = modulePath.replace(matched, '').replace(/^\//, '');
-    res = joinPath(getProjectRoot(), resolveTo, relativePath);
-  } else {
-    res = joinPath(path.dirname(relativeToFile), modulePath);
-  }
-
-  if (/src\/features\/[^/]+\/?$/.test(res)) {
-    // if import from a feature folder, then resolve to index.js
-    res = res.replace(/\/$/, '') + '/index';
-  }
-
-  return res;
-}
-
 module.exports = {
   getCssExt,
   setProjectRoot,
@@ -318,8 +261,6 @@ module.exports = {
   getFullPath,
   getActionType,
   getAsyncActionTypes,
-  isLocalModule,
-  resolveModulePath,
   mapSrcFile,
   mapComponent,
   mapReduxFile,

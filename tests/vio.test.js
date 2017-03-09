@@ -65,6 +65,7 @@ describe('vio', function () {
   });
 
   describe('ls', () => {
+    utils.setProjectRoot(path.join(__dirname, './test-prj'));
     it('list files under src/common', () => {
       const res = vio.ls(path.join(utils.getProjectRoot(), 'src/common'));
       expect(res.length).to.equal(3);
