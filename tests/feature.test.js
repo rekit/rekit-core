@@ -67,7 +67,6 @@ describe('feature', function() { // eslint-disable-line
 
   it('rename feature', () => {
     core.moveFeature(TEST_FEATURE_NAME, TEST_FEATURE_NAME_2);
-
     expectNoLines(mapSrcFile('common/rootReducer.js'), [
       CAMEL_TEST_FEATURE_NAME,
     ]);

@@ -234,7 +234,7 @@ module.exports = {
 
   renameInStyle(feature, oldName, newName) {
     const targetPath = utils.mapFeatureFile(feature, 'style.' + utils.getCssExt());
-    refactor.renameStyleModuleSource(targetPath, `./${oldName}.${utils.getCssExt()}`, `./${newName}.${utils.getCssExt()}`);
+    refactor.renameStyleImport(targetPath, `./${oldName}.${utils.getCssExt()}`, `./${newName}.${utils.getCssExt()}`);
   },
 
   addToRootStyle(feature) {
@@ -249,7 +249,7 @@ module.exports = {
 
   renameInRootStyle(oldFeature, newFeature) {
     const targetPath = utils.mapSrcFile('styles/index.' + utils.getCssExt());
-    refactor.renameStyleModuleSource(
+    refactor.renameStyleImport(
       targetPath,
       `../features/${_.kebabCase(oldFeature)}/style.${utils.getCssExt()}`,
       `../features/${_.kebabCase(newFeature)}/style.${utils.getCssExt()}`

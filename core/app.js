@@ -536,6 +536,7 @@ function getSrcFiles(dir) {
 }
 
 module.exports = {
+  getRekitProps,
   getFeatures,
   getFeatureStructure,
   getDeps,

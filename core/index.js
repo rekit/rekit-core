@@ -237,7 +237,7 @@ function addAction(feature, name, args) {
 **/
 function removeAction(feature, name) {
   const targetPath = utils.mapReduxFile(feature, name);
-  if (_.get(refactor.getRekitProps(targetPath), 'action.isAsync')) {
+  if (_.get(app.getRekitProps(targetPath), 'action.isAsync')) {
     removeAsyncAction(feature, name);
     return;
   }
@@ -255,7 +255,7 @@ function removeAction(feature, name) {
 **/
 function moveAction(source, target) {
   const targetPath = utils.mapReduxFile(source.feature, source.name);
-  if (_.get(refactor.getRekitProps(targetPath), 'action.isAsync')) {
+  if (_.get(app.getRekitProps(targetPath), 'action.isAsync')) {
     moveAsyncAction(source, target);
     return;
   }

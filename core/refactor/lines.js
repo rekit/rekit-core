@@ -23,7 +23,7 @@ function lineIndex(lines, match, fromMatch) {
     // Callback
     return _.findIndex(lines, match);
   }
-
+// console.log('regular: ', _.findIndex(lines, l => match.test(l), fromMatch || 0));
   // Regular expression
   return _.findIndex(lines, l => match.test(l), fromMatch || 0);
 }
@@ -46,7 +46,7 @@ function removeLines(lines, str) {
 }
 
 module.exports = {
-  lineIndex: common.acceptFilePathForLines(lineIndex),
-  lastLineIndex: common.acceptFilePathForLines(lastLineIndex),
+  lineIndex,
+  lastLineIndex,
   removeLines: common.acceptFilePathForLines(removeLines),
 };

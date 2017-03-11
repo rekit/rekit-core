@@ -5,40 +5,6 @@ const traverse = require('babel-traverse').default;
 const common = require('./common');
 const linesManager = require('./lines');
 
-// function addImportLine(lines, importLine) {
-//   // Summary:
-//   //  Add import npm module to source code (abs path)
-//   //  Use text matching instead of ast.
-
-//   const i = lastLineIndex(lines, /^import /);
-//   lines.splice(i + 1, 0, importLine);
-// }
-
-// function removeImportLine(file, moduleSource) {
-//   // Summary:
-//   //  Remove import xxx from '.xxx' line at the top. Usually used by entry files such as index.js
-
-//   const lines = vio.getLines(file);
-//   removeLines(lines, new RegExp(`import +.* +from +'${_.escapeRegExp(moduleSource)}'`));
-// }
-
-// function addExportFromLine(file, exportLine) {
-//   // Summary:
-//   //  Add export xxx from '.xxx' line at the top. Usually used by entry files such as index.js
-
-//   const lines = vio.getLines(file);
-//   const i = lastLineIndex(lines, /^export .* from /);
-//   lines.splice(i + 1, 0, exportLine);
-// }
-
-// function removeExportFromLine(file, moduleSource) {
-//   // Summary:
-//   //  Remove export xxx from '.xxx' line at the top. Usually used by entry files such as index.js
-
-//   const lines = vio.getLines(file);
-//   removeLines(lines, new RegExp(`export +.* +from +'${_.escapeRegExp(moduleSource)}'`));
-// }
-
 function renameCssClassName(ast, oldName, newName) {
   // Summary:
   //  Rename the css class name in a JSXAttribute
@@ -80,7 +46,7 @@ function renameStyleImport(lines, oldMoudleSource, newModuleSource) {
 
 module.exports = {
   renameCssClassName: common.acceptFilePathForAst(renameCssClassName),
-  addStyleImport: common.acceptFilePathForAst(addStyleImport),
-  removeStyleImport: common.acceptFilePathForAst(removeStyleImport),
-  renameStyleImport: common.acceptFilePathForAst(renameStyleImport),
+  addStyleImport: common.acceptFilePathForLines(addStyleImport),
+  removeStyleImport: common.acceptFilePathForLines(removeStyleImport),
+  renameStyleImport: common.acceptFilePathForLines(renameStyleImport),
 };

@@ -149,6 +149,7 @@ function removeObjectProperty(ast, varName, propName) {
 }
 
 module.exports = {
+  objExpToObj,
   addObjectProperty: common.acceptFilePathForAst(addObjectProperty),
   setObjectProperty: common.acceptFilePathForAst(setObjectProperty),
   renameObjectProperty: common.acceptFilePathForAst(renameObjectProperty),

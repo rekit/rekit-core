@@ -32,8 +32,8 @@ const opts = {
   stdio: 'inherit',
   env,
 };
-
-const params = ['mocha', testFile];
+console.log('test file: ', testFile);
+const params = ['mocha', `"${testFile}"`];
 
 if (needReport) {
   params.splice(0, 0,
