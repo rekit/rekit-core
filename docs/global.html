@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>template - Documentation</title>
+    <title>Global - Documentation</title>
 
     <script src="scripts/prettify/prettify.js"></script>
     <script src="scripts/prettify/lang-css.js"></script>
@@ -27,7 +27,7 @@
 
 <div id="main">
     
-    <h1 class="page-title">template</h1>
+    <h1 class="page-title">Global</h1>
     
 
     
@@ -39,8 +39,9 @@
 
 <header>
     
+        <h2>
         
-            
+        </h2>
         
     
 </header>
@@ -49,22 +50,9 @@
     <div class="container-overview">
     
         
-            <div class="description"><p>Template manager. A simple wrapper of lodash template for using vio internally.</p></div>
-        
-
-        
-            
-
-
-
 
 <dl class="details">
 
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="template.js.html">template.js</a>, <a href="template.js.html#line3">line 3</a>
-    </li></ul></dd>
     
 
     
@@ -101,30 +89,7 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        
 
         
     
@@ -150,7 +115,9 @@
 
     
 
-    <h4 class="name" id=".generate"><span class="type-signature">(static) </span>generate<span class="signature">(targetPath, args)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="module:refactor.addToArrayByNode
+@"><span class="type-signature"></span>module:refactor.addToArrayByNode
+@<span class="signature">(node, code)</span><span class="type-signature"></span></h4>
 
     
 
@@ -162,7 +129,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="template.js.html">template.js</a>, <a href="template.js.html#line53">line 53</a>
+        <a href="refactor_array.js.html">refactor/array.js</a>, <a href="refactor_array.js.html#line58">line 58</a>
     </li></ul></dd>
     
 
@@ -202,8 +169,7 @@
 
 
 <div class="description">
-    <p>Process the template file and save the result to virtual IO.
-If the target file has existed, throw fatal error and exit.</p>
+    <p>Add an element to an array definition.</p>
 </div>
 
 
@@ -212,17 +178,6 @@ If the target file has existed, throw fatal error and exit.</p>
 
 
 
-
-
-    <h5>Example</h5>
-    
-    <pre class="prettyprint"><code>const template = require('rekit-core').template;
-
-const tpl = 'hello ${user}!';
-template.generate('path/to/result.txt', { template: tpl, context: { user: 'Nate' } });
-
-// Result => create a file 'path/to/result.txt' which contains text: 'hello Nate!'
-// NOTE the result is only in vio, you need to call vio.flush() to write to disk.</code></pre>
 
 
 
@@ -252,7 +207,30 @@ template.generate('path/to/result.txt', { template: tpl, context: { user: 'Nate'
 
         <tr>
             
-                <td class="name"><code>targetPath</code></td>
+                <td class="name"><code>node</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The ast node of the array definition.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>code</code></td>
             
 
             <td class="type">
@@ -268,125 +246,7 @@ template.generate('path/to/result.txt', { template: tpl, context: { user: 'Nate'
 
             
 
-            <td class="description last"><p>The path to save the result.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>args</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Object</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>The path to save the result.</p>
-                <h6>Properties</h6>
-                
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>template</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>The template string to process.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>templateFile</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>If no 'template' defined, read the template file to process. One of template and templateFile should be provided.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>context</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Object</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>The context to process the template.</p></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-            </td>
+            <td class="description last"><p>The code to append to the array.</p></td>
         </tr>
 
     
@@ -413,7 +273,9 @@ template.generate('path/to/result.txt', { template: tpl, context: { user: 'Nate'
 
     
 
-    <h4 class="name" id=".readTemplate"><span class="type-signature">(static) </span>readTemplate<span class="signature">(file)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="module:refactor.removeFromArrayByNode
+@"><span class="type-signature"></span>module:refactor.removeFromArrayByNode
+@<span class="signature">(node, eleNode)</span><span class="type-signature"></span></h4>
 
     
 
@@ -425,7 +287,7 @@ template.generate('path/to/result.txt', { template: tpl, context: { user: 'Nate'
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="template.js.html">template.js</a>, <a href="template.js.html#line25">line 25</a>
+        <a href="refactor_array.js.html">refactor/array.js</a>, <a href="refactor_array.js.html#line99">line 99</a>
     </li></ul></dd>
     
 
@@ -465,8 +327,7 @@ template.generate('path/to/result.txt', { template: tpl, context: { user: 'Nate'
 
 
 <div class="description">
-    <p>Read a template content, if the file isn't absolute path, find it in rekit-core/templates folder. Otherwise read the file content.
-If the file doesn't exist, throw fatal error and exit.</p>
+    <p>Remove an element from an array definition.</p>
 </div>
 
 
@@ -504,7 +365,164 @@ If the file doesn't exist, throw fatal error and exit.</p>
 
         <tr>
             
-                <td class="name"><code>file</code></td>
+                <td class="name"><code>node</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The ast node of the array definition.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>eleNode</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The ast node to be removed.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="nearestCharAfter"><span class="type-signature"></span>nearestCharAfter<span class="signature">(char, str)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="refactor_array.js.html">refactor/array.js</a>, <a href="refactor_array.js.html#line39">line 39</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description">
+    <p>Similar with nearestCharBefore, but find the char after the given index.
+If not found, return -1</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>char</code></td>
             
 
             <td class="type">
@@ -520,7 +538,188 @@ If the file doesn't exist, throw fatal error and exit.</p>
 
             
 
-            <td class="description last"><p>The path to the template file.</p></td>
+            <td class="description last"><p>Which char to find</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>str</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The string to to search.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="nearestCharBefore"><span class="type-signature"></span>nearestCharBefore<span class="signature">(char, str)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="refactor_array.js.html">refactor/array.js</a>, <a href="refactor_array.js.html#line18">line 18</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description">
+    <p>Find the nearest char index before given index. skip white space strings
+If not found, return -1
+eg: nearestCharBefore(',', '1,    2, 3', 4) =&gt; 1</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>char</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Which char to find</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>str</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The string to to search.</p></td>
         </tr>
 
     

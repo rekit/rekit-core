@@ -14,6 +14,24 @@ function getDefNode(name, scope) {
   return null;
 }
 
+/**
+ * Rename an top scope identifier in a module. If first finds the definition node of the given name.
+ * Then rename all identifiers those refer to that definition node.
+ * @param {string} ast - Which module to rename an identifier.
+ * @param {string} oldName - The old identifier name.
+ * @index {string} newName - The new identifier name.
+ * @index {object} defNode - The definition node of the identifier. If not provided, then find the first definition in the module.
+ * @alias module:refactor.renameIdentifier
+ * @example
+ * // import { m1 } from './some-module';
+ * // m1.doSomething();
+ * // function () { const m1 = 'abc'; }
+ * const refactor = require('rekit-core').refactor;
+ * refactor.renameIdentifier(file, 'm1', 'm2');
+ * // => import { m2 } from './some-module';
+ * // => m2.doSomething();
+ * // => function () { const m1 = 'abc'; } // m1 is not renamed.
+**/
 function renameIdentifier(ast, oldName, newName, defNode) {
   // Summary:
   //  Rename identifiers with oldName in ast

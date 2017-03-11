@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>template - Documentation</title>
+    <title>refactor/identifier.js - Documentation</title>
 
     <script src="scripts/prettify/prettify.js"></script>
     <script src="scripts/prettify/lang-css.js"></script>
@@ -27,530 +27,80 @@
 
 <div id="main">
     
-    <h1 class="page-title">template</h1>
-    
-
-    
-
-
-
-
-<section>
-
-<header>
-    
-        
-            
-        
-    
-</header>
-
-<article>
-    <div class="container-overview">
-    
-        
-            <div class="description"><p>Template manager. A simple wrapper of lodash template for using vio internally.</p></div>
-        
-
-        
-            
-
-
-
-
-<dl class="details">
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="template.js.html">template.js</a>, <a href="template.js.html#line3">line 3</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-    
-    </div>
-
-    
-
-    
-
-    
-
-     
-
-    
-
-    
-
-    
-        <h3 class="subsection-title">Methods</h3>
-
-        
-            
-
-    
-
-    <h4 class="name" id=".generate"><span class="type-signature">(static) </span>generate<span class="signature">(targetPath, args)</span><span class="type-signature"></span></h4>
-
-    
-
-
-
-
-<dl class="details">
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="template.js.html">template.js</a>, <a href="template.js.html#line53">line 53</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-<div class="description">
-    <p>Process the template file and save the result to virtual IO.
-If the target file has existed, throw fatal error and exit.</p>
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Example</h5>
-    
-    <pre class="prettyprint"><code>const template = require('rekit-core').template;
-
-const tpl = 'hello ${user}!';
-template.generate('path/to/result.txt', { template: tpl, context: { user: 'Nate' } });
-
-// Result => create a file 'path/to/result.txt' which contains text: 'hello Nate!'
-// NOTE the result is only in vio, you need to call vio.flush() to write to disk.</code></pre>
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>targetPath</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>The path to save the result.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>args</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Object</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>The path to save the result.</p>
-                <h6>Properties</h6>
-                
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>template</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>The template string to process.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>templateFile</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>If no 'template' defined, read the template file to process. One of template and templateFile should be provided.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>context</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Object</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>The context to process the template.</p></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-            </td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-            
-
-    
-
-    <h4 class="name" id=".readTemplate"><span class="type-signature">(static) </span>readTemplate<span class="signature">(file)</span><span class="type-signature"></span></h4>
-
-    
-
-
-
-
-<dl class="details">
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="template.js.html">template.js</a>, <a href="template.js.html#line25">line 25</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-<div class="description">
-    <p>Read a template content, if the file isn't absolute path, find it in rekit-core/templates folder. Otherwise read the file content.
-If the file doesn't exist, throw fatal error and exit.</p>
-</div>
-
-
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>file</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>The path to the template file.</p></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-    
-
-    
-
-    
-</article>
-
-</section>
+    <h1 class="page-title">refactor/identifier.js</h1>
+    
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>'use strict';
+
+const traverse = require('babel-traverse').default;
+const common = require('./common');
+
+function getDefNode(name, scope) {
+  // Summary:
+  //  Get the definition node for an identifier
+
+  while (scope) {
+    if (scope.bindings[name]) return scope.bindings[name].identifier;
+    scope = scope.parent;
+  }
+  return null;
+}
+
+/**
+ * Rename an top scope identifier in a module. If first finds the definition node of the given name.
+ * Then rename all identifiers those refer to that definition node.
+ * @param {string} ast - Which module to rename an identifier.
+ * @param {string} oldName - The old identifier name.
+ * @index {string} newName - The new identifier name.
+ * @index {object} defNode - The definition node of the identifier. If not provided, then find the first definition in the module.
+ * @alias module:refactor.renameIdentifier
+ * @example
+ * // import { m1 } from './some-module';
+ * // m1.doSomething();
+ * // function () { const m1 = 'abc'; }
+ * const refactor = require('rekit-core').refactor;
+ * refactor.renameIdentifier(file, 'm1', 'm2');
+ * // => import { m2 } from './some-module';
+ * // => m2.doSomething();
+ * // => function () { const m1 = 'abc'; } // m1 is not renamed.
+**/
+function renameIdentifier(ast, oldName, newName, defNode) {
+  // Summary:
+  //  Rename identifiers with oldName in ast
+  const changes = [];
+  function rename(path) {
+    if (
+      path.node.name === oldName
+      &amp;&amp; path.key !== 'imported'// it should NOT be imported specifier
+      &amp;&amp; getDefNode(path.node.name, path.scope) === defNode) {
+      path.node.name = newName;
+      changes.push({
+        start: path.node.start,
+        end: path.node.end,
+        replacement: newName,
+      });
+    }
+  }
+  traverse(ast, {
+    JSXIdentifier: rename,
+    Identifier: rename,
+  });
+  return changes;
+}
+
+module.exports = {
+  renameIdentifier: common.acceptFilePathForAst(renameIdentifier),
+};
+</code></pre>
+        </article>
+    </section>
 
 
 

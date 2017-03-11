@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>template - Documentation</title>
+    <title>refactor - Documentation</title>
 
     <script src="scripts/prettify/prettify.js"></script>
     <script src="scripts/prettify/lang-css.js"></script>
@@ -27,7 +27,7 @@
 
 <div id="main">
     
-    <h1 class="page-title">template</h1>
+    <h1 class="page-title">refactor</h1>
     
 
     
@@ -49,7 +49,7 @@
     <div class="container-overview">
     
         
-            <div class="description"><p>Template manager. A simple wrapper of lodash template for using vio internally.</p></div>
+            <div class="description"><p>Simple refactor for es6 code.</p></div>
         
 
         
@@ -63,7 +63,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="template.js.html">template.js</a>, <a href="template.js.html#line3">line 3</a>
+        <a href="refactor_index.js.html">refactor/index.js</a>, <a href="refactor_index.js.html#line3">line 3</a>
     </li></ul></dd>
     
 
@@ -150,7 +150,7 @@
 
     
 
-    <h4 class="name" id=".generate"><span class="type-signature">(static) </span>generate<span class="signature">(targetPath, args)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id=".addImportFrom"><span class="type-signature">(static) </span>addImportFrom<span class="signature">(ast, moduleSource)</span><span class="type-signature"></span></h4>
 
     
 
@@ -162,7 +162,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="template.js.html">template.js</a>, <a href="template.js.html#line53">line 53</a>
+        <a href="refactor_importExport.js.html">refactor/importExport.js</a>, <a href="refactor_importExport.js.html#line46">line 46</a>
     </li></ul></dd>
     
 
@@ -202,8 +202,9 @@
 
 
 <div class="description">
-    <p>Process the template file and save the result to virtual IO.
-If the target file has existed, throw fatal error and exit.</p>
+    <p>Import from a given module source. This methods operates import statement:
+import defaultImmport, { namedImport ... } from './module-source';
+It noly supports es6 modules import but not commonJS or AMD or others...</p>
 </div>
 
 
@@ -216,13 +217,9 @@ If the target file has existed, throw fatal error and exit.</p>
 
     <h5>Example</h5>
     
-    <pre class="prettyprint"><code>const template = require('rekit-core').template;
-
-const tpl = 'hello ${user}!';
-template.generate('path/to/result.txt', { template: tpl, context: { user: 'Nate' } });
-
-// Result => create a file 'path/to/result.txt' which contains text: 'hello Nate!'
-// NOTE the result is only in vio, you need to call vio.flush() to write to disk.</code></pre>
+    <pre class="prettyprint"><code>const refactor = require('rekit-core').refactor;
+refactor.addImportFrom(file, './some-module', 'SomeModule', ['method1', 'method2']);
+// it generates: import SomeModule, { method1, method2 } from './some-module';</code></pre>
 
 
 
@@ -252,7 +249,7 @@ template.generate('path/to/result.txt', { template: tpl, context: { user: 'Nate'
 
         <tr>
             
-                <td class="name"><code>targetPath</code></td>
+                <td class="name"><code>ast</code></td>
             
 
             <td class="type">
@@ -268,56 +265,14 @@ template.generate('path/to/result.txt', { template: tpl, context: { user: 'Nate'
 
             
 
-            <td class="description last"><p>The path to save the result.</p></td>
+            <td class="description last"><p>Which module to rename function.</p></td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>args</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Object</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>The path to save the result.</p>
-                <h6>Properties</h6>
-                
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>template</code></td>
+                <td class="name"><code>moduleSource</code></td>
             
 
             <td class="type">
@@ -333,60 +288,7 @@ template.generate('path/to/result.txt', { template: tpl, context: { user: 'Nate'
 
             
 
-            <td class="description last"><p>The template string to process.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>templateFile</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>If no 'template' defined, read the template file to process. One of template and templateFile should be provided.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>context</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Object</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>The context to process the template.</p></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-            </td>
+            <td class="description last"><p>From which module source to add import from. If not found, the create an import line.</p></td>
         </tr>
 
     
@@ -413,7 +315,7 @@ template.generate('path/to/result.txt', { template: tpl, context: { user: 'Nate'
 
     
 
-    <h4 class="name" id=".readTemplate"><span class="type-signature">(static) </span>readTemplate<span class="signature">(file)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id=".addToArray"><span class="type-signature">(static) </span>addToArray<span class="signature">(ast, varName, identifierName)</span><span class="type-signature"></span></h4>
 
     
 
@@ -425,7 +327,7 @@ template.generate('path/to/result.txt', { template: tpl, context: { user: 'Nate'
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="template.js.html">template.js</a>, <a href="template.js.html#line25">line 25</a>
+        <a href="refactor_array.js.html">refactor/array.js</a>, <a href="refactor_array.js.html#line149">line 149</a>
     </li></ul></dd>
     
 
@@ -465,8 +367,8 @@ template.generate('path/to/result.txt', { template: tpl, context: { user: 'Nate'
 
 
 <div class="description">
-    <p>Read a template content, if the file isn't absolute path, find it in rekit-core/templates folder. Otherwise read the file content.
-If the file doesn't exist, throw fatal error and exit.</p>
+    <p>Add an identifier to the array of the name 'varName'.
+It only finds the first matched array in the top scope of ast.</p>
 </div>
 
 
@@ -475,6 +377,14 @@ If the file doesn't exist, throw fatal error and exit.</p>
 
 
 
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>const refactor = require('rekit-core').refactor;
+// code in ast: const arr = [a, b, c];
+refactor.addToArray(file, 'arr', 'd');
+// code changes to: const arr = [a, b, c, d];</code></pre>
 
 
 
@@ -504,7 +414,33 @@ If the file doesn't exist, throw fatal error and exit.</p>
 
         <tr>
             
-                <td class="name"><code>file</code></td>
+                <td class="name"><code>ast</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+|
+
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The ast tree or the js file path to find the array.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>varName</code></td>
             
 
             <td class="type">
@@ -520,7 +456,727 @@ If the file doesn't exist, throw fatal error and exit.</p>
 
             
 
-            <td class="description last"><p>The path to the template file.</p></td>
+            <td class="description last"><p>The variable name of the array definition.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>identifierName</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The identifier to append to array.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id=".removeFromArray"><span class="type-signature">(static) </span>removeFromArray<span class="signature">(ast, varName, identifierName)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="refactor_array.js.html">refactor/array.js</a>, <a href="refactor_array.js.html#line178">line 178</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description">
+    <p>Remove an identifier from the array of the name 'varName'.
+It only finds the first matched array in the global scope of ast.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>const refactor = require('rekit-core').refactor;
+// code in ast: const arr = [a, b, c];
+refactor.removeFromArray(file, 'arr', 'a');
+// code changes to: const arr = [b, c];</code></pre>
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>ast</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+|
+
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The ast tree or the js file path to find the array.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>varName</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The variable name of the array definition.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>identifierName</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The identifier to append to array.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id=".renameClassName"><span class="type-signature">(static) </span>renameClassName<span class="signature">(ast, oldName)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="refactor_cls.js.html">refactor/cls.js</a>, <a href="refactor_cls.js.html#line24">line 24</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description">
+    <p>Rename a es6 class name in a module. Only rename the class definition and its reference in the module.
+It will not find other files to rename reference.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>// class MyClass {
+//   ...
+// }
+const refactor = require('rekit-core').refactor;
+refactor.renameClassName(file, 'MyClass', 'NewMyClass');
+// => class NewMyClass {
+// =>   ...
+// => }</code></pre>
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>ast</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Which module to rename class name.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>oldName</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The old class name.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id=".renameFunctionName"><span class="type-signature">(static) </span>renameFunctionName<span class="signature">(ast, oldName)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="refactor_func.js.html">refactor/func.js</a>, <a href="refactor_func.js.html#line23">line 23</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description">
+    <p>Rename a function name in a module.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>// function MyFunc() {
+//   ...
+// }
+const refactor = require('rekit-core').refactor;
+refactor.renameFunctionName(file, 'MyFunc', 'NewMyFunc');
+// => function NewMyFunc {
+// =>   ...
+// => }</code></pre>
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>ast</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Which module to rename function.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>oldName</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The old function name.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id=".renameIdentifier"><span class="type-signature">(static) </span>renameIdentifier<span class="signature">(ast, oldName)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+
+<dl class="details">
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="refactor_identifier.js.html">refactor/identifier.js</a>, <a href="refactor_identifier.js.html#line35">line 35</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description">
+    <p>Rename an top scope identifier in a module. If first finds the definition node of the given name.
+Then rename all identifiers those refer to that definition node.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>// import { m1 } from './some-module';
+// m1.doSomething();
+// function () { const m1 = 'abc'; }
+const refactor = require('rekit-core').refactor;
+refactor.renameIdentifier(file, 'm1', 'm2');
+// => import { m2 } from './some-module';
+// => m2.doSomething();
+// => function () { const m1 = 'abc'; } // m1 is not renamed.</code></pre>
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>ast</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Which module to rename an identifier.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>oldName</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The old identifier name.</p></td>
         </tr>
 
     

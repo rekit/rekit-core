@@ -1,5 +1,11 @@
 'use strict';
 
+/**
+ * Simple refactor for es6 code.
+ * @module refactor
+**/
+
+
 const common = require('./common');
 const array = require('./array');
 const importExport = require('./importExport');

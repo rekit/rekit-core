@@ -6,6 +6,15 @@ const utils = require('../utils');
 const vio = require('../vio');
 const common = require('./common');
 
+/**
+ * Find the nearest char index before given index. skip white space strings
+ * If not found, return -1
+ * eg: nearestCharBefore(',', '1,    2, 3', 4) => 1
+ * @param {string} char - Which char to find
+ * @param {string} str - The string to to search.
+ * @index {number} index - From which index start to find
+ * @
+**/
 function nearestCharBefore(char, str, index) {
   // Find the nearest char index before given index. skip white space strings
   // If not found, return -1
@@ -19,6 +28,14 @@ function nearestCharBefore(char, str, index) {
   return -1;
 }
 
+/**
+ * Similar with nearestCharBefore, but find the char after the given index.
+ * If not found, return -1
+ * @param {string} char - Which char to find
+ * @param {string} str - The string to to search.
+ * @index {number} index - From which index start to find
+ * @
+**/
 function nearestCharAfter(char, str, index) {
   // Find the nearest char index before given index. skip white space strings
   // If not found, return -1
@@ -31,6 +48,13 @@ function nearestCharAfter(char, str, index) {
   return -1;
 }
 
+/**
+ * Add an element to an array definition.
+ * @param {object} node - The ast node of the array definition.
+ * @param {string} code - The code to append to the array.
+ * @alias module:refactor.addToArrayByNode
+ * @
+**/
 function addToArrayByNode(node, code) {
   // node: the arr expression node
   // code: added as the last element of the array
@@ -65,6 +89,13 @@ function addToArrayByNode(node, code) {
   }];
 }
 
+/**
+ * Remove an element from an array definition.
+ * @param {object} node - The ast node of the array definition.
+ * @param {object} eleNode - The ast node to be removed.
+ * @alias module:refactor.removeFromArrayByNode
+ * @
+**/
 function removeFromArrayByNode(node, eleNode) {
   const elements = node.elements;
 
@@ -100,13 +131,22 @@ function removeFromArrayByNode(node, eleNode) {
   }];
 }
 
+/**
+ * Add an identifier to the array of the name 'varName'.
+ * It only finds the first matched array in the top scope of ast.
+ *
+ * @param {object|string} ast - The ast tree or the js file path to find the array.
+ * @param {string} varName - The variable name of the array definition.
+ * @param {string} identifierName - The identifier to append to array.
+ * @alias module:refactor.addToArray
+ *
+ * @example
+ * const refactor = require('rekit-core').refactor;
+ * // code in ast: const arr = [a, b, c];
+ * refactor.addToArray(file, 'arr', 'd');
+ * // code changes to: const arr = [a, b, c, d];
+**/
 function addToArray(ast, varName, identifierName) {
-  // Summary:
-  //  Add an element to a specified array expression
-  //  eg: const arr = [a, b, c];
-  //  Added 'd' => [a, b, c, d];
-  //  It only adds to the first matched array.
-
   let changes = [];
   traverse(ast, {
     VariableDeclarator(path) {
@@ -120,6 +160,21 @@ function addToArray(ast, varName, identifierName) {
   return changes;
 }
 
+/**
+ * Remove an identifier from the array of the name 'varName'.
+ * It only finds the first matched array in the global scope of ast.
+ *
+ * @param {object|string} ast - The ast tree or the js file path to find the array.
+ * @param {string} varName - The variable name of the array definition.
+ * @param {string} identifierName - The identifier to append to array.
+ * @alias module:refactor.removeFromArray
+ *
+ * @example
+ * const refactor = require('rekit-core').refactor;
+ * // code in ast: const arr = [a, b, c];
+ * refactor.removeFromArray(file, 'arr', 'a');
+ * // code changes to: const arr = [b, c];
+**/
 function removeFromArray(ast, varName, identifierName) {
   let changes = [];
   traverse(ast, {
