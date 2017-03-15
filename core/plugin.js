@@ -105,7 +105,7 @@ function loadPlugins() {
       if (/node_modules/.test(pluginRoot) && shell.test('-e', utils.joinPath(prjRoot, 'tools/plugins', pluginName))) {
         err = `\nTip: plugin ${pluginName} seems to be a local plugin, it shouldn't be registered in rekit section of package.json.`;
       }
-      utils.fatalError(`Failed to load plugin: ${pluginName}, ${e}.${err}`);
+      utils.warn(`Failed to load plugin: ${pluginName}, ${e}.${err}`);
     }
 
     return null;

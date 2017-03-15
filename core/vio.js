@@ -244,7 +244,6 @@ function reset() {
 }
 
 function flush() {
-  console.log('flushing...', toSave);
   const res = [];
   Object.keys(dirs).forEach((dir) => {
     if (!shell.test('-e', dir)) {
@@ -316,7 +315,6 @@ function flush() {
 
   // Create/update files
   Object.keys(toSave).forEach((filePath) => {
-    console.log('to save: ', filePath);
     const newContent = getLines(filePath).join('\n');
     if (shell.test('-e', filePath)) {
       const oldContent = shell.cat(filePath).split(/\r?\n/).join('\n');
