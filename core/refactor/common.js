@@ -64,7 +64,7 @@ function getModuleResolverAlias() {
 /**
  * Check if a module is local module. It will check alias defined by babel plugin module-resolver.
  * @param {string} modulePath - The module path. i.e.: import * from './abc'; './abc' is the module path.
- * @alias module:utils.isLocalModule
+ * @alias module:common.isLocalModule
 **/
 function isLocalModule(modulePath) {
   // TODO: handle alias module path like src
@@ -76,7 +76,7 @@ function isLocalModule(modulePath) {
  * Resolve the module path.
  * @param {string} relativeTo - Relative to which file to resolve. That is the file in which import the module.
  * @param {string} modulePath - The relative module path.
- * @alias module:utils.resolveModulePath
+ * @alias module:common.resolveModulePath
 **/
 function resolveModulePath(relativeToFile, modulePath) {
   if (!isLocalModule(modulePath)) {

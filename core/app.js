@@ -11,6 +11,7 @@ const shell = require('shelljs');
 const traverse = require('babel-traverse').default;
 const vio = require('./vio');
 const utils = require('./utils');
+const refactor = require('./refactor');
 
 const propsCache = {};
 const depsCache = {};
@@ -280,7 +281,7 @@ function getEntryData(filePath) {
     ExportNamedDeclaration(path) {
       const node = path.node;
       if (!node.source || !node.source.value) return;
-      const sourceFile = `${utils.resolveModulePath(filePath, node.source.value)}.js`; // from which file
+      const sourceFile = `${refactor.resolveModulePath(filePath, node.source.value)}.js`; // from which file
       const specifiers = {};
       node.specifiers.forEach((specifier) => {
         specifiers[specifier.exported.name] = specifier.local && specifier.local.name || true;
@@ -330,8 +331,8 @@ function getDeps(filePath) {
   traverse(ast, {
     ExportNamedDeclaration(path) {
       const depModule = _.get(path, 'node.source.value');
-      if (!depModule || !utils.isLocalModule(depModule)) return;
-      const resolvedPath = utils.resolveModulePath(filePath, depModule);
+      if (!depModule || !refactor.isLocalModule(depModule)) return;
+      const resolvedPath = refactor.resolveModulePath(filePath, depModule);
       // if (!isLocalModule(depModule)) return;
       const fullPath = resolvedPath + '.js';
       if (!shell.test('-e', fullPath)) return;  // only depends on js modules, no json or other support
@@ -344,7 +345,7 @@ function getDeps(filePath) {
       if (_.get(path, 'node.callee.type') !== 'Import') return;
       const source = _.get(path, 'node.arguments[0].value');
       if (!source) return;
-      const resolvedPath = utils.resolveModulePath(filePath, source);
+      const resolvedPath = refactor.resolveModulePath(filePath, source);
       const fullPath = resolvedPath + '.js';
       if (!shell.test('-e', fullPath)) return;  // only depends on js modules, no json or other support
       depFiles.push({
@@ -356,9 +357,9 @@ function getDeps(filePath) {
     ImportDeclaration(path) {
       const node = path.node;
       const depModule = node.source.value;
-      const resolvedPath = utils.resolveModulePath(filePath, depModule);
+      const resolvedPath = refactor.resolveModulePath(filePath, depModule);
       // Only show deps of local modules
-      if (!utils.isLocalModule(depModule)) return;
+      if (!refactor.isLocalModule(depModule)) return;
       if (isFeatureIndex(resolvedPath)) {
         // Import from feature index
         const indexFile = resolvedPath + '.js';
