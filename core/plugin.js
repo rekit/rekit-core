@@ -43,7 +43,7 @@ function injectExtensionPoints(func, command, targetName) {
   };
 }
 
-function loadPlugins() {
+function loadPlugins(rekitCore) {
   const prjRoot = utils.getProjectRoot();
 
   const prjPkgJson = require(utils.joinPath(prjRoot, 'package.json')); // eslint-disable-line
@@ -85,7 +85,7 @@ function loadPlugins() {
         config.accept.forEach(
           (name) => {
             name = _.camelCase(name);
-            const commands = require(utils.joinPath(pluginRoot, name));
+            const commands = require(utils.joinPath(pluginRoot, name))(rekitCore);
             item.commands[name] = {};
             Object.keys(commands).forEach((key) => {
               item.commands[name][key] = injectExtensionPoints(commands[key], key, name);
