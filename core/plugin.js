@@ -10,9 +10,9 @@ const utils = require('./utils');
 // const template = require('./template');
 
 let plugins = null;
-function getPlugins() {
+function getPlugins(rekitCore) {
   if (!plugins) {
-    loadPlugins(); // eslint-disable-line
+    loadPlugins(rekitCore); // eslint-disable-line
     // utils.fatal('Plugins have not been loaded.');
   }
   return plugins;
@@ -95,9 +95,8 @@ function loadPlugins(rekitCore) {
       }
 
       if (shell.test('-e', utils.joinPath(pluginRoot, 'hooks.js'))) {
-        item.hooks = require(utils.joinPath(pluginRoot, 'hooks')); // eslint-disable-line
+        item.hooks = require(utils.joinPath(pluginRoot, 'hooks'))(rekitCore); // eslint-disable-line
       }
-
       return item;
     } catch (e) {
       const pluginName = path.basename(pluginRoot).replace(/^rekit-plugin-/, '');
@@ -105,7 +104,7 @@ function loadPlugins(rekitCore) {
       if (/node_modules/.test(pluginRoot) && shell.test('-e', utils.joinPath(prjRoot, 'tools/plugins', pluginName))) {
         err = `\nTip: plugin ${pluginName} seems to be a local plugin, it shouldn't be registered in rekit section of package.json.`;
       }
-      utils.warn(`Failed to load plugin: ${pluginName}, ${e}.${err}`);
+      utils.warn(`Failed to load plugin: ${pluginName}, ${e}.${err}\n${e.stack}`);
     }
 
     return null;

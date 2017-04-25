@@ -7,6 +7,7 @@
 
 
 const common = require('./common');
+const identifier = require('./identifier');
 const array = require('./array');
 const importExport = require('./importExport');
 const object = require('./object');
@@ -25,6 +26,9 @@ module.exports = {
   resolveModulePath: common.resolveModulePath,
   acceptFilePathForAst: common.acceptFilePathForAst,
   acceptFilePathForLines: common.acceptFilePathForLines,
+
+  // Identifier
+  renameIdentifier: identifier.renameIdentifier,
 
   // Class
   renameClassName: cls.renameClassName,

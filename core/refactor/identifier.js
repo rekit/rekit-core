@@ -36,6 +36,20 @@ function renameIdentifier(ast, oldName, newName, defNode) {
   // Summary:
   //  Rename identifiers with oldName in ast
   const changes = [];
+  if (!defNode) {
+    let scope;
+    traverse(ast, {
+      Identifier(path) {
+        if (path.node.name === oldName) {
+          scope = path.scope;
+          path.stop();
+        }
+      }
+    });
+    if (!scope) return;
+    defNode = getDefNode(oldName, scope);
+  }
+
   function rename(path) {
     if (
       path.node.name === oldName
