@@ -1,4 +1,4 @@
-import React, { Component, PropTypes } from 'react';
+import React, { Component } from 'react';
 
 export default class ${_.pascalCase(component)} extends Component {
   static propTypes = {
