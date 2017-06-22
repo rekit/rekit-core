@@ -304,6 +304,7 @@ function flush() {
         file: filePath.replace(prjRoot, ''),
       });
     } else {
+      ensurePathDir(mvs[filePath]);
       shell.mv(filePath, mvs[filePath]);
       log('Moved: ', 'green', filePath, mvs[filePath]);
       res.push({
