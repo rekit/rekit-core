@@ -10,7 +10,7 @@ describe('${_.kebabCase(feature)}/${_.pascalCase(component)}', () => {
     );
 
     expect(
-      renderedComponent.find('.${_.kebabCase(feature || 'component')}-${_.kebabCase(component)}').node
+      renderedComponent.find('.${_.kebabCase(feature || 'component')}-${_.kebabCase(component)}').getElement()
     ).to.exist;
   });
 });
