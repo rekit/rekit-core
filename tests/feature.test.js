@@ -100,7 +100,7 @@ describe('feature', function() { // eslint-disable-line
     expectLines(mapTestFile2('DefaultPage.test.js'), [
       `import { DefaultPage } from 'src/features/${TEST_FEATURE_NAME_2}/DefaultPage';`,
       `describe('${TEST_FEATURE_NAME_2}/DefaultPage', () => {`,
-      `      renderedComponent.find('.${TEST_FEATURE_NAME_2}-default-page').node`,
+      `      renderedComponent.find('.${TEST_FEATURE_NAME_2}-default-page').getElement()`,
     ]);
 
     expectLines(mapTestFile2('redux/reducer.test.js'), [
