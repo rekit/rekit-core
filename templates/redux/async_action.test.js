@@ -43,7 +43,7 @@ describe('${_.kebabCase(feature)}/redux/${_.camelCase(action)}', () => {
         const actions = store.getActions();
         expect(actions[0]).to.have.property('type', ${actionTypes.begin});
         expect(actions[1]).to.have.property('type', ${actionTypes.failure});
-        expect(actions[1]).to.have.deep.property('data.error').that.exist;
+        expect(actions[1]).to.have.nested.property('data.error').that.exist;
       });
   });
 

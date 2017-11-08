@@ -18,9 +18,10 @@ export function ${_.camelCase(action)}(args = {}) {
     // It's hard to use state to manage it, but returning a promise allows you to easily achieve it.
     // e.g.: handleSubmit() { this.props.actions.submitForm(data).then(()=> {}).catch(() => {}); }
     const promise = new Promise((resolve, reject) => {
-      // doRequest is a sample which resolves promise in 20ms. You should replace it with your own logic.
+      // doRequest is a placeholder Promise. You should replace it with your own logic.
       // See the real-word example at:  https://github.com/supnate/rekit/blob/master/src/features/home/redux/fetchRedditReactjsList.js
-      const doRequest = new Promise((resolve2, reject2) => setTimeout(() => (args.error ? reject2('error') : resolve2('success')), 20));
+      // args.error here is only for test coverage purpose.
+      const doRequest = args.error ? Promise.reject(new Error()) : Promise.resolve();
       doRequest.then(
         (res) => {
           dispatch({
