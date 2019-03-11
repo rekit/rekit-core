@@ -1,148 +1,172 @@
 'use strict';
 
 // Summary:
-//  Load plugins and export helper modules
+//  Load plugins
+const nodeModulesPath = require.resolve('lodash').replace('/lodash/lodash.js', '');
+process.env.NODE_PATH = nodeModulesPath;
+require('module').Module._initPaths();
 
+const fs = require('fs');
 const path = require('path');
-const _ = require('lodash');
 const shell = require('shelljs');
-const utils = require('./utils');
-// const template = require('./template');
+const _ = require('lodash');
+const os = require('os');
+const paths = require('./paths');
+const config = require('./config');
 
-let plugins = null;
-function getPlugins(rekitCore) {
-  if (!plugins) {
-    loadPlugins(rekitCore); // eslint-disable-line
-    // utils.fatal('Plugins have not been loaded.');
-  }
-  return plugins;
+let plugins = [];
+let loaded = false;
+let needFilterPlugin = true;
+
+const DEFAULT_PLUGIN_DIR = path.join(os.homedir(), '.rekit/plugins');
+
+const pluginsDirs = [DEFAULT_PLUGIN_DIR];
+function addPluginsDir(dir) {
+  pluginsDirs.push(dir);
+}
+function getPluginsDir() {
+  return DEFAULT_PLUGIN_DIR;
 }
 
-function injectExtensionPoints(func, command, targetName) {
-  // Summary:
-  //  Hook: add/move/remove elements
+function filterPlugins() {
+  const rekitConfig = config.getRekitConfig();
+  let appType = rekitConfig.appType;
 
-  function execExtension(hookName, args) {
-    getPlugins().forEach((p) => {
-      if (p.hooks && p.hooks[hookName]) {
-        p.hooks[hookName].apply(p.hooks, args);
-      }
-    });
+  console.log('all plugins: ', plugins.map(p => p.name));
+  // If no appType configured, set it to the first matched plugin except common.
+  // Pure folder plugin is always loaded.
+  if (!appType) {
+    plugins = plugins.filter(checkFeatureFiles); // Check folder structure if necessary
+    const appPlugin = _.find(plugins, p => p.isAppPlugin && p.appType !== 'common');
+    if (appPlugin) appType = _.castArray(appPlugin.appType)[0];
   }
 
-  return function() { // eslint-disable-line
-    const beforeHook = `before${_.pascalCase(command)}${_.pascalCase(targetName)}`;
-    execExtension(beforeHook, arguments);
+  if (!appType) appType = 'common';
+  config.setAppType(appType);
+  plugins = plugins.filter(p => !p.appType || _.intersection(_.castArray(p.appType), _.castArray(appType)).length > 0);
+  console.log('applied plugins: ', plugins.map(p => p.name));
+  needFilterPlugin = false;
+}
+function getPlugins(prop) {
+  if (!loaded) {
+    if (fs.existsSync(DEFAULT_PLUGIN_DIR)) loadPlugins(DEFAULT_PLUGIN_DIR);
+    loaded = true;
+  }
 
-    const res = func.apply(null, arguments);
+  if (needFilterPlugin) {
+    filterPlugins();
+  }
 
-    const afterHook = `after${_.pascalCase(command)}${_.pascalCase(targetName)}`;
-    execExtension(afterHook, arguments);
-
-    return res;
-  };
+  return prop ? plugins.filter(_.property(prop)) : plugins;
 }
 
-function loadPlugins(rekitCore) {
-  const prjRoot = utils.getProjectRoot();
-
-  const prjPkgJson = require(utils.joinPath(prjRoot, 'package.json')); // eslint-disable-line
-
-  // Find local plugins, all local plugins are loaded
-  const localPluginsFolder = utils.joinPath(prjRoot, 'tools/plugins');
-  plugins = [];
-  if (shell.test('-e', localPluginsFolder)) {
-    plugins = plugins.concat(shell.ls(localPluginsFolder)
-      .filter(d => shell.test('-d', utils.joinPath(prjRoot, 'tools/plugins', d)))
-      .map(d => utils.joinPath(prjRoot, 'tools/plugins', d)));
+function checkFeatureFiles(plugin) {
+  // Detect if folder structure is for the plugin
+  if (
+    _.isArray(plugin.featureFiles) &&
+    !plugin.featureFiles.every(
+      f => (f.startsWith('!') ? !fs.existsSync(paths.map(f.replace('!', ''))) : fs.existsSync(paths.map(f)))
+    )
+  ) {
+    return false;
   }
+  return true;
+}
 
-  // Find installed plugins, only those defined in package.rekit.plugins are loaded.
-  if (prjPkgJson.rekit && prjPkgJson.rekit.plugins) {
-    plugins = plugins.concat(prjPkgJson.rekit.plugins.map(p => (
-      path.isAbsolute(p)
-      ? p
-      : utils.joinPath(
-          prjRoot,
-          'node_modules',
-          /^rekit-plugin-/.test(p) ? p : ('rekit-plugin-' + p)
-        )
-      )
-    )); // rekit plugin should be prefixed with 'rekit-plugin'.
-  }
-
-  // Create plugin instances
-  plugins = plugins.map((pluginRoot) => {
-    try {
-      const config = require(utils.joinPath(pluginRoot, 'config')); // eslint-disable-line
-      const item = {
-        config,
-        commands: {},
-        hooks: {},
-      };
-
-      if (config.accept) {
-        config.accept.forEach(
-          (name) => {
-            name = _.camelCase(name);
-            const commands = require(utils.joinPath(pluginRoot, name))(rekitCore);
-            item.commands[name] = {};
-            Object.keys(commands).forEach((key) => {
-              item.commands[name][key] = injectExtensionPoints(commands[key], key, name);
-            });
-          }
-        );
-      }
-
-      if (shell.test('-e', utils.joinPath(pluginRoot, 'hooks.js'))) {
-        item.hooks = require(utils.joinPath(pluginRoot, 'hooks'))(rekitCore); // eslint-disable-line
-      }
-      return item;
-    } catch (e) {
-      const pluginName = path.basename(pluginRoot).replace(/^rekit-plugin-/, '');
-      let err = '';
-      if (/node_modules/.test(pluginRoot) && shell.test('-e', utils.joinPath(prjRoot, 'tools/plugins', pluginName))) {
-        err = `\nTip: plugin ${pluginName} seems to be a local plugin, it shouldn't be registered in rekit section of package.json.`;
-      }
-      utils.warn(`Failed to load plugin: ${pluginName}, ${e}.${err}\n${e.stack}`);
+// Load plugin instance, plugin depends on project config
+function loadPlugin(pluginRoot, noUI) {
+  // noUI flag is used for loading dev plugins whose ui is from webpack dev server
+  try {
+    const pkgJson = require(paths.join(pluginRoot, 'package.json'));
+    const pluginInstance = {};
+    // Core part
+    const coreIndex = paths.join(pluginRoot, 'core/index.js');
+    if (fs.existsSync(coreIndex)) {
+      Object.assign(pluginInstance, require(coreIndex));
     }
 
-    return null;
-  });
-}
+    // UI part
+    if (!noUI && fs.existsSync(path.join(pluginRoot, 'build/main.js'))) {
+      pluginInstance.ui = {
+        root: path.join(pluginRoot, 'build'),
+      };
+    }
 
-// Get the first matched command provided by some plugin
-// Local plugin first, then installed plugin.
-function getCommand(command, elementName) {
-  // example: commands.asyncActionSaga.add
-  const keyPath = `commands.${_.camelCase(elementName)}.${_.camelCase(command)}`;
-  const found = getPlugins().find(item => _.has(item, keyPath));
-  if (found) {
-    return _.get(found, keyPath);
+    // Plugin meta
+    Object.assign(pluginInstance, _.pick(pkgJson, ['appType', 'name', 'isAppPlugin', 'featureFiles']));
+    return pluginInstance;
+  } catch (e) {
+    console.warn(`Failed to load plugin: ${pluginRoot}, ${e}\n${e.stack}`);
   }
+
   return null;
 }
 
-// function add(name) {
-//   // Summary:
-//   //  Add a local plugin.
-//   name = _.kebabCase(name);
+function loadPlugins(dir) {
+  console.log('load plugins from dir: ', dir);
+  fs.readdirSync(dir)
+    .map(d => path.join(dir, d))
+    .filter(d => fs.statSync(d).isDirectory())
+    .forEach(addPluginByPath);
+}
 
-//   const pluginDir = utils.joinPath(utils.getProjectRoot(), 'tools/plugins', name);
-//   shell.mkdir(pluginDir);
-//   const configPath = utils.joinPath(pluginDir, name, 'config.js');
-//   template.generate(configPath, {
-//     templateFile: 'plugin/config.js',
-//     context: {
-//       pluginName: name,
-//     },
-//   });
-// }
+// Dynamically add an plugin
+function addPlugin(plugin) {
+  if (!plugin) {
+    console.warn('adding none plugin, ignored: ', plugin);
+    return;
+  }
+  if (!needFilterPlugin) {
+    console.warn('You are adding a plugin after getPlugins is called.');
+  }
+  needFilterPlugin = true;
+  if (!plugin.name) {
+    console.log('plugin: ', plugin);
+    throw new Error('Each plugin should have a name.');
+  }
+  if (_.find(plugins, { name: plugin.name })) {
+    console.warn('You should not add a plugin with same name: ' + plugin.name);
+    return;
+  }
+  plugins.push(plugin);
+}
+
+function addPluginByPath(pluginRoot) {
+  addPlugin(loadPlugin(pluginRoot));
+}
+
+function removePlugin(pluginName) {
+  const removed = _.remove(plugins, { name: pluginName });
+  if (!removed.length) console.warn('No plugin was removed: ' + pluginName);
+}
+
+// Load plugins from a plugin project
+function loadDevPlugins(prjRoot) {
+  const devPort = config.getRekitConfig(false, prjRoot).devPort;
+  const featuresDir = path.join(prjRoot, 'src/features');
+  shell
+    .ls(featuresDir)
+    .map(p => path.join(featuresDir, p))
+    .forEach(pluginRoot => {
+      const p = loadPlugin(pluginRoot, true);
+      if (!p) return;
+      if (fs.existsSync(path.join(pluginRoot, 'entry.js'))) {
+        p.ui = {
+          root: path.join(pluginRoot, 'public'),
+          rootLink: `http://localhost:${devPort}/static/js/${p.name}.bundle.js`,
+        };
+      }
+      addPlugin(p);
+    });
+}
 
 module.exports = {
-  // add,
-  getCommand,
-  loadPlugins,
   getPlugins,
-  injectExtensionPoints,
+  loadPlugins,
+  addPlugin,
+  addPluginByPath,
+  removePlugin,
+  getPluginsDir,
+  loadDevPlugins,
+  addPluginsDir,
 };

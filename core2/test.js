@@ -79,6 +79,13 @@ function move(source, target) {
   const oldImportPath2 = `src/features/${_.kebabCase(source.feature)}/${_.pascalCase(source.name)}`;
   const newImportPath2 = `src/features/${_.kebabCase(target.feature)}/${_.pascalCase(target.name)}`;
 
+  // Those without module alias
+  const oldImportPath3 = `../../../src/features/${_.kebabCase(source.feature)}`;
+  const newImportPath3 = `../../../src/features/${_.kebabCase(target.feature)}`;
+
+  const oldImportPath4 = `../../../src/features/${_.kebabCase(source.feature)}/${_.pascalCase(source.name)}`;
+  const newImportPath4 = `../../../src/features/${_.kebabCase(target.feature)}/${_.pascalCase(target.name)}`;
+
   // Try to update describe('xxx')
   const oldDescribe = `${_.kebabCase(source.feature)}/${_.pascalCase(source.name)}`;
   const newDescribe = `${_.kebabCase(target.feature)}/${_.pascalCase(target.name)}`;
@@ -87,6 +94,8 @@ function move(source, target) {
     refactor.renameImportSpecifier(ast, source.name, target.name),
     refactor.renameStringLiteral(ast, oldImportPath1, newImportPath1),
     refactor.renameStringLiteral(ast, oldImportPath2, newImportPath2),
+    refactor.renameStringLiteral(ast, oldImportPath3, newImportPath3),
+    refactor.renameStringLiteral(ast, oldImportPath4, newImportPath4),
     refactor.renameStringLiteral(ast, oldDescribe, newDescribe),
     refactor.renameStringLiteral(ast, oldCssClass, newCssClass)
   ));
@@ -166,15 +175,26 @@ function moveAction(source, target, args) {
   const oldImportPath2 = `src/features/${source.feature}/redux/constants`;
   const newImportPath2 = `src/features/${target.feature}/redux/constants`;
 
+  // For action/reducer import
+  const oldImportPath3 = `../../../../src/features/${source.feature}/redux/${source.name}`;
+  const newImportPath3 = `../../../../src/features/${target.feature}/redux/${target.name}`;
+
+  // For constant import
+  const oldImportPath4 = `../../../../src/features/${source.feature}/redux/constants`;
+  const newImportPath4 = `../../../../src/features/${target.feature}/redux/constants`;
+
   // Try to update describe('xxx')
   const oldDescribe = `${source.feature}/redux/${source.name}`;
   const newDescribe = `${target.feature}/redux/${target.name}`;
 
   const ast = vio.getAst(targetPath);
+  vio.assertAst(ast, targetPath);
   let changes = [].concat(
     refactor.renameImportSpecifier(ast, source.name, target.name),
     refactor.renameStringLiteral(ast, oldImportPath1, newImportPath1),
     refactor.renameStringLiteral(ast, oldImportPath2, newImportPath2),
+    refactor.renameStringLiteral(ast, oldImportPath3, newImportPath3),
+    refactor.renameStringLiteral(ast, oldImportPath4, newImportPath4),
     refactor.renameStringLiteral(ast, oldDescribe, newDescribe)
   );
 
