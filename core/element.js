@@ -1,6 +1,27 @@
 const _ = require('lodash');
 const plugin = require('./plugin');
 
+function execHooks(beforeAfter, action, type) {
+  console.log('exec hooks: ', beforeAfter, action, type);
+  const methodName = _.camelCase(`${beforeAfter}-${action}-${type}`);
+  const hooksPlugins = plugin.getPlugins(`hooks.${methodName}`);
+  console.log('hooks plugins: ', `hooks.${methodName}`, hooksPlugins.length);
+  const args = _.toArray(arguments).slice(3);
+  hooksPlugins.forEach(p => p.hooks[methodName].apply(p.hook, args));
+}
+
+function execBeforeHooks() {
+  const args = _.toArray(arguments);
+  args.unshift('before');
+  execHooks.apply(null, args);
+}
+
+function execAfterHooks() {
+  const args = _.toArray(arguments);
+  args.unshift('after');
+  execHooks.apply(null, args);
+}
+
 function add(type, name, args) {
   console.log(`Adding ${type}: `, name);
   execBeforeHooks('add', type, name, args);
@@ -29,32 +50,12 @@ function remove(type, name, args) {
 }
 
 function update(type, name, args) {
+  // Placeholder for potential future usage
   console.log('updating element: ', type, name, args);
 }
 
 function byId(id) {
   return id;
-}
-
-function execHooks(beforeAfter, action, type) {
-  console.log('exec hooks: ', beforeAfter, action, type);
-  const methodName = _.camelCase(`${beforeAfter}-${action}-${type}`);
-  const hooksPlugins = plugin.getPlugins(`hooks.${methodName}`);
-  console.log('hooks plugins: ', `hooks.${methodName}`, hooksPlugins.length);
-  const args = _.toArray(arguments).slice(3);
-  hooksPlugins.forEach(p => p.hooks[methodName].apply(p.hook, args));
-}
-
-function execBeforeHooks() {
-  const args = _.toArray(arguments);
-  args.unshift('before');
-  execHooks.apply(null, args);
-}
-
-function execAfterHooks() {
-  const args = _.toArray(arguments);
-  args.unshift('after');
-  execHooks.apply(null, args);
 }
 
 module.exports = {
