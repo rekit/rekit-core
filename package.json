@@ -4,7 +4,7 @@
   "description": "Rekit core functions.",
   "author": "Nate Wang <supnate@gmail.com>",
   "license": "MIT",
-  "homepage": "https://github.com/supnate/rekit",
+  "homepage": "https://github.com/rekit/rekit-core",
   "main": "index.js",
   "keywords": [
     "rekit",
@@ -15,10 +15,10 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/supnate/rekit-core"
+    "url": "git+https://github.com/rekit/rekit-core"
   },
   "bugs": {
-    "url": "https://github.com/supnate/rekit-core/issues"
+    "url": "https://github.com/rekit/rekit-core/issues"
   },
   "scripts": {
     "test": "node ./tools/run_test.js",
