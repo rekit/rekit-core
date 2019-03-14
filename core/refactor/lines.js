@@ -41,6 +41,10 @@ function lastLineIndex(lines, match) {
   return _.findLastIndex(lines, l => match.test(l));
 }
 
+function lineExists(lines, line) {
+  return lines.indexOf(line) >= 0;
+}
+
 function removeLines(lines, str) {
   _.remove(lines, line => isStringMatch(line, str));
 }
@@ -48,5 +52,6 @@ function removeLines(lines, str) {
 module.exports = {
   lineIndex,
   lastLineIndex,
+  lineExists,
   removeLines: common.acceptFilePathForLines(removeLines),
 };
