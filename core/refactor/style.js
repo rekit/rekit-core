@@ -30,7 +30,7 @@ function renameCssClassName(ast, oldName, newName) {
   return changes;
 }
 
-function addStyleImport(lines, moduleSource) {console.log('add style import')
+function addStyleImport(lines, moduleSource) {
   const i = linesManager.lastLineIndex(lines, '@import ');
   const line = `@import '${moduleSource}';`;
   if (!linesManager.lineExists(lines, line)) {
