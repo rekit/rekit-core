@@ -32,7 +32,10 @@ function renameCssClassName(ast, oldName, newName) {
 
 function addStyleImport(lines, moduleSource) {
   const i = linesManager.lastLineIndex(lines, '@import ');
-  lines.splice(i + 1, 0, `@import '${moduleSource}';`);
+  const line = `@import '${moduleSource}';`;
+  if (!linesManager.lineExists(lines, line)) {
+    lines.splice(i + 1, 0, line);
+  }
 }
 
 function removeStyleImport(lines, moduleSource) {
