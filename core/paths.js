@@ -9,6 +9,7 @@ function join() {
 
 let projectRoot;
 function setProjectRoot(prjRoot) {
+  prjRoot = path.normalize(prjRoot).replace(/\\/g, '/');
   projectRoot = /\/$/.test(prjRoot) ? prjRoot : prjRoot + '/';
 }
 

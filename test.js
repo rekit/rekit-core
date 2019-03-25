@@ -1,6 +1,6 @@
 const rekit = require('./');
 
-rekit.core.paths.setProjectRoot('/Users/pwang7/workspace/rekit/packages/rekit-core');
+rekit.core.paths.setProjectRoot('C:/Users/pwang7/rekit-org/rekit-core');
 // rekit.core.paths.setProjectRoot('/Users/pwang7/workspace/rekitebaynode');
 let prjData;
 console.log(rekit.core.plugin.getPlugins().map(p => p.name));
