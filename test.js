@@ -1,27 +1,27 @@
 const rekit = require('./');
 
-rekit.core.paths.setProjectRoot('C:/Users/pwang7/rekit-org/rekit-core');
-// rekit.core.paths.setProjectRoot('/Users/pwang7/workspace/rekitebaynode');
-let prjData;
-console.log(rekit.core.plugin.getPlugins().map(p => p.name));
-console.time('Load project data');
-// rekit.core.vio.reset();
-prjData = rekit.core.app.getProjectData();
-console.timeEnd('Load project data');
-console.log(prjData);
+// rekit.core.paths.setProjectRoot('C:/Users/pwang7/rekit-org/rekit-core');
+// // rekit.core.paths.setProjectRoot('/Users/pwang7/workspace/rekitebaynode');
+// let prjData;
+// console.log(rekit.core.plugin.getPlugins().map(p => p.name));
+// console.time('Load project data');
+// // rekit.core.vio.reset();
+// prjData = rekit.core.app.getProjectData();
+// console.timeEnd('Load project data');
+// console.log(prjData);
 
-rekit.core.files.on('change', () => {
-  console.log('files changed');
-  console.time('Load project');
+// rekit.core.files.on('change', () => {
+//   console.log('files changed');
+//   console.time('Load project');
 
-  prjData = rekit.core.app.getProjectData();
-  console.log(prjData);
-  // prjData = rekit.core.files.readDir();
-  console.timeEnd('Load project');
-  // Object.keys(prjData.elementById)
-  //   .filter(s => /\/home\/redux\//.test(s) && !/test/.test(s))
-  //   .forEach(k => console.log(k));
-});
+//   prjData = rekit.core.app.getProjectData();
+//   console.log(prjData);
+//   // prjData = rekit.core.files.readDir();
+//   console.timeEnd('Load project');
+//   // Object.keys(prjData.elementById)
+//   //   .filter(s => /\/home\/redux\//.test(s) && !/test/.test(s))
+//   //   .forEach(k => console.log(k));
+// });
 
 // console.time('Load project data');
 // rekit.core.vio.reset();
@@ -42,3 +42,9 @@ rekit.core.files.on('change', () => {
 // Object.values(prjData.elementById).forEach(ele => {
 //   if (ele.id.endsWith('.marko')) console.log(ele);
 // });
+
+function installPluginTest() {
+  rekit.core.plugin.installPlugin('redux-saga');
+}
+
+installPluginTest();

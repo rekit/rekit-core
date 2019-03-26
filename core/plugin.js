@@ -8,11 +8,13 @@ require('module').Module._initPaths();
 
 const fs = require('fs');
 const path = require('path');
+const spawn = require('child_process').spawn;
 const shell = require('shelljs');
 const _ = require('lodash');
 const os = require('os');
 const paths = require('./paths');
 const config = require('./config');
+const downloadNpmPackage = require('download-npm-package');
 
 let plugins = [];
 let loaded = false;
@@ -160,6 +162,29 @@ function loadDevPlugins(prjRoot) {
     });
 }
 
+function installPlugin(name) {
+  if (!/^rekit-plugin-/.test(name)) {
+    name = 'rekit-plugin-' + name;
+  }
+
+  downloadNpmPackage({ arg: name, dir: paths.configFile('plugins2') }).then(() => {
+    console.log('Plugin downloaded, installing its dependencies...');
+    const npmCmd = process.platform === 'win32' ? 'npm.cmd' : 'npm';
+    const child = spawn(npmCmd, ['install', '--colors', '--only=production'], {
+      stdio: 'inherit',
+      cwd: paths.configFile(`plugins2/${name}`),
+    });
+    let failed = false;
+    child.on('exit', () => {
+      if (!failed) console.log('npm install success');
+    });
+    child.on('error', () => {
+      failed = true;
+      console.log('npm install failed');
+    });
+  });
+}
+
 module.exports = {
   getPlugins,
   loadPlugins,
@@ -169,4 +194,5 @@ module.exports = {
   getPluginsDir,
   loadDevPlugins,
   addPluginsDir,
+  installPlugin,
 };
