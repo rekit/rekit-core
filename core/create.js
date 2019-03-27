@@ -129,9 +129,6 @@ function syncAppRegistryRepo() {
     const arr2 = arr[1].split('#');
     const repo = arr2[0];
     const branch = arr2[1] || 'master';
-    console.log(owner, repo, branch);
-    const url = `https://api.github.com/repos/${owner}/${repo}/git/refs/heads/${branch}`;
-    console.log('url:', url);
     https
       .get(
         // url,
@@ -163,7 +160,6 @@ function syncAppRegistryRepo() {
                   })
                   .catch(reject);
               } else {
-                console.log('App registry is up to date.');
                 resolve();
               }
             } catch (err) {
@@ -181,3 +177,4 @@ function syncAppRegistryRepo() {
 
 module.exports = create;
 module.exports.syncAppRegistryRepo = syncAppRegistryRepo;
+module.exports.getAppTypes = getAppTypes;
