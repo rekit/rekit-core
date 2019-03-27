@@ -46,5 +46,10 @@ const rekit = require('./');
 function installPluginTest() {
   rekit.core.plugin.installPlugin('redux-saga');
 }
+function listPlugins() {
+  console.log(rekit.core.plugin.listInstalledPlugins());
+}
 
-installPluginTest();
+listPlugins();
+
+// installPluginTest();

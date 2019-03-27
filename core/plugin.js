@@ -162,6 +162,31 @@ function loadDevPlugins(prjRoot) {
     });
 }
 
+function listInstalledPlugins() {
+  // Only get plugins from standard rekit plugin folder
+  const dir = paths.configFile('plugins2');
+  const plugins = [];
+
+  if (fs.existsSync(dir))
+    fs.readdirSync(dir)
+      .filter(name => /^rekit-plugin-/.test(name))
+      .map(name => path.join(dir, name))
+      .filter(d => fs.statSync(d).isDirectory())
+      .forEach(pluginRoot => {
+        try {
+          const pkgJson = require(paths.join(pluginRoot, 'package.json'));
+          // Plugin info
+          const pluginInfo = {};
+          Object.assign(pluginInfo, pkgJson);
+
+          plugins.push(pluginInfo);
+        } catch (err) {
+          console.log('Failed to load plugin info: ', pluginRoot);
+        }
+      });
+
+  return plugins;
+}
 function installPlugin(name) {
   if (!/^rekit-plugin-/.test(name)) {
     name = 'rekit-plugin-' + name;
@@ -185,6 +210,9 @@ function installPlugin(name) {
   });
 }
 
+function uninstallPlugin(name) {}
+function updatePlugin(name) {}
+
 module.exports = {
   getPlugins,
   loadPlugins,
@@ -195,4 +223,7 @@ module.exports = {
   loadDevPlugins,
   addPluginsDir,
   installPlugin,
+  uninstallPlugin,
+  updatePlugin,
+  listInstalledPlugins,
 };
