@@ -9,6 +9,7 @@ const chokidar = require('chokidar');
 const EventEmitter = require('events');
 
 // Maintain file structure in memory and keep sync with disk if any file changed.
+const MAX_FILES = 800;
 
 let cache = {};
 let parentHash = {};
@@ -147,8 +148,8 @@ function getDirElement(dir) {
   };
   allElementById[rDir] = dirEle;
 
-  shell
-    .ls('-A', dir)
+  const allFiles = shell.ls('-A', dir);
+  allFiles
     .filter(
       file =>
         (path.basename(file) !== 'node_modules' &&
@@ -168,7 +169,16 @@ function getDirElement(dir) {
         getFileElement(file);
       }
     });
-  sortElements(dirEle.children, allElementById);
+  if (Object.keys(allElementById).length > MAX_FILES) {
+    console.log(
+      `Rekit does'nt support a project with too many files. The project contains ${
+        Object.keys(allElementById).length
+      } files, the max size is ${MAX_FILES}.`
+    );
+    throw new Error('OVER_MAX_FILES');
+  }
+
+  sortElements(dirEle.children);
 
   return dirEle;
 }
