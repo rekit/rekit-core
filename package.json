@@ -45,25 +45,25 @@
   ],
   "dependencies": {
     "@babel/generator": "^7.4.0",
+    "@babel/parser": "^7.4.2",
     "@babel/traverse": "^7.4.0",
     "@babel/types": "^7.4.0",
-    "@babel/parser": "^7.4.2",
-    "chokidar": "^2.1.5",
     "chalk": "^2.4.2",
+    "chokidar": "^2.1.5",
     "diff": "^4.0.1",
     "download-git-repo": "^1.1.0",
     "download-npm-package": "^3.1.12",
     "fs-extra": "^7.0.1",
-    "lodash": "^4.17.11"
+    "lodash": "^4.17.11",
+    "minimatch": "^3.0.4"
   },
   "devDependencies": {
     "npm-run": "^5.0.1",
     "chai": "^4.2.0",
     "codecov": "^3.2.0",
     "eslint": "^5.15.3",
-    "eslint-plugin-react-app": "^4.0.1",
-    "jsdoc": "^3.4.3",
-    "mocha": "^4.1.0",
-    "nyc": "^11.4.1"
+    "eslint-config-node": "^4.0.0",
+    "mocha": "^6.0.2",
+    "nyc": "^13.3.0"
   }
 }

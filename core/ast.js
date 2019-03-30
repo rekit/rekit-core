@@ -1,14 +1,23 @@
 const _ = require('lodash');
-const babylon = require('babylon');
-const vio = require('../core/vio');
-const logger = require('../core/logger');
+const parser = require('@babel/parser');
+const minimatch = require('minimatch');
+const vio = require('./vio');
+const logger = require('./logger');
+const config = require('./config');
 
 let cache = {};
 const failedToParse = {};
 
 function getAst(filePath, throwIfError) {
-  // Todo: make src/libs configurable
-  if (_.startsWith(filePath, 'src/libs/')) return null; // ignore libs folder to parse
+  const astFolders = config.getRekitConfig().astFolders || [];
+  const excludeAstFolders = config.getRekitConfig().excludeAstFolders || [];
+
+  if (
+    (astFolders.length && !astFolders.some(d => _.startsWith(filePath, d + '/') || minimatch(filePath, d))) ||
+    excludeAstFolders.some(d => _.startsWith(filePath, d + '/') || minimatch(filePath, d))
+  ) {
+    return;
+  }
   const checkAst = ast => {
     if (!ast && throwIfError) {
       throw new Error(`Failed to parse ast or file not exists, please check syntax: ${filePath}`);
@@ -24,7 +33,7 @@ function getAst(filePath, throwIfError) {
 
   if (!cache[filePath] || cache[filePath].code !== code) {
     try {
-      const ast = babylon.parse(code, {
+      const ast = parser.parse(code, {
         // parse in strict mode and allow module declarations
         sourceType: 'module',
         plugins: [
@@ -32,7 +41,7 @@ function getAst(filePath, throwIfError) {
           'flow',
           'doExpressions',
           'objectRestSpread',
-          'decorators',
+          'decorators-legacy',
           'classProperties',
           'exportExtensions',
           'asyncGenerators',
@@ -53,6 +62,7 @@ function getAst(filePath, throwIfError) {
       cache[filePath] = { ast, code };
       ast._filePath = filePath;
     } catch (e) {
+      console.log('parse ast failed: ', e);
       checkAst(null);
       failedToParse[filePath] = true;
       logger.warn(`Failed to parse ast, please check syntax: ${filePath}`);

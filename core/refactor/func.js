@@ -1,8 +1,8 @@
-'use strict';
+"use strict";
 
-const traverse = require('babel-traverse').default;
-const common = require('./common');
-const identifier = require('./identifier');
+const traverse = require("@babel/traverse").default;
+const common = require("./common");
+const identifier = require("./identifier");
 
 /**
  * Rename a function name in a module.
@@ -19,7 +19,7 @@ const identifier = require('./identifier');
  * // => function NewMyFunc {
  * // =>   ...
  * // => }
-**/
+ **/
 function renameFunctionName(ast, oldName, newName) {
   // Summary:
   //  Rename the name of the function first found. Usually used by
@@ -32,7 +32,7 @@ function renameFunctionName(ast, oldName, newName) {
       if (path.node.id && path.node.id.name === oldName) {
         defNode = path.node.id;
       }
-    },
+    }
   });
 
   if (defNode) {
@@ -42,5 +42,5 @@ function renameFunctionName(ast, oldName, newName) {
 }
 
 module.exports = {
-  renameFunctionName: common.acceptFilePathForAst(renameFunctionName),
+  renameFunctionName: common.acceptFilePathForAst(renameFunctionName)
 };

@@ -1,18 +1,9 @@
 {
-  "extends": "react-app",
+  "extends": "node",
   "rules": {
-    "strict": 0,
-    "prefer-template": 0,
-    "comma-dangle": 0,
-    "prefer-rest-params": 0,
-    "prefer-spread": 0,
-    "quotes": 0,
-    "no-mixed-operators": 0,
-    "no-param-reassign": 0,
+    "import/no-nodejs-modules": 0,
+    "import/no-commonjs": 0,
     "no-console": 0,
-    "max-len": 0,
-    "global-require": 0,
-    "no-underscore-dangle": 0,
-    "import/no-dynamic-require": 0
+    "no-sync": 0
   }
 }

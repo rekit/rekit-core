@@ -1,8 +1,8 @@
-'use strict';
+"use strict";
 
-const _ = require('lodash');
-const traverse = require('babel-traverse').default;
-const common = require('./common');
+const _ = require("lodash");
+const traverse = require("@babel/traverse").default;
+const common = require("./common");
 
 function renameStringLiteral(ast, oldName, newName) {
   // Summary:
@@ -18,10 +18,10 @@ function renameStringLiteral(ast, oldName, newName) {
         changes.push({
           start: path.node.start + 1,
           end: path.node.end - 1,
-          replacement: newName,
+          replacement: newName
         });
       }
-    },
+    }
   });
   return changes;
 }
@@ -32,7 +32,7 @@ function replaceStringLiteral(ast, oldName, newName, fullMatch) {
   // Return:
   //  All changes needed.
 
-  if (typeof fullMatch === 'undefined') fullMatch = true;
+  if (typeof fullMatch === "undefined") fullMatch = true;
 
   const changes = [];
   traverse(ast, {
@@ -42,7 +42,7 @@ function replaceStringLiteral(ast, oldName, newName, fullMatch) {
         changes.push({
           start: path.node.start + 1,
           end: path.node.end - 1,
-          replacement: newName,
+          replacement: newName
         });
       } else if (!fullMatch && _.includes(path.node.value, oldName)) {
         const i = path.node.value.indexOf(oldName);
@@ -51,15 +51,15 @@ function replaceStringLiteral(ast, oldName, newName, fullMatch) {
         changes.push({
           start,
           end,
-          replacement: newName,
+          replacement: newName
         });
       }
-    },
+    }
   });
   return changes;
 }
 
 module.exports = {
   renameStringLiteral: common.acceptFilePathForAst(renameStringLiteral),
-  replaceStringLiteral: common.acceptFilePathForAst(replaceStringLiteral),
+  replaceStringLiteral: common.acceptFilePathForAst(replaceStringLiteral)
 };

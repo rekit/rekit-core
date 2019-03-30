@@ -1,11 +1,11 @@
-'use strict';
+"use strict";
 
-const _ = require('lodash');
-const traverse = require('babel-traverse').default;
-const generate = require('babel-generator').default;
-const babelTypes = require('babel-types');
-const common = require('./common');
-const identifier = require('./identifier');
+const _ = require("lodash");
+const generate = "@babel/generator";
+const traverse = require("@babel/traverse").default;
+const babelTypes = "@babel/types";
+const common = require("./common");
+const identifier = require("./identifier");
 
 // NOTE: comments set to false to avoid leadingComments and tailingComments be output.
 // So that comments will not be duplicated.
@@ -14,8 +14,8 @@ const identifier = require('./identifier');
 // The inline comment /* my comment */ will be removed after import/export change.
 
 const babelGeneratorOptions = {
-  quotes: 'single',
-  comments: false,
+  quotes: "single",
+  comments: false
 };
 
 function formatMultilineImport(importCode) {
@@ -29,7 +29,7 @@ function formatMultilineImport(importCode) {
   if (m) {
     const arr = _.compact(m[1].split(/, */).map(_.trim));
     if (arr.length) {
-      return importCode.replace(/\{[^}]+\}/, `{\n  ${arr.join(',\n  ')},\n}`);
+      return importCode.replace(/\{[^}]+\}/, `{\n  ${arr.join(",\n  ")},\n}`);
     }
   }
   return importCode;
@@ -50,13 +50,19 @@ function formatMultilineImport(importCode) {
  * refactor.addImportFrom(file, './some-module', 'SomeModule', ['method1', 'method2']);
  * // it generates: import SomeModule, { method1, method2 } from './some-module';
  **/
-function addImportFrom(ast, moduleSource, defaultImport, namedImport, namespaceImport) {
+function addImportFrom(
+  ast,
+  moduleSource,
+  defaultImport,
+  namedImport,
+  namespaceImport
+) {
   // Summary:
   //  Add import from source module. Such as import { xxx } from './x';
   let names = [];
 
   if (namedImport) {
-    if (typeof namedImport === 'string') {
+    if (typeof namedImport === "string") {
       names.push(namedImport);
     } else {
       names = names.concat(namedImport);
@@ -75,18 +81,31 @@ function addImportFrom(ast, moduleSource, defaultImport, namedImport, namespaceI
       const multilines = node.loc.start.line !== node.loc.end.line;
       targetImportPos = path.node.end + 1;
 
-      if (!node.specifiers || !node.source || node.source.value !== moduleSource) return;
+      if (
+        !node.specifiers ||
+        !node.source ||
+        node.source.value !== moduleSource
+      )
+        return;
       sourceExisted = true;
       let newNames = [];
-      const alreadyHaveDefaultImport = !!_.find(node.specifiers, { type: 'ImportDefaultSpecifier' });
-      const alreadyHaveNamespaceImport = !!_.find(node.specifiers, { type: 'ImportNamespaceSpecifier' });
-      if (defaultImport && !alreadyHaveDefaultImport) newNames.push(defaultImport);
-      if (namespaceImport && !alreadyHaveNamespaceImport) newNames.push(namespaceImport);
+      const alreadyHaveDefaultImport = !!_.find(node.specifiers, {
+        type: "ImportDefaultSpecifier"
+      });
+      const alreadyHaveNamespaceImport = !!_.find(node.specifiers, {
+        type: "ImportNamespaceSpecifier"
+      });
+      if (defaultImport && !alreadyHaveDefaultImport)
+        newNames.push(defaultImport);
+      if (namespaceImport && !alreadyHaveNamespaceImport)
+        newNames.push(namespaceImport);
 
       newNames = newNames.concat(names);
 
       // only add names which don't exist
-      newNames = newNames.filter(n => !_.find(node.specifiers, s => s.local.name === n));
+      newNames = newNames.filter(
+        n => !_.find(node.specifiers, s => s.local.name === n)
+      );
 
       if (newNames.length > 0) {
         const newSpecifiers = [].concat(node.specifiers);
@@ -111,10 +130,10 @@ function addImportFrom(ast, moduleSource, defaultImport, namedImport, namespaceI
         changes.push({
           start: node.start,
           end: node.end,
-          replacement: newCode,
+          replacement: newCode
         });
       }
-    },
+    }
   });
 
   if (changes.length === 0 && !sourceExisted) {
@@ -124,7 +143,9 @@ function addImportFrom(ast, moduleSource, defaultImport, namedImport, namespaceI
       specifiers.push(t.importDefaultSpecifier(t.identifier(defaultImport)));
     }
     if (namespaceImport) {
-      specifiers.push(t.importNamespaceSpecifier(t.identifier(namespaceImport)));
+      specifiers.push(
+        t.importNamespaceSpecifier(t.identifier(namespaceImport))
+      );
     }
 
     names.forEach(n => {
@@ -138,7 +159,7 @@ function addImportFrom(ast, moduleSource, defaultImport, namedImport, namespaceI
     changes.push({
       start: targetImportPos,
       end: targetImportPos,
-      replacement: `${code}\n`,
+      replacement: `${code}\n`
     });
   }
 
@@ -159,7 +180,7 @@ function addExportFrom(ast, moduleSource, defaultExport, namedExport) {
   let names = [];
 
   if (namedExport) {
-    if (typeof namedExport === 'string') {
+    if (typeof namedExport === "string") {
       names.push(namedExport);
     } else {
       names = names.concat(namedExport);
@@ -175,17 +196,30 @@ function addExportFrom(ast, moduleSource, defaultExport, namedExport) {
     ExportNamedDeclaration(path) {
       const node = path.node;
       targetExportPos = path.node.end + 1;
-      if (!node.specifiers || !node.source || node.source.value !== moduleSource) return;
+      if (
+        !node.specifiers ||
+        !node.source ||
+        node.source.value !== moduleSource
+      )
+        return;
       sourceExisted = true;
       let newNames = [];
-      const alreadyHaveDefaultExport = !!_.find(node.specifiers, s => _.get(s, 'local.name') === 'default');
-      if (defaultExport && !alreadyHaveDefaultExport) newNames.push(defaultExport);
+      const alreadyHaveDefaultExport = !!_.find(
+        node.specifiers,
+        s => _.get(s, "local.name") === "default"
+      );
+      if (defaultExport && !alreadyHaveDefaultExport)
+        newNames.push(defaultExport);
 
       newNames = newNames.concat(names);
 
       // only add names which don't exist
       newNames = newNames.filter(
-        n => !_.find(node.specifiers, s => (_.get(s, 'exported.name') || _.get(s, 'local.name')) === n)
+        n =>
+          !_.find(
+            node.specifiers,
+            s => (_.get(s, "exported.name") || _.get(s, "local.name")) === n
+          )
       );
 
       if (newNames.length > 0) {
@@ -194,7 +228,9 @@ function addExportFrom(ast, moduleSource, defaultExport, namedExport) {
           const local = t.identifier(n);
           const exported = local; // TODO: doesn't support local alias.
           if (n === defaultExport) {
-            newSpecifiers.unshift(t.exportSpecifier(t.identifier('default'), exported));
+            newSpecifiers.unshift(
+              t.exportSpecifier(t.identifier("default"), exported)
+            );
           } else {
             newSpecifiers.push(t.exportSpecifier(local, exported));
           }
@@ -205,16 +241,18 @@ function addExportFrom(ast, moduleSource, defaultExport, namedExport) {
         changes.push({
           start: node.start,
           end: node.end,
-          replacement: newCode,
+          replacement: newCode
         });
       }
-    },
+    }
   });
 
   if (changes.length === 0 && !sourceExisted) {
     const specifiers = [];
     if (defaultExport) {
-      specifiers.push(t.exportSpecifier(t.identifier('default'), t.identifier(defaultExport)));
+      specifiers.push(
+        t.exportSpecifier(t.identifier("default"), t.identifier(defaultExport))
+      );
     }
 
     names.forEach(n => {
@@ -223,12 +261,16 @@ function addExportFrom(ast, moduleSource, defaultExport, namedExport) {
       specifiers.push(t.exportSpecifier(local, exported));
     });
 
-    const node = t.ExportNamedDeclaration(null, specifiers, t.stringLiteral(moduleSource));
+    const node = t.ExportNamedDeclaration(
+      null,
+      specifiers,
+      t.stringLiteral(moduleSource)
+    );
     const code = generate(node, babelGeneratorOptions).code;
     changes.push({
       start: targetExportPos,
       end: targetExportPos,
-      replacement: `${code}\n`,
+      replacement: `${code}\n`
     });
   }
 
@@ -241,13 +283,15 @@ function renameImportAsSpecifier(ast, oldName, newName) {
 
   traverse(ast, {
     ImportSpecifier(path) {
-      if (_.get(path.node, 'local.name') === oldName) {
+      if (_.get(path.node, "local.name") === oldName) {
         defNode = path.node.local;
       }
-    },
+    }
   });
   if (defNode) {
-    changes = changes.concat(identifier.renameIdentifier(ast, oldName, newName, defNode));
+    changes = changes.concat(
+      identifier.renameIdentifier(ast, oldName, newName, defNode)
+    );
   }
   return changes;
 }
@@ -267,32 +311,38 @@ function renameImportSpecifier(ast, oldName, newName, moduleSource) {
   traverse(ast, {
     ImportDeclaration(path) {
       const node = path.node;
-      if (moduleSource && _.get(node, 'source.value') !== moduleSource) return;
+      if (moduleSource && _.get(node, "source.value") !== moduleSource) return;
       node.specifiers.forEach(specifier => {
         if (
-          (specifier.type === 'ImportDefaultSpecifier' || specifier.type === 'ImportNamespaceSpecifier') &&
-          _.get(specifier, 'local.name') === oldName
+          (specifier.type === "ImportDefaultSpecifier" ||
+            specifier.type === "ImportNamespaceSpecifier") &&
+          _.get(specifier, "local.name") === oldName
         ) {
           defNode = specifier.local;
         }
 
         // only rename imported specifier
-        if (specifier.type === 'ImportSpecifier' && _.get(specifier, 'imported.name') === oldName) {
-          if (_.get(specifier, 'local.name') === oldName) {
+        if (
+          specifier.type === "ImportSpecifier" &&
+          _.get(specifier, "imported.name") === oldName
+        ) {
+          if (_.get(specifier, "local.name") === oldName) {
             defNode = specifier.local;
           } else {
             changes.push({
               start: specifier.imported.start,
               end: specifier.imported.end,
-              replacement: newName,
+              replacement: newName
             });
           }
         }
       });
-    },
+    }
   });
   if (defNode) {
-    changes = changes.concat(identifier.renameIdentifier(ast, oldName, newName, defNode));
+    changes = changes.concat(
+      identifier.renameIdentifier(ast, oldName, newName, defNode)
+    );
   }
   return changes;
 }
@@ -303,22 +353,26 @@ function renameExportSpecifier(ast, oldName, newName, moduleSource) {
   traverse(ast, {
     ExportSpecifier(path) {
       const node = path.node;
-      if (moduleSource && _.get(path.parentPath.node, 'source.value') !== moduleSource) return;
+      if (
+        moduleSource &&
+        _.get(path.parentPath.node, "source.value") !== moduleSource
+      )
+        return;
 
-      if (_.get(node, 'local.name') === oldName) {
+      if (_.get(node, "local.name") === oldName) {
         changes.push({
           start: node.local.start,
           end: node.local.end,
-          replacement: newName,
+          replacement: newName
         });
-      } else if (_.get(node, 'exported.name') === oldName) {
+      } else if (_.get(node, "exported.name") === oldName) {
         changes.push({
           start: node.exported.start,
           end: node.exported.end,
-          replacement: newName,
+          replacement: newName
         });
       }
-    },
+    }
   });
   return changes;
 }
@@ -336,14 +390,14 @@ function renameModuleSource(ast, oldModuleSource, newModuleSource) {
       changes.push({
         start: node.source.start + 1,
         end: node.source.end - 1,
-        replacement: newModuleSource,
+        replacement: newModuleSource
       });
     }
   }
 
   traverse(ast, {
     ImportDeclaration: renameSource,
-    ExportNamedDeclaration: renameSource,
+    ExportNamedDeclaration: renameSource
   });
 
   return changes;
@@ -353,7 +407,7 @@ function removeImportSpecifier(ast, name) {
   // Remove import specifier by local name
 
   let names = name;
-  if (typeof name === 'string') {
+  if (typeof name === "string") {
     names = [name];
   }
   const changes = [];
@@ -362,13 +416,15 @@ function removeImportSpecifier(ast, name) {
       const node = path.node;
       const multilines = node.loc.start.line !== node.loc.end.line;
       if (!node.specifiers) return;
-      const newSpecifiers = node.specifiers.filter(s => !names.includes(s.local.name));
+      const newSpecifiers = node.specifiers.filter(
+        s => !names.includes(s.local.name)
+      );
       if (newSpecifiers.length === 0) {
         // no specifiers, should delete the import statement
         changes.push({
           start: node.start,
           end: node.end,
-          replacement: '',
+          replacement: ""
         });
       } else if (newSpecifiers.length !== node.specifiers.length) {
         // remove the specifier import
@@ -378,10 +434,10 @@ function removeImportSpecifier(ast, name) {
         changes.push({
           start: node.start,
           end: node.end,
-          replacement: newCode,
+          replacement: newCode
         });
       }
-    },
+    }
   });
 
   return changes;
@@ -397,13 +453,13 @@ function removeImportBySource(ast, moduleSource) {
       changes.push({
         start: node.start,
         end: node.end,
-        replacement: '',
+        replacement: ""
       });
     }
   }
   traverse(ast, {
     ExportNamedDeclaration: removeBySource,
-    ImportDeclaration: removeBySource,
+    ImportDeclaration: removeBySource
   });
 
   return changes;
@@ -421,5 +477,5 @@ module.exports = {
   // removeExportSpecifier: common.acceptFilePathForAst(removeExportSpecifier),
   removeImportBySource: common.acceptFilePathForAst(removeImportBySource),
 
-  renameModuleSource: common.acceptFilePathForAst(renameModuleSource),
+  renameModuleSource: common.acceptFilePathForAst(renameModuleSource)
 };

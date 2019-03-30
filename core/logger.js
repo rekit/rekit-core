@@ -1,6 +1,6 @@
-'use strict';
+"use strict";
 
-const colors = require('colors/safe');
+const chalk = require("chalk");
 
 let silent = false;
 
@@ -17,7 +17,7 @@ function log(msg) {
  * @param {string} msg - The message to log.
  **/
 function warn(msg) {
-  if (!silent) console.log(colors.yellow('Warning: ' + msg));
+  if (!silent) console.log(chalk.yellow("Warning: " + msg));
 }
 
 /**
@@ -25,12 +25,12 @@ function warn(msg) {
  * @param {string} msg - The message to log.
  **/
 function error(msg) {
-  if (!silent) console.log(colors.red('Error: ' + msg));
+  if (!silent) console.log(chalk.red("Error: " + msg));
 }
 
 module.exports = {
   setSilent,
   log,
   warn,
-  error,
+  error
 };

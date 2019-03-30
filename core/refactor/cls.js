@@ -1,8 +1,8 @@
-'use strict';
+"use strict";
 
-const traverse = require('babel-traverse').default;
-const common = require('./common');
-const identifier = require('./identifier');
+const traverse = require("@babel/traverse").default;
+const common = require("./common");
+const identifier = require("./identifier");
 
 /**
  * Rename a es6 class name in a module. Only rename the class definition and its reference in the module.
@@ -20,7 +20,7 @@ const identifier = require('./identifier');
  * // => class NewMyClass {
  * // =>   ...
  * // => }
-**/
+ **/
 function renameClassName(ast, oldName, newName) {
   let defNode = null;
   // Find the definition node of the class
@@ -29,7 +29,7 @@ function renameClassName(ast, oldName, newName) {
       if (path.node.id && path.node.id.name === oldName) {
         defNode = path.node.id;
       }
-    },
+    }
   });
 
   if (defNode) {
@@ -39,5 +39,5 @@ function renameClassName(ast, oldName, newName) {
 }
 
 module.exports = {
-  renameClassName: common.acceptFilePathForAst(renameClassName),
+  renameClassName: common.acceptFilePathForAst(renameClassName)
 };
