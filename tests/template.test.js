@@ -2,7 +2,6 @@
 
 const expect = require('chai').expect;
 const vio = require('../core/vio');
-const utils = require('../core/utils');
 const template = require('../core/template');
 
 const V_FILE = 'vio-temp-file';

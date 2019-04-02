@@ -2,8 +2,8 @@
   Summary:
     Run specific tests
   Usage examples:
-   - node run_test.js // run all tests
-   - node run_test.js refactor.test.js // run refactor tests
+   - node runTests.js // run all tests
+   - node runTests.js refactor.test.js // run refactor tests
 */
 
 'use strict';
@@ -21,7 +21,6 @@ if (!testFile) {
 } else {
   testFile = path.join(prjRoot, 'tests', testFile);
 }
-console.log(prjRoot);
 console.log('Running tests: ', testFile.replace(prjRoot, ''), '...');
 
 const env = Object.create(process.env);
@@ -42,7 +41,7 @@ const params = [
 ];
 
 if (needReport) {
-  // params.splice(0, 0, 'nyc', '--report-dir=coverage');
+  params.splice(0, 0, 'nyc', '--report-dir=coverage');
 }
 npmRun.execSync(params.join(' '), opts);
 
