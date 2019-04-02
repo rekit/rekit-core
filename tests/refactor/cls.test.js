@@ -6,7 +6,7 @@ const refactor = require('../../core/refactor/cls');
 const helpers = require('../helpers');
 
 const expectLines = helpers.expectLines;
-const V_FILE = 'vio-temp-file';
+const V_FILE = 'vio-temp-file.js';
 
 describe('renameClassName', function() {
   before(() => {

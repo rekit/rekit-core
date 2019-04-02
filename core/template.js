@@ -1,22 +1,21 @@
-"use strict";
+'use strict';
 
 /**
  * Template manager. A simple wrapper of lodash template for using vio internally.
  * @module
  **/
 
-const _ = require("lodash");
-const fs = require("fs");
-const vio = require("./vio");
+const _ = require('lodash');
+const vio = require('./vio');
 
 // Make sure it works in template
 _.pascalCase = _.flow(
   _.camelCase,
-  _.upperFirst
+  _.upperFirst,
 );
 _.upperSnakeCase = _.flow(
   _.snakeCase,
-  _.toUpper
+  _.toUpper,
 );
 
 /**
@@ -40,16 +39,12 @@ _.upperSnakeCase = _.flow(
  * // NOTE the result is only in vio, you need to call vio.flush() to write to disk.
  **/
 function generate(targetPath, args) {
-  if (
-    !args.template &&
-    args.templateFile &&
-    !fs.existsSync(args.templateFile)
-  ) {
+  if (!args.template && args.templateFile && !vio.fileExists(args.templateFile)) {
     const err = new Error(`No template file found: ${args.templateFile}`);
-    err.code = "TEMPLATE_FILE_NOT_FOUND";
+    err.code = 'TEMPLATE_FILE_NOT_FOUND';
     throw err;
   }
-  const tpl = args.template || fs.readFileSync(args.templateFile);
+  const tpl = args.template || vio.getContent(args.templateFile);
   const compiled = _.template(tpl, args.templateOptions || {});
   const result = compiled(args.context || {});
 
@@ -57,5 +52,5 @@ function generate(targetPath, args) {
 }
 
 module.exports = {
-  generate
+  generate,
 };

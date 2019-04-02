@@ -6,7 +6,7 @@ const ast = require('../../core/ast');
 const refactor = require('../../core/refactor');
 const helpers = require('../helpers');
 
-const V_FILE = 'vio-temp-file';
+const V_FILE = 'vio-temp-file.js';
 
 const expectLines = helpers.expectLines;
 const expectNoLines = helpers.expectNoLines;

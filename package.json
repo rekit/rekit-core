@@ -55,15 +55,16 @@
     "download-npm-package": "^3.1.12",
     "fs-extra": "^7.0.1",
     "lodash": "^4.17.11",
-    "minimatch": "^3.0.4"
+    "minimatch": "^3.0.4",
+    "prettier": "^1.16.4"
   },
   "devDependencies": {
-    "npm-run": "^5.0.1",
     "chai": "^4.2.0",
     "codecov": "^3.2.0",
     "eslint": "^5.15.3",
     "eslint-config-node": "^4.0.0",
     "mocha": "^6.0.2",
+    "npm-run": "^5.0.1",
     "nyc": "^13.3.0"
   }
 }

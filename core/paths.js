@@ -33,7 +33,10 @@ function relative(from, to) {
 // get the module source of 'to' from 'from' file.
 // e.g: import to from '../to';
 function relativeModuleSource(from, to) {
-  const p = join(relative(path.dirname(from), path.dirname(to)), path.basename(to).replace(/\.\w+$/, ''));
+  const p = join(
+    relative(path.dirname(from), path.dirname(to)),
+    path.basename(to).replace(/\.\w+$/, ''),
+  );
 
   if (!_.startsWith(p, '.')) return './' + p;
   return p;

@@ -3,8 +3,7 @@
 /**
  * Simple refactor for es6 code.
  * @module refactor
-**/
-
+ **/
 
 const common = require('./common');
 const identifier = require('./identifier');
@@ -16,6 +15,7 @@ const string = require('./string');
 const cls = require('./cls');
 const func = require('./func');
 const lines = require('./lines');
+const format = require('./format');
 
 module.exports = {
   // Common
@@ -76,4 +76,7 @@ module.exports = {
   lineIndex: lines.lineIndex,
   lastLineIndex: lines.lastLineIndex,
   removeLines: lines.removeLines,
+
+  // Format
+  format,
 };

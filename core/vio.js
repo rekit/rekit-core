@@ -40,7 +40,7 @@ function log(label, color, filePath, toFilePath) {
 
 // function mapPathAfterMvDir() {}
 function getLines(filePath) {
-  if (path.isAbsolute(filePath)) throw new Error('Absolute file path is not allowed: ' + filePath);
+  // if (path.isAbsolute(filePath)) throw new Error('Absolute file path is not allowed: ' + filePath);
 
   if (_.isArray(filePath)) {
     // If it's already lines, return the arg.
@@ -57,7 +57,7 @@ function getLines(filePath) {
       }
     });
     // console.log('real file path: ', Object.keys(fileLines), realFilePath);
-    const absPath = paths.map(realFilePath);
+    const absPath = path.isAbsolute(realFilePath) ? realFilePath : paths.map(realFilePath);
     if (!fs.existsSync(absPath)) {
       throw new Error("Can't find such file: " + realFilePath + '(' + absPath + ')');
     }
