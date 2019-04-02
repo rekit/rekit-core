@@ -4,13 +4,13 @@ const vio = require('../../core/vio');
 const refactor = require('../../core/refactor');
 const expect = require('chai').expect;
 
-const V_FILE = '/vio-temp-file';
+const V_FILE = 'vio-temp-file';
 
-describe('refactor array tests', function() { // eslint-disable-line
+describe('refactor array tests', function() {
+  // eslint-disable-line
   before(() => {
     vio.reset();
   });
-
 
   it(`addObjectProperty`, () => {
     const CODE1 = `\
@@ -42,12 +42,15 @@ const initialState = {
     const CODE4 = `const initialState = { a: 1 };`;
     vio.put(V_FILE, CODE4);
     refactor.addObjectProperty(V_FILE, 'initialState', 'doFetchPending', false);
-    expect(vio.getContent(V_FILE)).to.equal(`const initialState = { a: 1, doFetchPending: false };`);
+    expect(vio.getContent(V_FILE)).to.equal(
+      `const initialState = { a: 1, doFetchPending: false };`,
+    );
 
     const CODE5 = `const initialState = { a: 1, };`;
     vio.put(V_FILE, CODE5);
     refactor.addObjectProperty(V_FILE, 'initialState', 'doFetchPending', false);
-    expect(vio.getContent(V_FILE)).to.equal(`const initialState = { a: 1, doFetchPending: false, };`);
+    expect(vio.getContent(V_FILE)).to.equal(
+      `const initialState = { a: 1, doFetchPending: false, };`,
+    );
   });
 });
-

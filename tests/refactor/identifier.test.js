@@ -4,7 +4,7 @@ const vio = require('../../core/vio');
 const refactor = require('../../core/refactor');
 const helpers = require('../helpers');
 
-const V_FILE = '/vio-temp-file';
+const V_FILE = 'vio-temp-file';
 
 const expectLines = helpers.expectLines;
 
@@ -23,7 +23,6 @@ function abc() {
 
   it(`rename the first matched variable`, () => {
     vio.put(V_FILE, CODE);
-    // const ast1 = ast.getAst(V_FILE);
     refactor.renameIdentifier(V_FILE, 'arr1', 'arr2');
     refactor.renameIdentifier(V_FILE, 'v1', 'v2');
 

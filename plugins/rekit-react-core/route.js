@@ -1,7 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
-const traverse = require('babel-traverse').default;
+const traverse = require('@babel/traverse').default;
 const utils = require('./utils');
 
 const { ast, refactor, vio } = rekit.core;

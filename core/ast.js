@@ -13,7 +13,8 @@ function getAst(filePath, throwIfError) {
   const excludeAstFolders = config.getRekitConfig().excludeAstFolders || [];
 
   if (
-    (astFolders.length && !astFolders.some(d => _.startsWith(filePath, d + '/') || minimatch(filePath, d))) ||
+    (astFolders.length &&
+      !astFolders.some(d => _.startsWith(filePath, d + '/') || minimatch(filePath, d))) ||
     excludeAstFolders.some(d => _.startsWith(filePath, d + '/') || minimatch(filePath, d))
   ) {
     return;

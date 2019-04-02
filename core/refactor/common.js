@@ -27,13 +27,17 @@ function updateSourceCode(code, changes) {
       }
       return cleanChanges;
     },
-    []
+    [],
   );
 
   const chars = code.split('');
   newChanges.forEach(c => {
     // Special case: after the change, two empty lines occurs, should delete one line
-    if (c.replacement === '' && (c.start === 0 || chars[c.start - 1] === '\n') && chars[c.end] === '\n') {
+    if (
+      c.replacement === '' &&
+      (c.start === 0 || chars[c.start - 1] === '\n') &&
+      chars[c.end] === '\n'
+    ) {
       c.end += 1;
     }
     chars.splice(c.start, c.end - c.start, c.replacement);
@@ -129,12 +133,11 @@ function acceptFilePathForAst(func) {
     let theAst = file;
     if (_.isString(file)) {
       theAst = ast.getAst(file, true);
-      // vio.assertAst(theAst, file);
     }
     const args = _.toArray(arguments);
     args[0] = theAst;
 
-    const changes = func.apply(null, args);
+    const changes = func(...args);
 
     if (_.isString(file)) {
       updateFile(file, changes);
@@ -157,7 +160,8 @@ function acceptFilePathForLines(func) {
     }
     const args = _.toArray(arguments);
     args[0] = lines;
-    func.apply(null, args);
+
+    func(...args);
 
     if (_.isString(file)) {
       vio.save(file, lines);

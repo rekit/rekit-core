@@ -42,14 +42,19 @@ const rekit = require('./');
 // Object.values(prjData.elementById).forEach(ele => {
 //   if (ele.id.endsWith('.marko')) console.log(ele);
 // });
-
+global.__REKIT_NO_WATCH = true;
 function installPluginTest() {
   rekit.core.plugin.installPlugin('redux-saga');
 }
 function listPlugins() {
   console.log(rekit.core.plugin.listInstalledPlugins());
 }
+function testAst() {
+  console.log(rekit.core.ast.getAst('test.js'));
+  console.log('abc');
+}
 
-listPlugins();
+// listPlugins();
+testAst();
 
 // installPluginTest();

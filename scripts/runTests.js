@@ -33,10 +33,16 @@ const opts = {
   env,
 };
 console.log('test file: ', testFile);
-const params = ['mocha', '--require', 'tests/before-all.js', `"${testFile}"`];
+const params = [
+  'mocha',
+  '--require',
+  'tests/before-all.js',
+  `"${testFile}"`,
+  // "--exit"
+];
 
 if (needReport) {
-  params.splice(0, 0, 'nyc', '--report-dir=coverage');
+  // params.splice(0, 0, 'nyc', '--report-dir=coverage');
 }
 npmRun.execSync(params.join(' '), opts);
 

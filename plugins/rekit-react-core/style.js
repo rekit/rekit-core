@@ -7,7 +7,6 @@
 const path = require('path');
 const _ = require('lodash');
 const entry = require('./entry');
-const utils = require('./utils');
 
 const { vio, template } = rekit.core;
 

@@ -1,7 +1,7 @@
-"use strict";
+'use strict';
 
-const traverse = require("@babel/traverse").default;
-const common = require("./common");
+const traverse = require('@babel/traverse').default;
+const common = require('./common');
 
 function getDefNode(name, scope) {
   // Summary:
@@ -44,7 +44,7 @@ function renameIdentifier(ast, oldName, newName, defNode) {
           scope = path.scope;
           path.stop();
         }
-      }
+      },
     });
     if (!scope) return;
     defNode = getDefNode(oldName, scope);
@@ -53,24 +53,24 @@ function renameIdentifier(ast, oldName, newName, defNode) {
   function rename(path) {
     if (
       path.node.name === oldName &&
-      path.key !== "imported" && // it should NOT be imported specifier
+      path.key !== 'imported' && // it should NOT be imported specifier
       getDefNode(path.node.name, path.scope) === defNode
     ) {
       path.node.name = newName;
       changes.push({
         start: path.node.start,
         end: path.node.end,
-        replacement: newName
+        replacement: newName,
       });
     }
   }
   traverse(ast, {
     JSXIdentifier: rename,
-    Identifier: rename
+    Identifier: rename,
   });
   return changes;
 }
 
 module.exports = {
-  renameIdentifier: common.acceptFilePathForAst(renameIdentifier)
+  renameIdentifier: common.acceptFilePathForAst(renameIdentifier),
 };

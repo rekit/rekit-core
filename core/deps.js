@@ -1,6 +1,6 @@
 const _ = require("lodash");
 const traverse = require("@babel/traverse").default;
-const t = require("babel-types");
+const t = require("@babel/types").default;
 const vio = require("./vio");
 const ast = require("./ast");
 const refactor = require("./refactor");

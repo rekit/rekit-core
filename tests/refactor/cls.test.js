@@ -6,7 +6,7 @@ const refactor = require('../../core/refactor/cls');
 const helpers = require('../helpers');
 
 const expectLines = helpers.expectLines;
-const V_FILE = '/vio-temp-file';
+const V_FILE = 'vio-temp-file';
 
 describe('renameClassName', function() {
   before(() => {
@@ -30,6 +30,9 @@ export default Hello;
   it('rename es6 class name', () => {
     vio.put(V_FILE, CODE);
     refactor.renameClassName(V_FILE, 'Hello', 'NewHello');
-    expectLines(V_FILE, ['export class NewHello extends PureComponent {', 'export default NewHello;']);
+    expectLines(V_FILE, [
+      'export class NewHello extends PureComponent {',
+      'export default NewHello;',
+    ]);
   });
 });

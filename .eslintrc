@@ -1,9 +1,13 @@
 {
+  "globals": {
+    "rekit": "readonly"
+  },
   "extends": "node",
   "rules": {
     "import/no-nodejs-modules": 0,
     "import/no-commonjs": 0,
     "no-console": 0,
+    "prefer-rest-params": 0,
     "no-sync": 0
   }
 }

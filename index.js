@@ -22,8 +22,6 @@ _.upperSnakeCase = _.flow(
   _.snakeCase,
   _.toUpper
 );
-// paths.setProjectRoot('/Users/pwang7/workspace/app-next/');
-// if (process.env.NODE_ENV !== 'production') paths.setProjectRoot('/Users/pwang7/workspace/rekitebaynode/');
 
 global.rekit = {
   core: {

@@ -1,9 +1,9 @@
 "use strict";
 
 const _ = require("lodash");
-const generate = "@babel/generator";
+const generate = require("@babel/generator").default;
 const traverse = require("@babel/traverse").default;
-const babelTypes = "@babel/types";
+const babelTypes = require("@babel/types");
 const common = require("./common");
 const identifier = require("./identifier");
 

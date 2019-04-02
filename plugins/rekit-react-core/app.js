@@ -2,7 +2,7 @@ const _ = require('lodash');
 const path = require('path');
 const fs = require('fs-extra');
 // const shell = require('shelljs');
-const traverse = require('babel-traverse').default;
+const traverse = require('@babel/traverse').default;
 
 const { ast, paths, vio, app, config, files } = rekit.core;
 

@@ -21,7 +21,7 @@
     "url": "https://github.com/rekit/rekit-core/issues"
   },
   "scripts": {
-    "test": "node ./tools/run_test.js",
+    "test": "node ./scripts/runTests.js",
     "jsdoc:build": "jsdoc core -r -c .jsdoc.json --verbose",
     "codecov": "codecov"
   },

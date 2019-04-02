@@ -1,6 +1,6 @@
 const _ = require('lodash');
 const path = require('path');
-const traverse = require('babel-traverse').default;
+const traverse = require('@babel/traverse').default;
 
 const entry = require('./entry');
 const utils = require('./utils');
