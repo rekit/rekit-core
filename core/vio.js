@@ -87,7 +87,7 @@ function fileExists(filePath) {
     !!_.findKey(mvs, s => s === filePath) || // to be moved
     !!fileLines[filePath] ||
     !!toSave[filePath] ||
-    fs.existsSync(paths.map(realPath))
+    fs.existsSync(path.isAbsolute(realPath) ? realPath : paths.map(realPath))
   );
 }
 
@@ -107,8 +107,8 @@ function dirNotExists(dir) {
 }
 
 function ensurePathDir(fullPath) {
-  const absPath = paths.map(fullPath);
-  fs.ensureDirSync(absPath);
+  const absPath = path.isAbsolute(fullPath) ? fullPath : paths.map(fullPath);
+  fs.ensureDirSync(path.dirname(absPath));
 }
 
 function put(filePath, lines) {

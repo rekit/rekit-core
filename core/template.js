@@ -39,7 +39,10 @@ _.upperSnakeCase = _.flow(
  * // NOTE the result is only in vio, you need to call vio.flush() to write to disk.
  **/
 function generate(targetPath, args) {
-  if (!args.template && args.templateFile && !vio.fileExists(args.templateFile)) {
+  if (
+    !args.template &&
+    (!args.templateFile || (args.templateFile && !vio.fileExists(args.templateFile)))
+  ) {
     const err = new Error(`No template file found: ${args.templateFile}`);
     err.code = 'TEMPLATE_FILE_NOT_FOUND';
     throw err;

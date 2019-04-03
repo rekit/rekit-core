@@ -8,7 +8,7 @@
  *    clone the repo to the project folder.
  *  - Execute postCreate.js
  *
-*/
+ */
 
 const path = require('path');
 const https = require('https');
@@ -19,7 +19,7 @@ const config = require('./config');
 const paths = require('./paths');
 
 function create(options) {
-  console.log('Creating app: ', options);
+  console.log('Creating app: ', options.name);
 
   if (!options.status)
     options.status = (code, msg) => {
@@ -42,7 +42,9 @@ function create(options) {
           gitRepo = options.source;
         } else {
           // It's a local folder
-          const srcDir = path.isAbsolute(options.source) ? options.source : path.join(process.cwd(), options.source);
+          const srcDir = path.isAbsolute(options.source)
+            ? options.source
+            : path.join(process.cwd(), options.source);
           options.status('CREATE_APP_COPY_FILES', `Copy files from ${srcDir}...`);
           await fs.copy(srcDir, prjDir, {
             filter: src => !/\/(\.git|node_modules\/|node_modules$)/.test(src),
@@ -50,7 +52,10 @@ function create(options) {
         }
       } else if (options.type) {
         // Get gitRepo
-        options.status('QUERY_APP_TYPES_GIT_REPO', `Looking for the git repo for app type ${options.type}...`);
+        options.status(
+          'QUERY_APP_TYPES_GIT_REPO',
+          `Looking for the git repo for app type ${options.type}...`,
+        );
         const appTypes = await getAppTypes();
         const appType = _.find(appTypes, { id: options.type });
         if (!appType) reject('APP_TYPE_NOT_SUPPORTED');
@@ -61,7 +66,7 @@ function create(options) {
       }
 
       if (gitRepo) {
-        options.status('CLONE_PROJECT', `Cloning project from ${gitRepo}...`);
+        options.status('CLONE_PROJECT', `Downloading project from ${gitRepo}...`);
         await cloneRepo(gitRepo, prjDir);
       }
 
@@ -88,12 +93,13 @@ function getAppTypes() {
 }
 
 function cloneRepo(gitRepo, prjDir) {
-  console.log('Cloning repp: ', gitRepo);
   return new Promise((resolve, reject) => {
     const isDirect = /^https?:/.test(gitRepo);
     download(isDirect ? `direct:${gitRepo}` : gitRepo, prjDir, { clone: isDirect }, err => {
       if (err) {
-        console.log('Failed to download the boilerplate. The project was not created. Please check and retry.');
+        console.log(
+          'Failed to download the boilerplate. The project was not created. Please check and retry.',
+        );
         console.log(err);
         reject('CLONE_REPO_FAILED');
         return;
@@ -166,7 +172,7 @@ function syncAppRegistryRepo() {
               reject(err);
             }
           });
-        }
+        },
       )
       .on('error', err => {
         console.log('Failed to get last commit of app registry: ', err);
