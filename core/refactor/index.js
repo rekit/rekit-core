@@ -16,6 +16,7 @@ const cls = require('./cls');
 const func = require('./func');
 const lines = require('./lines');
 const format = require('./format');
+const generate = require('./generate');
 
 module.exports = {
   // Common
@@ -79,4 +80,7 @@ module.exports = {
 
   // Format
   format,
+
+  // Generate
+  generate,
 };

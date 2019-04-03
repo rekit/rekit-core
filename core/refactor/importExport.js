@@ -368,9 +368,7 @@ function removeImportSpecifier(ast, name) {
       } else if (newSpecifiers.length !== node.specifiers.length) {
         // remove the specifier import
         const newNode = Object.assign({}, node, { specifiers: newSpecifiers });
-        let newCode = generate(newNode, {}).code;
-        // if (multilines) newCode = formatMultilineImport(newCode);
-        newCode = format(newCode, ast._filePath, { insertFinalNewline: false }).formatted;
+        const newCode = generate(newNode, ast._filePath);
         changes.push({
           start: node.start,
           end: node.end,

@@ -1,9 +1,8 @@
-"use strict";
+'use strict';
 
-const _ = require("lodash");
-const traverse = require("@babel/traverse").default;
-const common = require("./common");
-const utils = require("../utils");
+const _ = require('lodash');
+const traverse = require('@babel/traverse').default;
+const common = require('./common');
 
 function objExpToObj(objExp) {
   // only for non-computed properties
@@ -34,20 +33,18 @@ function addObjectProperty(ast, varName, propName, propValue) {
     VariableDeclarator(path) {
       const node = path.node;
       if (
-        (varName && _.get(node, "id.name") !== varName) ||
-        _.get(node, "init.type") !== "ObjectExpression"
+        (varName && _.get(node, 'id.name') !== varName) ||
+        _.get(node, 'init.type') !== 'ObjectExpression'
       )
         return;
-      const props = _.get(node, "init.properties");
+      const props = _.get(node, 'init.properties');
 
       const multilines = node.loc.start.line !== node.loc.end.line;
       // Check if it exists
       const targetPropNode = _.find(
         props,
         p =>
-          _.get(p, "key.type") === "Identifier" &&
-          _.get(p, "key.name") === propName &&
-          !p.computed
+          _.get(p, 'key.type') === 'Identifier' && _.get(p, 'key.name') === propName && !p.computed,
       );
 
       let insertPos = node.init.start + 1;
@@ -57,9 +54,8 @@ function addObjectProperty(ast, varName, propName, propValue) {
       const code = `${propName}: ${propValue}`;
       if (!targetPropNode) {
         let replacement;
-        const targetPos = node.end - 1;
         if (multilines) {
-          const indent = _.repeat(" ", node.loc.end.column - 1);
+          const indent = _.repeat(' ', node.loc.end.column - 1);
           replacement = `\n${indent}  ${code}`;
           if (props.length) {
             replacement = `,${replacement}`;
@@ -75,14 +71,12 @@ function addObjectProperty(ast, varName, propName, propValue) {
         changes.push({
           start: insertPos,
           end: insertPos,
-          replacement
+          replacement,
         });
       } else {
-        utils.warn(
-          `Property name '${propName}' already exists for ${varName}.`
-        );
+        console.warn(`Property name '${propName}' already exists for ${varName}.`);
       }
-    }
+    },
   });
   return changes;
 }
@@ -93,29 +87,27 @@ function setObjectProperty(ast, varName, propName, propValue) {
     VariableDeclarator(path) {
       const node = path.node;
       if (
-        (varName && _.get(node, "id.name") !== varName) ||
-        _.get(node, "init.type") !== "ObjectExpression"
+        (varName && _.get(node, 'id.name') !== varName) ||
+        _.get(node, 'init.type') !== 'ObjectExpression'
       )
         return;
-      const props = _.get(node, "init.properties");
+      const props = _.get(node, 'init.properties');
 
       // Check if it exists
       const targetPropNode = _.find(
         props,
         p =>
-          _.get(p, "key.type") === "Identifier" &&
-          _.get(p, "key.name") === propName &&
-          !p.computed
+          _.get(p, 'key.type') === 'Identifier' && _.get(p, 'key.name') === propName && !p.computed,
       );
 
       if (targetPropNode) {
         changes.push({
           start: targetPropNode.value.start,
           end: targetPropNode.value.end,
-          replacement: propValue
+          replacement: propValue,
         });
       }
-    }
+    },
   });
   return changes;
 }
@@ -131,29 +123,27 @@ function renameObjectProperty(ast, varName, oldName, newName) {
     VariableDeclarator(path) {
       const node = path.node;
       if (
-        (varName && _.get(node, "id.name") !== varName) ||
-        _.get(node, "init.type") !== "ObjectExpression"
+        (varName && _.get(node, 'id.name') !== varName) ||
+        _.get(node, 'init.type') !== 'ObjectExpression'
       )
         return;
-      const props = _.get(node, "init.properties");
+      const props = _.get(node, 'init.properties');
 
       // const multilines = node.loc.start.line !== node.loc.end.line;
       const targetPropNode = _.find(
         props,
         p =>
-          _.get(p, "key.type") === "Identifier" &&
-          _.get(p, "key.name") === oldName &&
-          !p.computed
+          _.get(p, 'key.type') === 'Identifier' && _.get(p, 'key.name') === oldName && !p.computed,
       );
 
       if (targetPropNode) {
         changes.push({
           start: targetPropNode.key.start,
           end: targetPropNode.key.end,
-          replacement: newName
+          replacement: newName,
         });
       }
-    }
+    },
   });
   return changes;
 }
@@ -164,20 +154,18 @@ function removeObjectProperty(ast, varName, propName) {
     VariableDeclarator(path) {
       const node = path.node;
       if (
-        (varName && _.get(node, "id.name") !== varName) ||
-        _.get(node, "init.type") !== "ObjectExpression"
+        (varName && _.get(node, 'id.name') !== varName) ||
+        _.get(node, 'init.type') !== 'ObjectExpression'
       )
         return;
-      const props = _.get(node, "init.properties");
+      const props = _.get(node, 'init.properties');
 
       const multilines = node.loc.start.line !== node.loc.end.line;
 
       const targetPropNode = _.find(
         props,
         p =>
-          _.get(p, "key.type") === "Identifier" &&
-          _.get(p, "key.name") === propName &&
-          !p.computed
+          _.get(p, 'key.type') === 'Identifier' && _.get(p, 'key.name') === propName && !p.computed,
       );
 
       if (targetPropNode) {
@@ -189,17 +177,15 @@ function removeObjectProperty(ast, varName, propName) {
           endIndex = targetPropNode.end;
         } else {
           startIndex = node.init.start + 1;
-          endIndex =
-            targetPropNode.end +
-            (multilines || targetIndex < props.length - 1 ? 1 : 0);
+          endIndex = targetPropNode.end + (multilines || targetIndex < props.length - 1 ? 1 : 0);
         }
         changes.push({
           start: startIndex,
           end: endIndex,
-          replacement: ""
+          replacement: '',
         });
       }
-    }
+    },
   });
   return changes;
 }
@@ -209,5 +195,5 @@ module.exports = {
   addObjectProperty: common.acceptFilePathForAst(addObjectProperty),
   setObjectProperty: common.acceptFilePathForAst(setObjectProperty),
   renameObjectProperty: common.acceptFilePathForAst(renameObjectProperty),
-  removeObjectProperty: common.acceptFilePathForAst(removeObjectProperty)
+  removeObjectProperty: common.acceptFilePathForAst(removeObjectProperty),
 };

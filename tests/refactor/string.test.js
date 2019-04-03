@@ -1,17 +1,14 @@
 'use strict';
 
-const traverse = require('@babel/traverse').default;
 const vio = require('../../core/vio');
-const ast = require('../../core/ast');
 const refactor = require('../../core/refactor');
 const helpers = require('../helpers');
 
 const V_FILE = 'vio-temp-file.js';
 
 const expectLines = helpers.expectLines;
-const expectNoLines = helpers.expectNoLines;
 
-describe('refactor array tests', function() {
+describe('refactor string tests', function() {
   // eslint-disable-line
   before(() => {
     vio.reset();
@@ -33,5 +30,28 @@ const s2 = 'ghijk';
     vio.put(V_FILE, CODE);
     refactor.replaceStringLiteral(V_FILE, 'hij', '234', false);
     expectLines(V_FILE, ["const s2 = 'g234k';"]);
+  });
+
+  const CODE2 = `
+const str1 = 'abcdefg';
+const jsx = (
+  <div className="div1">
+    <h2 className="sub-title-2">sub-title</h2>
+  </div>
+);
+
+`;
+  it('should only replace full string when fullMatch === true', () => {
+    vio.put(V_FILE, CODE2);
+    refactor.replaceStringLiteral(V_FILE, 'abcdefg', 'new-str');
+    expectLines(V_FILE, ["const str1 = 'new-str';"]);
+    refactor.replaceStringLiteral(V_FILE, 'new', 'xxx');
+    expectLines(V_FILE, ["const str1 = 'new-str';"]);
+  });
+
+  it('should only replace full string when fullMatch === false', () => {
+    vio.put(V_FILE, CODE2);
+    refactor.replaceStringLiteral(V_FILE, 'sub-title', 'second-title', false);
+    expectLines(V_FILE, ['    <h2 className="second-title-2">sub-title</h2>']);
   });
 });
