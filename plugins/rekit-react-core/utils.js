@@ -1,7 +1,8 @@
+const fs = require('fs');
 const path = require('path');
 const _ = require('lodash');
 
-const { config } = rekit.core;
+const { config, paths } = rekit.core;
 
 const pascalCase = _.flow(
   _.camelCase,
@@ -85,7 +86,11 @@ function getAsyncActionTypes(feature, action) {
 // Get the template file path
 function getTplPath(tpl) {
   const tplFile = path.join(__dirname, './templates', tpl);
-  return tplFile;
+  const customTplDir =
+    _.get(config.getRekitConfig(), 'rekitReact.templateDir') ||
+    path.join(paths.map('.rekit-react/templates'));
+  const customTplFile = path.join(customTplDir, tpl);
+  return fs.existsSync(customTplFile) ? customTplFile : tplFile;
 }
 
 module.exports = {
