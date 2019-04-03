@@ -18,6 +18,12 @@ const download = require('download-git-repo');
 const config = require('./config');
 const paths = require('./paths');
 
+/*
+  options: {
+    status: callback
+    source: where to create app from
+  }
+*/
 function create(options) {
   console.log('Creating app: ', options.name);
 
