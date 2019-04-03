@@ -73,13 +73,6 @@ function getAst(filePath, throwIfError) {
   return cache[filePath].ast;
 }
 
-// function assertAst(ast, filePath) {
-//   if (!ast) {
-//     reset(); // eslint-disable-line
-//     utils.fatalError(`Failed to parse ${filePath}, please fix and try again.`);
-//   }
-// }
-
 function getFilesFailedToParse() {
   return failedToParse;
 }

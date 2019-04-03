@@ -56,19 +56,17 @@ const otherCode = 1;
     refactor.addImportFrom(V_FILE, './X', null, null, 'AllX');
     refactor.addImportFrom(V_FILE, './Y', 'Y');
     refactor.addImportFrom(V_FILE, './Z', 'Z');
-    console.log(vio.getContent(V_FILE));
+
     expectLines(V_FILE, [
       "import K from './K';",
-      // "import Y from './Y';",
-      // "import Z from './Z';",
-      // "import L, { L1 } from './L';",
-      // "import { M1 } from './M';",
-      // "import N, { N1, N2 } from './N';",
-      // '  G4,',
-      // '  G5,',
-      // '  H1,',
-      // "import A, * as all from './A';",
-      // "import * as AllX from './X';",
+      "import Y from './Y';",
+      "import Z from './Z';",
+      "import L, { L1 } from './L';",
+      "import { M1 } from './M';",
+      "import N, { N1, N2 } from './N';",
+      "import { G1, G2, G3, G4, G5 } from './G';",
+      "import A, * as all from './A';",
+      "import * as AllX from './X';",
     ]);
   });
 
@@ -87,7 +85,7 @@ export default {
       `;
     vio.put(V_FILE, code);
     refactor.addImportFrom(V_FILE, './', '', 'A');
-    expectLines(V_FILE, ['  A,']);
+    expectLines(V_FILE, ["import { A } from './';"]);
   });
 
   it('should add import specifier(s) when module exist', () => {
@@ -119,6 +117,7 @@ const otherCode = 1;
     refactor.addExportFrom(V_FILE, './L', 'L', 'L1');
     refactor.addExportFrom(V_FILE, './M', '', 'M1');
     refactor.addExportFrom(V_FILE, './N', 'N', ['N1', 'N2']);
+
     expectLines(V_FILE, [
       "export { default as K } from './K';",
       "export { default as L, L1 } from './L';",

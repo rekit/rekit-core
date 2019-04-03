@@ -1,12 +1,13 @@
 'use strict';
 
 const _ = require('lodash');
-const generate = require('@babel/generator').default;
+// const generate = require('@babel/generator').default;
 const traverse = require('@babel/traverse').default;
 const babelTypes = require('@babel/types');
 const format = require('./format');
 const common = require('./common');
 const identifier = require('./identifier');
+const generate = require('./generate');
 
 // NOTE: comments set to false to avoid leadingComments and tailingComments be output.
 // So that comments will not be duplicated.
@@ -14,27 +15,10 @@ const identifier = require('./identifier');
 //   import { /* my comment */ ModuleA } from 'modules';
 // The inline comment /* my comment */ will be removed after import/export change.
 
-const babelGeneratorOptions = {
-  quotes: 'single',
-  comments: false,
-};
-
-function formatMultilineImport(importCode) {
-  // format import statement to:
-  // import {
-  //   name1,
-  //   name2,
-  // } from './xxx';
-
-  const m = importCode.match(/\{([^}]+)\}/);
-  if (m) {
-    const arr = _.compact(m[1].split(/, */).map(_.trim));
-    if (arr.length) {
-      return importCode.replace(/\{[^}]+\}/, `{\n  ${arr.join(',\n  ')},\n}`);
-    }
-  }
-  return importCode;
-}
+// const babelGeneratorOptions = {
+//   quotes: 'single',
+//   comments: false,
+// };
 
 /**
  * Import from a given module source. This methods operates import statement:
@@ -106,8 +90,9 @@ function addImportFrom(ast, moduleSource, defaultImport, namedImport, namespaceI
         });
 
         const newNode = Object.assign({}, node, { specifiers: newSpecifiers });
-        let newCode = generate(newNode, babelGeneratorOptions).code;
-        newCode = format(newCode, ast._filePath, { insertFinalNewline: false }).formatted;
+        const newCode = generate(newNode, ast._filePath);
+        // let newCode = generate(newNode, babelGeneratorOptions).code;
+        // newCode = format(newCode, ast._filePath, { insertFinalNewline: false }).formatted;
         // if (multilines) {
         //   newCode = formatMultilineImport(newCode);
         // }
@@ -137,8 +122,7 @@ function addImportFrom(ast, moduleSource, defaultImport, namedImport, namespaceI
     });
 
     const node = t.importDeclaration(specifiers, t.stringLiteral(moduleSource));
-    let newCode = generate(node, babelGeneratorOptions).code;
-    newCode = format(newCode, ast._filePath, { insertFinalNewline: false }).formatted;
+    const newCode = generate(node, ast._filePath);
     changes.push({
       start: targetImportPos,
       end: targetImportPos,
@@ -212,7 +196,7 @@ function addExportFrom(ast, moduleSource, defaultExport, namedExport) {
         });
 
         const newNode = Object.assign({}, node, { specifiers: newSpecifiers });
-        const newCode = generate(newNode, babelGeneratorOptions).code;
+        const newCode = generate(newNode, ast._filePath);
         changes.push({
           start: node.start,
           end: node.end,
@@ -235,7 +219,7 @@ function addExportFrom(ast, moduleSource, defaultExport, namedExport) {
     });
 
     const node = t.ExportNamedDeclaration(null, specifiers, t.stringLiteral(moduleSource));
-    const code = generate(node, babelGeneratorOptions).code;
+    const code = generate(node, ast._filePath);
     changes.push({
       start: targetExportPos,
       end: targetExportPos,
@@ -372,7 +356,6 @@ function removeImportSpecifier(ast, name) {
   traverse(ast, {
     ImportDeclaration(path) {
       const node = path.node;
-      const multilines = node.loc.start.line !== node.loc.end.line;
       if (!node.specifiers) return;
       const newSpecifiers = node.specifiers.filter(s => !names.includes(s.local.name));
       if (newSpecifiers.length === 0) {
@@ -386,7 +369,8 @@ function removeImportSpecifier(ast, name) {
         // remove the specifier import
         const newNode = Object.assign({}, node, { specifiers: newSpecifiers });
         let newCode = generate(newNode, {}).code;
-        if (multilines) newCode = formatMultilineImport(newCode);
+        // if (multilines) newCode = formatMultilineImport(newCode);
+        newCode = format(newCode, ast._filePath, { insertFinalNewline: false }).formatted;
         changes.push({
           start: node.start,
           end: node.end,
@@ -430,7 +414,6 @@ module.exports = {
   renameExportSpecifier: common.acceptFilePathForAst(renameExportSpecifier),
 
   removeImportSpecifier: common.acceptFilePathForAst(removeImportSpecifier),
-  // removeExportSpecifier: common.acceptFilePathForAst(removeExportSpecifier),
   removeImportBySource: common.acceptFilePathForAst(removeImportBySource),
 
   renameModuleSource: common.acceptFilePathForAst(renameModuleSource),
