@@ -1,10 +1,10 @@
-const _ = require("lodash");
-const traverse = require("@babel/traverse").default;
-const t = require("@babel/types").default;
-const vio = require("./vio");
-const ast = require("./ast");
-const refactor = require("./refactor");
-const plugin = require("./plugin");
+const _ = require('lodash');
+const traverse = require('@babel/traverse').default;
+const t = require('@babel/types');
+const vio = require('./vio');
+const ast = require('./ast');
+const refactor = require('./refactor');
+const plugin = require('./plugin');
 
 const depsCache = {};
 
@@ -15,15 +15,11 @@ function getDeps(filePath, originalFilePath) {
 
   if (originalFilePath === filePath) return [];
 
-  if (
-    depsCache[filePath] &&
-    depsCache[filePath].content === vio.getContent(filePath)
-  ) {
-    console.log("hit deps cache: ", filePath);
+  if (depsCache[filePath] && depsCache[filePath].content === vio.getContent(filePath)) {
     return depsCache[filePath].deps;
   }
 
-  const plugins = plugin.getPlugins("deps.getDeps");
+  const plugins = plugin.getPlugins('deps.getDeps');
   let deps = null;
   if (plugins.length) {
     _.reverse(plugins.slice()).some(p => {
@@ -33,7 +29,7 @@ function getDeps(filePath, originalFilePath) {
     if (deps) return deps;
   }
 
-  if (!filePath.endsWith(".js") && !filePath.endsWith(".jsx")) {
+  if (!filePath.endsWith('.js') && !filePath.endsWith('.jsx')) {
     return null;
   }
 
@@ -46,49 +42,41 @@ function getDeps(filePath, originalFilePath) {
     if (!refactor.isLocalModule(moduleSource)) {
       deps.push({
         id: moduleSource,
-        type: "npm",
-        ...args
+        type: 'npm',
+        ...args,
       });
       return;
     }
     let modulePath = refactor.resolveModulePath(filePath, moduleSource);
     // maybe modulePath is json/img or others.
-    if (!vio.fileExists(modulePath)) modulePath += ".js";
-    deps.push({ id: modulePath, type: "file", ...args });
+    if (!vio.fileExists(modulePath)) modulePath += '.js';
+    deps.push({ id: modulePath, type: 'file', ...args });
   };
   const ast2 = ast.getAst(filePath);
   if (!ast2) {
-    console.log("no ast: ", filePath);
+    console.log('no ast: ', filePath);
     return []; // if syntax error, no deps returned.
   }
   try {
     traverse(ast2, {
       ExportNamedDeclaration(path) {
-        const moduleSource = _.get(path, "node.source.value");
-        const exported = _.get(path, "node.specifiers").reduce(
-          (prev, specifier) => {
-            prev[_.get(specifier, "exported.name")] = _.get(
-              specifier,
-              "local.name"
-            );
-            return prev;
-          },
-          {}
-        );
+        const moduleSource = _.get(path, 'node.source.value');
+        const exported = _.get(path, 'node.specifiers').reduce((prev, specifier) => {
+          prev[_.get(specifier, 'exported.name')] = _.get(specifier, 'local.name');
+          return prev;
+        }, {});
         pushModuleSource(moduleSource, { exported });
       },
       ExportAllDeclaration(path) {
-        const moduleSource = _.get(path, "node.source.value");
+        const moduleSource = _.get(path, 'node.source.value');
         pushModuleSource(moduleSource);
       },
       CallExpression(path) {
-        const isRequire = _.get(path, "node.callee.name") === "require";
-        const isImport = _.get(path, "node.callee.type") === "Import";
-        if (
-          (isRequire || isImport) &&
-          t.isStringLiteral(_.get(path, "node.arguments[0]"))
-        ) {
-          const moduleSource = _.get(path, "node.arguments[0].value");
+        const isRequire = _.get(path, 'node.callee.name') === 'require';
+        const isImport = _.get(path, 'node.callee.type') === 'Import';
+
+        if ((isRequire || isImport) && t.isStringLiteral(_.get(path, 'node.arguments[0]'))) {
+          const moduleSource = _.get(path, 'node.arguments[0].value');
           const args = {};
           if (isRequire) args.isRequire = true;
           if (isImport) args.isImport = true;
@@ -96,20 +84,20 @@ function getDeps(filePath, originalFilePath) {
         }
       },
       ImportDeclaration(path) {
-        const moduleSource = _.get(path, "node.source.value");
+        const moduleSource = _.get(path, 'node.source.value');
         const imported = [];
         let defaultImport = false;
         let nsImport = false;
         path.node.specifiers.forEach(specifier => {
-          if (specifier.type === "ImportNamespaceSpecifier") {
+          if (specifier.type === 'ImportNamespaceSpecifier') {
             // imported.push('*');
             // TODO: try to analyze namespace import
             nsImport = true;
           }
-          if (specifier.type === "ImportSpecifier") {
+          if (specifier.type === 'ImportSpecifier') {
             imported.push(specifier.imported.name);
           }
-          if (specifier.type === "ImportDefaultSpecifier") {
+          if (specifier.type === 'ImportDefaultSpecifier') {
             defaultImport = true;
           }
         });
@@ -119,7 +107,7 @@ function getDeps(filePath, originalFilePath) {
         if (nsImport) args.nsImport = true;
         args.defaultImport = defaultImport;
         pushModuleSource(moduleSource, args);
-      }
+      },
     });
   } catch (e) {
     return [];
@@ -142,7 +130,7 @@ function getDeps(filePath, originalFilePath) {
               _.pull(imported, importedName);
               const dep2 = { id: theDep.id, type: theDep.type };
               const realImported = theDep.exported[importedName];
-              if (realImported === "default") dep2.defaultImport = true;
+              if (realImported === 'default') dep2.defaultImport = true;
               else {
                 dep2.imported = [realImported];
                 dep2.defaultImport = false;
@@ -155,7 +143,7 @@ function getDeps(filePath, originalFilePath) {
       if (imported.length) {
         prev.push({
           ...dep,
-          imported
+          imported,
         });
       } else if (dep.defaultImport) {
         const dep2 = { ...dep };
@@ -181,7 +169,7 @@ function getDeps(filePath, originalFilePath) {
         exported: { ...dep.exported, ...dep2.exported },
         isImport: dep.isImport || dep2.isImport,
         isRequire: dep.isRequire || dep2.isRequire,
-        type: dep.type
+        type: dep.type,
       };
       if (!merged.imported.length) delete merged.imported;
       if (!merged.isImport) delete merged.isImport;
@@ -196,5 +184,5 @@ function getDeps(filePath, originalFilePath) {
 }
 
 module.exports = {
-  getDeps
+  getDeps,
 };

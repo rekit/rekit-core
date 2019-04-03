@@ -56,7 +56,7 @@ describe('deps', function() {
       import B from './moduleB';
       import { C } from './moduleC';
       import D, { D1 } from './moduleD';
-    `
+    `,
     );
     const resDeps = deps.getDeps(moduleA);
     expect(resDeps).to.deep.equal([
@@ -116,7 +116,7 @@ describe('deps', function() {
       moduleA,
       `
         import { B1 } from './moduleB';
-        import { B2 } from './moduleB';`
+        import { B2 } from './moduleB';`,
     );
     expect(deps.getDeps(moduleA)).to.deep.equal([
       {
@@ -160,7 +160,7 @@ describe('deps', function() {
       export { default as A } from './moduleA';
       export { default as B, B1, B2 as BB2 } from './moduleB';
       export { default as C } from './moduleC';
-    `
+    `,
     );
     expect(deps.getDeps(moduleA)).to.deep.equal([
       { id: moduleB, defaultImport: false, imported: ['B1', 'B2'], type: 'file' },

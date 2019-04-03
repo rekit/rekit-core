@@ -59,20 +59,8 @@ function updateFile(filePath, changes) {
   vio.save(filePath, code);
 }
 
-// find module alias
-// TODO: support .babelrc
-//
 function getModuleResolverAlias() {
-  const thePkgJson = config.getPkgJson();
-  if (!thePkgJson) return {};
-  const babelPlugins = _.get(thePkgJson, 'babel.plugins');
   const alias = config.getRekitConfig().moduleAlias || {};
-  if (_.isArray(babelPlugins)) {
-    const moduleResolver = babelPlugins.filter(p => p[0] === 'module-resolver');
-    if (moduleResolver.length && moduleResolver[0][1]) {
-      Object.assign(alias, moduleResolver[0][1].alias);
-    }
-  }
   return alias;
 }
 

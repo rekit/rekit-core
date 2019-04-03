@@ -1,7 +1,6 @@
 'use strict';
 
 const expect = require('chai').expect;
-// const utils = require('../../core/utils');
 const paths = require('../../core/paths');
 const vio = require('../../core/vio');
 const refactorCommon = require('../../core/refactor/common');
@@ -9,32 +8,8 @@ const refactorCommon = require('../../core/refactor/common');
 describe('refactor common tests', function() {
   // eslint-disable-line
 
-  const pkgJsonPath = paths.map('package.json');
   before(() => {
     vio.reset();
-    require.cache[pkgJsonPath] = {
-      id: pkgJsonPath,
-      filename: pkgJsonPath,
-      loaded: true,
-      exports: {
-        babel: {
-          plugins: [
-            [
-              'module-resolver',
-              {
-                alias: {
-                  src: './src',
-                },
-              },
-            ],
-          ],
-        },
-      },
-    };
-  });
-
-  after(() => {
-    delete require.cache[pkgJsonPath];
   });
 
   it('isLocalModule', () => {

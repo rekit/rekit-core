@@ -1,0 +1,6 @@
+{
+  "moduleAlias": {
+    "app": "./src",
+    "src": "./src"
+  }
+}

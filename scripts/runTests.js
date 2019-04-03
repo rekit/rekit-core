@@ -9,7 +9,7 @@
 'use strict';
 
 const path = require('path');
-const npmRun = require('npm-run');
+const { spawn } = require('child_process');
 
 const prjRoot = path.join(__dirname, '../');
 
@@ -26,24 +26,23 @@ console.log('Running tests: ', testFile.replace(prjRoot, ''), '...');
 const env = Object.create(process.env);
 env.NODE_ENV = 'test';
 
-const opts = {
-  cwd: prjRoot,
-  stdio: 'inherit',
-  env,
-};
-console.log('test file: ', testFile);
 const params = [
   'mocha',
   '--require',
   'tests/before-all.js',
-  `"${testFile}"`,
+  `${testFile}`,
   // "--exit"
 ];
 
 if (needReport) {
   params.splice(0, 0, 'nyc', '--report-dir=coverage');
 }
-npmRun.execSync(params.join(' '), opts);
+const opts = {
+  cwd: prjRoot,
+  stdio: 'inherit',
+  env,
+};
+spawn('npx', params, opts);
 
 if (needReport) {
   console.log('Report: ', path.join(prjRoot, 'coverage/lcov-report/index.html'));
