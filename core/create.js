@@ -80,6 +80,8 @@ function create(options) {
       options.status('CREATION_SUCCESS', '😃App creation success.');
       resolve();
     } catch (err) {
+      console.log('Failed to create project.');
+      fs.removeSync(prjDir);
       reject(err);
     }
   });
