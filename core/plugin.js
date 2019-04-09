@@ -20,6 +20,7 @@ let loaded = false;
 let needFilterPlugin = true;
 
 const DEFAULT_PLUGIN_DIR = path.join(os.homedir(), '.rekit/plugins');
+const BUILT_IN_UI_PLUGINS = ['rekit-react-ui', 'default', 'test', 'terminal', 'scripts'];
 
 const pluginsDirs = [DEFAULT_PLUGIN_DIR];
 function addPluginsDir(dir) {
@@ -33,7 +34,7 @@ function filterPlugins() {
   const rekitConfig = config.getRekitConfig();
   let appType = rekitConfig.appType;
 
-  console.log('all plugins: ', plugins.map(p => p.name));
+  console.log('all plugins: ', appType, plugins.map(p => p.name));
   // If no appType configured, set it to the first matched plugin except common.
   // Pure folder plugin is always loaded.
   if (!appType) {
@@ -56,22 +57,28 @@ function getPlugins(prop) {
     loaded = true;
   }
 
-  // plugins = plugins.map(plugin => {
-  //   if (plugin.inherit1) {
-  //     const newPlugin = {};
-  //     _.castArray(plugin.inherit).forEach(name => {
-  //       const p = getPlugin(name);
-  //       if (!p)
-  //         throw new Error('INHERIT_PLUGIN_NOT_FOUND: ' + name + ' inherited by ' + plugin.name);
-  //       _.merge(newPlugin, p);
-  //     });
-  //     _.merge(newPlugin, plugin);
-  //     plugin.__originalInherit = plugin.inherit;
-  //     delete plugin.inherit; // only inherit once
-  //     return newPlugin;
-  //   }
-  //   return plugin;
-  // });
+  plugins = plugins.map(plugin => {
+    if (plugin.inherit) {
+      const newPlugin = {};
+      _.castArray(plugin.inherit).forEach(name => {
+        const p = getPlugin(name);
+        if (!p) {
+          if (_.includes(BUILT_IN_UI_PLUGINS, name)) {
+            if (!newPlugin.uiInherit) newPlugin.uiInherit = [];
+            newPlugin.uiInherit.push(name);
+          } else {
+            throw new Error('INHERIT_PLUGIN_NOT_FOUND: ' + name + ' inherited by ' + plugin.name);
+          }
+        }
+        _.merge(newPlugin, p);
+      });
+      _.merge(newPlugin, plugin);
+      newPlugin.__originalInherit = plugin.inherit;
+      delete newPlugin.inherit; // only inherit once
+      return newPlugin;
+    }
+    return plugin;
+  });
 
   if (needFilterPlugin) {
     filterPlugins();
@@ -84,11 +91,10 @@ function checkFeatureFiles(plugin) {
   // Detect if folder structure is for the plugin
   if (
     _.isArray(plugin.featureFiles) &&
-    !plugin.featureFiles.every(
-      f =>
-        f.startsWith('!')
-          ? !fs.existsSync(paths.map(f.replace('!', '')))
-          : fs.existsSync(paths.map(f)),
+    !plugin.featureFiles.every(f =>
+      f.startsWith('!')
+        ? !fs.existsSync(paths.map(f.replace('!', '')))
+        : fs.existsSync(paths.map(f)),
     )
   ) {
     return false;
@@ -122,8 +128,13 @@ function loadPlugin(pluginRoot, noUI) {
     // Plugin meta
     Object.assign(
       pluginInstance,
-      _.pick(pkgJson, ['appType', 'name', 'isAppPlugin', 'featureFiles']),
+      pkgJson.rekitPlugin || _.pick(pkgJson, ['appType', 'name', 'isAppPlugin', 'featureFiles']),
     );
+    let name = pkgJson.name;
+    if (name.startsWith('rekit-plugin')) name = name.replace('rekit-plugin-', '');
+    pluginInstance.name = name;
+    if (pluginInstance.name.startsWith('rekit-plugin'))
+      pluginInstance.name = pluginInstance.name.replace('rekit-plugin-', '');
     return pluginInstance;
   } catch (e) {
     console.warn(`Failed to load plugin: ${pluginRoot}, ${e}\n${e.stack}`);
@@ -133,7 +144,6 @@ function loadPlugin(pluginRoot, noUI) {
 }
 
 function loadPlugins(dir) {
-  console.log('load plugins from dir: ', dir);
   fs.readdirSync(dir)
     .map(d => path.join(dir, d))
     .filter(d => fs.statSync(d).isDirectory())
@@ -161,8 +171,8 @@ function addPlugin(plugin) {
   plugins.push(plugin);
 }
 
-function addPluginByPath(pluginRoot) {
-  addPlugin(loadPlugin(pluginRoot));
+function addPluginByPath(pluginRoot, noUI) {
+  addPlugin(loadPlugin(pluginRoot, noUI));
 }
 
 function removePlugin(pluginName) {
