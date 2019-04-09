@@ -31,6 +31,9 @@ function readDir(dir, args = {}) {
     allElementById = {};
   }
   dir = dir || paths.map('src');
+  if (!fs.existsSync(dir)) {
+    return { elements: [], elementById: {}};
+  }
   if (!watchers[dir]) startWatch(dir);
   if (!cache[dir]) {
     cache[dir] = getDirElement(dir);
@@ -184,7 +187,6 @@ function getDirElement(dir) {
       // )
     })
     .forEach(file => {
-      file = paths.join(dir, file);
       const rFile = file.replace(prjRoot, '');
       dirEle.children.push(rFile);
       parentHash[rFile] = rDir;

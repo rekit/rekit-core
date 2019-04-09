@@ -384,6 +384,7 @@ function getProjectData(args) {
   });
   const folders = config.getRekitConfig().folders || [];
   folders.forEach(f => {
+    if (!fs.existsSync(paths.map(f))) return;
     const res = files.readDir(paths.map(f));
     Object.assign(elementById, res.elementById);
 

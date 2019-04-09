@@ -56,6 +56,23 @@ function getPlugins(prop) {
     loaded = true;
   }
 
+  // plugins = plugins.map(plugin => {
+  //   if (plugin.inherit1) {
+  //     const newPlugin = {};
+  //     _.castArray(plugin.inherit).forEach(name => {
+  //       const p = getPlugin(name);
+  //       if (!p)
+  //         throw new Error('INHERIT_PLUGIN_NOT_FOUND: ' + name + ' inherited by ' + plugin.name);
+  //       _.merge(newPlugin, p);
+  //     });
+  //     _.merge(newPlugin, plugin);
+  //     plugin.__originalInherit = plugin.inherit;
+  //     delete plugin.inherit; // only inherit once
+  //     return newPlugin;
+  //   }
+  //   return plugin;
+  // });
+
   if (needFilterPlugin) {
     filterPlugins();
   }
@@ -77,6 +94,10 @@ function checkFeatureFiles(plugin) {
     return false;
   }
   return true;
+}
+
+function getPlugin(name) {
+  return _.find(plugins, { name }) || null;
 }
 
 // Load plugin instance, plugin depends on project config
@@ -222,6 +243,7 @@ function updatePlugin(name) {}
 
 module.exports = {
   getPlugins,
+  getPlugin,
   loadPlugins,
   addPlugin,
   addPluginByPath,

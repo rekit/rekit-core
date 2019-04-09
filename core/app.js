@@ -6,8 +6,10 @@ const app = {};
 function getProjectData(args = {}) {
   const plugins = plugin.getPlugins('app.getProjectData');
   const prjData = {};
+  console.log('plugins: ', plugins.map(p=>p.name))
   if (plugins.length) {
-    plugins.forEach(p => Object.assign(prjData, p.app.getProjectData(args)));
+    
+    plugins.forEach(p => console.log(p.name) || Object.assign(prjData, p.app.getProjectData(args)));
   }
 
   app.lastGetProjectDataTimestamp = files.lastChangeTime;
