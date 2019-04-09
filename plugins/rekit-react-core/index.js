@@ -6,6 +6,7 @@ const hooks = require('./hooks');
 
 module.exports = {
   name: 'rekit-react-core',
+  appType: 'rekit-react',
   app,
   hooks,
   elements: {
