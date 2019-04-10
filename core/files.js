@@ -8,8 +8,7 @@ const chokidar = require('chokidar');
 const EventEmitter = require('events');
 const minimatch = require('minimatch');
 
-// Maintain file structure in memory and keep sync with disk if any file changed.
-const MAX_FILES = 800;
+const MAX_FILES = 3000;
 
 let cache = {};
 let parentHash = {};
