@@ -143,7 +143,9 @@ function onUnlinkDir(file) {
   emitChange();
 }
 
-function getDirElement(dir) {
+function getDirElement(dir, theElementById) {
+  if (!theElementById) theElementById = allElementById;
+  if (!path.isAbsolute(dir)) dir = paths.map(dir);
   const prjRoot = paths.getProjectRoot();
   let rDir = dir.replace(prjRoot, '');
   if (!rDir) rDir = '.'; // root dir
@@ -153,7 +155,7 @@ function getDirElement(dir) {
     id: rDir,
     children: [],
   };
-  allElementById[rDir] = dirEle;
+  theElementById[rDir] = dirEle;
 
   // const allFiles = shell.ls('-A', dir);
   const exclude = [
@@ -192,13 +194,13 @@ function getDirElement(dir) {
       if (fs.statSync(file).isDirectory()) {
         getDirElement(file);
       } else {
-        getFileElement(file);
+        getFileElement(file, theElementById);
       }
     });
-  if (Object.keys(allElementById).length > MAX_FILES) {
+  if (Object.keys(theElementById).length > MAX_FILES) {
     console.log(
       `Rekit does'nt support a project with too many files. The project contains ${
-        Object.keys(allElementById).length
+        Object.keys(theElementById).length
       } files, the max size is ${MAX_FILES}.`,
     );
     throw new Error('OVER_MAX_FILES');
@@ -209,7 +211,8 @@ function getDirElement(dir) {
   return dirEle;
 }
 
-function getFileElement(file) {
+function getFileElement(file, theElementById) {
+  if (!theElementById) theElementById = allElementById;
   const prjRoot = paths.getProjectRoot();
   const rFile = file.replace(prjRoot, '');
   const ext = path.extname(file).replace('.', '');
@@ -221,7 +224,7 @@ function getFileElement(file) {
     size,
     id: rFile,
   };
-  allElementById[rFile] = fileEle;
+  theElementById[rFile] = fileEle;
   const fileDeps = size < 50000 ? deps.getDeps(rFile) : null;
   if (fileDeps) {
     fileEle.views = [
