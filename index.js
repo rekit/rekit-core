@@ -42,7 +42,7 @@ global.rekit = {
   },
 };
 
-plugin.addPlugin(require('./plugins/common'));
+plugin.addPlugin(require('./plugins/common-core'));
 plugin.addPlugin(require('./plugins/rekit-react-core'));
 plugin.addPlugin(require('./plugins/rekit-plugin-core'));
 

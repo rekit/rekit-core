@@ -1,5 +1,5 @@
 module.exports = {
-  name: 'rekit-core-plugin-common',
+  name: 'common-core',
   app: require('./app'),
   isAppPlugin: true,
   appType: 'common',
