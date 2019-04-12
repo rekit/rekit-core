@@ -5,6 +5,5 @@ module.exports = {
   appType: 'rekit-plugin',
   isAppPlugin: true,
   inherit: 'rekit-react-core',
-  featureFiles: null,
   app,
 };

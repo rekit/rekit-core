@@ -53,7 +53,7 @@ function create(options) {
             : path.join(process.cwd(), options.source);
           options.status('CREATE_APP_COPY_FILES', `Copy files from ${srcDir}...`);
           await fs.copy(srcDir, prjDir, {
-            filter: src => !/\/(\.git|node_modules\/|node_modules$)/.test(src),
+            filter: src => !/\/(\.git|node_modules\/|node_modules$)/.test(src) || path.basename(src) === '.gitignore',
           });
         }
       } else if (options.type) {

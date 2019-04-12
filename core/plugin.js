@@ -43,30 +43,45 @@ function getPlugins(prop) {
     if (fs.existsSync(DEFAULT_PLUGIN_DIR)) loadPlugins(DEFAULT_PLUGIN_DIR);
     loaded = true;
   }
-  initPluginsIfNecessary();
   filterPluginsIfNecessary();
   return prop ? appliedPlugins.filter(_.property(prop)) : appliedPlugins;
 }
 
 function filterPluginsIfNecessary() {
+  initPluginsIfNecessary();
   if (!needFilterPlugin) return;
   const rekitConfig = config.getRekitConfig();
 
   // A plugin could decide if it's fit for the current project by feature files
   appliedPlugins = allPlugins.filter(checkFeatureFiles);
   console.log('All plugins: ', allPlugins.map(p => p.name));
-
-  let appType = rekitConfig.appType;
-  if (!appType) {
-     // appType is not defined for the project, then find the first app plugin
-    const appPlugin = _.find(appliedPlugins, p => p.isAppPlugin && p.appType !== 'common');
-    if (appPlugin) appType = appPlugin.appType;
-    else appType = 'common';
-    config.setAppType(appType);
+  if (!rekitConfig.appType) {
+    // This is used to support Rekit 2.x project which are all rekit-react project
+    // Otherwise every project should have appType configured.
+    if (
+      [
+        'src/Root.js',
+        'src/features',
+        'src/common/rootReducer.js',
+        'src/common/routeConfig.js',
+      ].every(f => fs.existsSync(paths.map(f)))
+    ) {
+      config.setAppType('rekit-react');
+    } else {
+      config.setAppType('common');
+    }
   }
-
+  const appType = rekitConfig.appType;
+  // if (!appType) {
+  //   // appType is not defined for the project, then find the first app plugin
+  //   const appPlugin = _.find(appliedPlugins, p => p.isAppPlugin && p.appType !== 'common');
+  //   if (appPlugin) appType = appPlugin.appType;
+  //   else appType = 'common';
+  //   config.setAppType(appType);
+  // }
+  console.log('app type: ', appType, rekitConfig);
   appliedPlugins = appliedPlugins.filter(
-    p => !p.appType || _.castArray(p.appType).includes(appType) // _.intersection(_.castArray(p.appType), _.castArray(appType)).length > 0,
+    p => !p.appType || _.castArray(p.appType).includes(appType), // _.intersection(_.castArray(p.appType), _.castArray(appType)).length > 0,
   );
   console.log('Applied plugins for appType ' + appType + ': ', appliedPlugins.map(p => p.name));
   needFilterPlugin = false;
@@ -99,13 +114,13 @@ function initPluginsIfNecessary() {
 
 function checkFeatureFiles(plugin) {
   // Detect if folder structure is for the plugin
+  console.log('plugin:', plugin);
   if (
     _.isArray(plugin.featureFiles) &&
-    !plugin.featureFiles.every(
-      f =>
-        f.startsWith('!')
-          ? !fs.existsSync(paths.map(f.replace('!', '')))
-          : fs.existsSync(paths.map(f)),
+    !plugin.featureFiles.every(f =>
+      f.startsWith('!')
+        ? !fs.existsSync(paths.map(f.replace('!', '')))
+        : fs.existsSync(paths.map(f)),
     )
   ) {
     return false;

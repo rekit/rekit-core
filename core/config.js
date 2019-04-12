@@ -62,6 +62,7 @@ function getAppName() {
 }
 
 function setAppType(_appType) {
+  if (rekitConfig) rekitConfig.appType = _appType;
   appType = _appType;
 }
 
