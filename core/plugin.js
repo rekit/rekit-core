@@ -56,7 +56,6 @@ function getPlugins(prop) {
     if (fs.existsSync(DEFAULT_PLUGIN_DIR)) loadPlugins(DEFAULT_PLUGIN_DIR);
     loaded = true;
   }
-
   plugins = plugins.map(plugin => {
     if (plugin.inherit) {
       const newPlugin = {};

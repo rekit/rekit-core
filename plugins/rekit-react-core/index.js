@@ -7,6 +7,13 @@ const hooks = require('./hooks');
 module.exports = {
   name: 'rekit-react-core',
   appType: 'rekit-react',
+  isAppPlugin: true,
+  featureFiles: [
+    'src/Root.js',
+    'src/features',
+    'src/common/rootReducer.js',
+    'src/common/routeConfig.js',
+  ],
   app,
   hooks,
   elements: {
