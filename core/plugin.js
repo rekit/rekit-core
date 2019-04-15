@@ -72,16 +72,8 @@ function filterPluginsIfNecessary() {
     }
   }
   const appType = rekitConfig.appType;
-  // if (!appType) {
-  //   // appType is not defined for the project, then find the first app plugin
-  //   const appPlugin = _.find(appliedPlugins, p => p.isAppPlugin && p.appType !== 'common');
-  //   if (appPlugin) appType = appPlugin.appType;
-  //   else appType = 'common';
-  //   config.setAppType(appType);
-  // }
-  console.log('app type: ', appType, rekitConfig);
   appliedPlugins = appliedPlugins.filter(
-    p => !p.appType || _.castArray(p.appType).includes(appType), // _.intersection(_.castArray(p.appType), _.castArray(appType)).length > 0,
+    p => !p.appType || _.castArray(p.appType).includes(appType),
   );
   console.log('Applied plugins for appType ' + appType + ': ', appliedPlugins.map(p => p.name));
   needFilterPlugin = false;
@@ -114,7 +106,6 @@ function initPluginsIfNecessary() {
 
 function checkFeatureFiles(plugin) {
   // Detect if folder structure is for the plugin
-  console.log('plugin:', plugin);
   if (
     _.isArray(plugin.featureFiles) &&
     !plugin.featureFiles.every(f =>
@@ -159,8 +150,6 @@ function loadPlugin(pluginRoot, noUI) {
     let name = pkgJson.name;
     if (name.startsWith('rekit-plugin')) name = name.replace('rekit-plugin-', '');
     pluginInstance.name = name;
-    if (pluginInstance.name.startsWith('rekit-plugin'))
-      pluginInstance.name = pluginInstance.name.replace('rekit-plugin-', '');
     return pluginInstance;
   } catch (e) {
     console.warn(`Failed to load plugin: ${pluginRoot}, ${e}\n${e.stack}`);

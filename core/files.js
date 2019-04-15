@@ -31,7 +31,7 @@ function readDir(dir, args = {}) {
   }
   dir = dir || paths.map('src');
   if (!fs.existsSync(dir)) {
-    return { elements: [], elementById: {}};
+    return { elements: [], elementById: {} };
   }
   if (!watchers[dir]) startWatch(dir);
   if (!cache[dir]) {
@@ -98,13 +98,17 @@ function onUnlink(file) {
   delete allElementById[rFile];
 
   const dir = path.dirname(rFile);
-  _.pull(byId(dir).children, rFile);
+  const dirEle = byId(dir);
+  if (dirEle) {
+    // If an element is in watching but not in project data
+    // Then its parent may not exist.
+    _.pull(byId(dir).children, rFile);
+  }
 
   setLastChangeTime();
   emitChange();
 }
 function onChange(file) {
-  // console.log('on change', file);
   const prjRoot = paths.getProjectRoot();
   const rFile = file.replace(prjRoot, '');
   allElementById[rFile] = getFileElement(file);
@@ -113,7 +117,6 @@ function onChange(file) {
   emitChange();
 }
 function onAddDir(file) {
-  // console.log('on add dir', file);
   const prjRoot = paths.getProjectRoot();
   const rFile = file.replace(prjRoot, '');
   if (byId(rFile)) return; // already exists
@@ -136,11 +139,7 @@ function onAddDir(file) {
   emitChange();
 }
 function onUnlinkDir(file) {
-  // console.log('on unlink dir', file);
   onUnlink(file);
-
-  setLastChangeTime();
-  emitChange();
 }
 
 function getDirElement(dir, theElementById) {
@@ -157,7 +156,6 @@ function getDirElement(dir, theElementById) {
   };
   theElementById[rDir] = dirEle;
 
-  // const allFiles = shell.ls('-A', dir);
   const exclude = [
     '**/node_modules',
     '**/.DS_Store',
@@ -170,22 +168,6 @@ function getDirElement(dir, theElementById) {
     .filter(file => {
       const rFile = file.replace(prjRoot, '');
       return !exclude.some(p => minimatch(rFile, p)) || include.some(p => minimatch(rFile, p));
-      // (path.basename(file) !== "node_modules" &&
-      //   path.basename(file) !== ".DS_Store" &&
-      //   !(
-      //     path.basename(file).startsWith(".") &&
-      //     fs.statSync(file).isDirectory()
-      //   ) &&
-      //     (config.getRekitConfig().exclude || []).some(p => minimatch(file))
-      //   &&
-      //   !_.includes(
-      //     config.getRekitConfig().exclude || [],
-      //     file.replace(prjRoot, "")
-      //   )) ||
-      // _.includes(
-      //   config.getRekitConfig().include || [],
-      //   file.replace(prjRoot, "")
-      // )
     })
     .forEach(file => {
       const rFile = file.replace(prjRoot, '');
@@ -201,7 +183,7 @@ function getDirElement(dir, theElementById) {
     console.log(
       `Rekit does'nt support a project with too many files. The project contains ${
         Object.keys(theElementById).length
-      } files, the max size is ${MAX_FILES}.`,
+      } files, the max size is ${MAX_FILES}. Consider exclude some in rekit.json.`,
     );
     throw new Error('OVER_MAX_FILES');
   }
