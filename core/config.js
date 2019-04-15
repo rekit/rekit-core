@@ -62,7 +62,7 @@ function getRekitConfig(noCache, prjRoot) {
 
 function getAppName() {
   const pkgJson = getPkgJson();
-  return pkgJson ? pkgJson.name : path.basename(__dirname);
+  return pkgJson ? pkgJson.name : path.basename(paths.getProjectRoot());
 }
 
 function setAppType(_appType) {
