@@ -33,8 +33,12 @@ function getRekitConfig(noCache, prjRoot) {
   if (!rekitConfigWatcher && !global.__REKIT_NO_WATCH) {
     rekitConfigWatcher = chokidar.watch([rekitConfigFile, pkgJsonPath], { persistent: true });
     rekitConfigWatcher.on('all', () => {
-      rekitConfig = null;
-      config.emit('change');
+      try {
+        rekitConfig = fs.readJsonSync(rekitConfigFile);
+        config.emit('change');
+      }catch(e) {
+        // Do nothing if rekit config is broken. Will use the last available one
+      }
     });
   }
 

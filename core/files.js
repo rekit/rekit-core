@@ -101,6 +101,7 @@ function onUnlink(file) {
   const dirEle = byId(dir);
   if (dirEle) {
     // If an element is in watching but not in project data
+    // Or it's top element
     // Then its parent may not exist.
     _.pull(byId(dir).children, rFile);
   }
