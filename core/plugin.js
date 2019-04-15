@@ -28,6 +28,7 @@ const BUILT_IN_UI_PLUGINS = [
   'test',
   'terminal',
   'scripts',
+  'git-manager',
 ];
 
 const pluginsDirs = [DEFAULT_PLUGIN_DIR];
@@ -127,7 +128,12 @@ function getPlugin(name) {
 function loadPlugin(pluginRoot, noUI) {
   // noUI flag is used for loading dev plugins whose ui is from webpack dev server
   try {
-    const pkgJson = require(paths.join(pluginRoot, 'package.json'));
+    const pkgJsonPath = paths.map('package.json');
+    let pkgJson = null;
+    if (fs.existsSync(pkgJsonPath)) {
+      pkgJson = fs.readJsonSync(pkgJsonPath);
+    }
+    // const pkgJson = require(paths.join(pluginRoot, 'package.json'));
     const pluginInstance = {};
     // Core part
     const coreIndex = paths.join(pluginRoot, 'core/index.js');
@@ -143,13 +149,18 @@ function loadPlugin(pluginRoot, noUI) {
     }
 
     // Plugin meta
-    Object.assign(
-      pluginInstance,
-      pkgJson.rekitPlugin || _.pick(pkgJson, ['appType', 'name', 'isAppPlugin', 'featureFiles']),
-    );
-    let name = pkgJson.name;
-    if (name.startsWith('rekit-plugin')) name = name.replace('rekit-plugin-', '');
-    pluginInstance.name = name;
+    if (pkgJson) {
+      Object.assign(
+        pluginInstance,
+        pkgJson.rekitPlugin || _.pick(pkgJson, ['appType', 'name', 'isAppPlugin', 'featureFiles']),
+      );
+      if (!pluginInstance.name) {
+        let name = pkgJson.name;
+        if (name.startsWith('rekit-plugin')) name = name.replace('rekit-plugin-', '');
+        pluginInstance.name = name;
+      }
+    }
+
     return pluginInstance;
   } catch (e) {
     console.warn(`Failed to load plugin: ${pluginRoot}, ${e}\n${e.stack}`);
