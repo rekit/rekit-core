@@ -6,7 +6,7 @@ const nodeModulesPath = require.resolve('lodash').replace('/lodash/lodash.js', '
 process.env.NODE_PATH = nodeModulesPath;
 require('module').Module._initPaths();
 
-const fs = require('fs');
+const fs = require('fs-extra');
 const path = require('path');
 const spawn = require('child_process').spawn;
 const _ = require('lodash');
@@ -128,7 +128,7 @@ function getPlugin(name) {
 function loadPlugin(pluginRoot, noUI) {
   // noUI flag is used for loading dev plugins whose ui is from webpack dev server
   try {
-    const pkgJsonPath = paths.map('package.json');
+    const pkgJsonPath = path.join(pluginRoot, 'package.json');
     let pkgJson = null;
     if (fs.existsSync(pkgJsonPath)) {
       pkgJson = fs.readJsonSync(pkgJsonPath);
@@ -148,17 +148,19 @@ function loadPlugin(pluginRoot, noUI) {
       };
     }
 
-    // Plugin meta
+    // Plugin meta defined in package.json
     if (pkgJson) {
-      Object.assign(
-        pluginInstance,
-        pkgJson.rekitPlugin || _.pick(pkgJson, ['appType', 'name', 'isAppPlugin', 'featureFiles']),
-      );
-      if (!pluginInstance.name) {
-        let name = pkgJson.name;
-        if (name.startsWith('rekit-plugin')) name = name.replace('rekit-plugin-', '');
-        pluginInstance.name = name;
-      }
+      ['appType', 'name', 'isAppPlugin', 'featureFiles'].forEach(key => {
+        if (!pluginInstance.hasOwnProperty(key) && pkgJson.hasOwnProperty(key)) {
+          if (key === 'name') {
+            let name = pkgJson.name;
+            if (name.startsWith('rekit-plugin')) name = name.replace('rekit-plugin-', '');
+            pluginInstance.name = name;
+          } else {
+            pluginInstance[key] = pkgJson[key] || null;
+          }
+        }
+      });
     }
 
     return pluginInstance;
