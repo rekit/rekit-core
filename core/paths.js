@@ -2,9 +2,9 @@ const path = require('path');
 const os = require('os');
 const _ = require('lodash');
 
-function join() {
+function join(...args) {
   // A consistent and normalized version of path.join cross platforms
-  return path.normalize(path.join.apply(path, arguments)).replace(/\\/g, '/');
+  return path.normalize(path.join(...args)).replace(/\\/g, '/');
 }
 
 let projectRoot;

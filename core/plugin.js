@@ -2,9 +2,15 @@
 
 // Summary:
 //  Load plugins
+
+// Set the node_modules of Rekit Studio as the NODE_PATH to find modules.
+// So that plugin could use dependencies of Rekit Studio and Rekit Core.
+const utils = require('./utils');
 const nodeModulesPath = require.resolve('lodash').replace('/lodash/lodash.js', '');
-process.env.NODE_PATH = nodeModulesPath;
-require('module').Module._initPaths();
+utils.addNodePath(nodeModulesPath);
+// console.log('node modules path: ', nodeModulesPath);
+// process.env.NODE_PATH = nodeModulesPath;
+// require('module').Module._initPaths();
 
 const fs = require('fs-extra');
 const path = require('path');
@@ -74,7 +80,7 @@ function filterPluginsIfNecessary() {
   }
   const appType = rekitConfig.appType;
   appliedPlugins = appliedPlugins.filter(
-    p => !p.appType || _.castArray(p.appType).includes(appType),
+    p => (!p.shouldUse || p.shouldUse(paths.getProjectRoot())) && (!p.appType || _.castArray(p.appType).includes(appType)),
   );
   console.log('Applied plugins for appType ' + appType + ': ', appliedPlugins.map(p => p.name));
   needFilterPlugin = false;
