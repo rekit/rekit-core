@@ -24,22 +24,21 @@ const DEFAULT_PRETTIER_OPTIONS = {
   editorconfig: true,
 };
 
-if (!global.__REKIT_NO_WATCH) {
-  const watcher = chokidar.watch(PRETTIER_CONFIG_FILES, {
-    persistent: true,
-    awaitWriteFinish: true,
-  });
+let watcher;
+function startWatch() {
+  if (!global.__REKIT_NO_WATCH) {
+    watcher = chokidar.watch(PRETTIER_CONFIG_FILES, {
+      persistent: true,
+      awaitWriteFinish: true,
+    });
 
-  const clearConfigCache = () => prettier.clearConfigCache();
-  watcher
-    .on('add', clearConfigCache)
-    .on('change', clearConfigCache)
-    .on('ready', clearConfigCache)
-    .on('unlink', clearConfigCache)
-    .on('error', clearConfigCache);
+    const clearConfigCache = () => prettier.clearConfigCache();
+    watcher.on('all', clearConfigCache);
+  }
 }
 
 function format(code, file, opts = {}) {
+  if (!watcher) startWatch();
   const filePath = path.isAbsolute(file) ? file : paths.map(file);
   if (!code) code = fs.readFileSync(filePath).toString();
 
