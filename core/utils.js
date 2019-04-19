@@ -1,4 +1,6 @@
 const fs = require('fs-extra');
+const config = require('./config');
+
 module.exports = {
   fatal(code, msg) {
     console.log('Fatal error: ', code, msg);
@@ -8,6 +10,9 @@ module.exports = {
   },
   isDirectory(file) {
     return fs.statSync(file).isDirectory(file);
+  },
+  useYarn() {
+    return fs.existsSync(config.map('yarn.lock'));
   },
   addNodePath(p) {
     // Add a path to NODE_PATH to find node_modules

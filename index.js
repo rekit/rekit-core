@@ -13,6 +13,7 @@ const deps = require('./core/deps');
 const handleCommand = require('./core/handleCommand');
 const create = require('./core/create');
 const utils = require('./core/utils');
+const logger = require('./core/logger');
 
 _.pascalCase = _.flow(
   _.camelCase,
@@ -39,6 +40,7 @@ global.rekit = {
     handleCommand,
     create,
     utils,
+    logger,
   },
 };
 

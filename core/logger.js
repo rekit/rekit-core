@@ -1,36 +1,48 @@
-"use strict";
+const fs = require('fs-extra');
+const { createLogger, transports, format } = require('winston');
+const stringify = require('fast-safe-stringify');
+const paths = require('./paths');
 
-const chalk = require("chalk");
+const SPLAT = Symbol.for('splat');
 
-let silent = false;
+fs.ensureDirSync(paths.configFile('logs'));
+const myFormat = format.combine(
+  format.timestamp({
+    format: 'YYYY-MM-DD hh:mm:ss.SSS',
+  }),
+  format.splat(),
+  format.printf(info => {
+    const splat = info[SPLAT];
+    const ss = [];
+    if (splat) {
+      splat.forEach(s => {
+        ss.push(s instanceof Error ? s.stack || s.message : stringify(s));
+      });
+    }
+    return `[${info.timestamp}] ${info.label ? '[' + info.label + '] ' : ''}[${info.level}] ${
+      info.message
+    } ${ss.join(',')}`;
+  }),
+);
 
-function setSilent(isSilent) {
-  silent = isSilent;
-}
+const myTransports = [
+  new transports.File({
+    filename: paths.configFile(`logs/rekit.log`),
+    maxsize: 1000000,
+    maxFiles: 5,
+    handleExceptions: true,
+  }),
+  new transports.Console({
+    handleExceptions: true,
+  }),
+];
 
-function log(msg) {
-  if (!silent) console.log(msg);
-}
+const logger = createLogger({
+  level: 'info',
+  exitOnError: false,
+  format: myFormat,
+  splat: true,
+  transports: myTransports,
+});
 
-/**
- * Log a warning message to console. It respects the setSilent switch.
- * @param {string} msg - The message to log.
- **/
-function warn(msg) {
-  if (!silent) console.log(chalk.yellow("Warning: " + msg));
-}
-
-/**
- * Log an error message to console. It respects the setSilent switch.
- * @param {string} msg - The message to log.
- **/
-function error(msg) {
-  if (!silent) console.log(chalk.red("Error: " + msg));
-}
-
-module.exports = {
-  setSilent,
-  log,
-  warn,
-  error
-};
+module.exports = logger;

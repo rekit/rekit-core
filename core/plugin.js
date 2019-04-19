@@ -19,6 +19,7 @@ const _ = require('lodash');
 const os = require('os');
 const paths = require('./paths');
 const config = require('./config');
+const logger = require('./logger');
 const downloadNpmPackage = require('download-npm-package');
 
 let appliedPlugins = undefined;
@@ -61,7 +62,7 @@ function filterPluginsIfNecessary() {
 
   // A plugin could decide if it's fit for the current project by feature files
   appliedPlugins = allPlugins.filter(checkFeatureFiles);
-  console.log('All plugins: ', allPlugins.map(p => p.name));
+  logger.info('All plugins:', allPlugins.map(p => p.name));
   if (!rekitConfig.appType) {
     // This is used to support Rekit 2.x project which are all rekit-react project
     // Otherwise every project should have appType configured.
@@ -82,7 +83,9 @@ function filterPluginsIfNecessary() {
   appliedPlugins = appliedPlugins.filter(
     p => (!p.shouldUse || p.shouldUse(paths.getProjectRoot())) && (!p.appType || _.castArray(p.appType).includes(appType)),
   );
-  console.log('Applied plugins for appType ' + appType + ': ', appliedPlugins.map(p => p.name));
+  logger.info('Applied plugins for appType ' + appType + ': ', appliedPlugins.map(p => p.name));
+  
+  // logger.error(new Error('abc'))
   needFilterPlugin = false;
 }
 
@@ -168,10 +171,9 @@ function loadPlugin(pluginRoot, noUI) {
         }
       });
     }
-
     return pluginInstance;
   } catch (e) {
-    console.warn(`Failed to load plugin: ${pluginRoot}, ${e}\n${e.stack}`);
+    logger.warn(`Failed to load plugin: ${pluginRoot}`, e);
   }
 
   return null;

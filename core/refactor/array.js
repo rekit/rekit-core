@@ -1,10 +1,10 @@
-"use strict";
+'use strict';
 
-const _ = require("lodash");
-const traverse = require("@babel/traverse").default;
-const logger = require("../logger");
-const vio = require("../vio");
-const common = require("./common");
+const _ = require('lodash');
+const traverse = require('@babel/traverse').default;
+const logger = require('../logger');
+const vio = require('../vio');
+const common = require('./common');
 
 /**
  * Find the nearest char index before given index. skip white space strings
@@ -69,7 +69,7 @@ function addToArrayByNode(node, code) {
 
   let replacement;
   if (multilines) {
-    const indent = _.repeat(" ", node.loc.end.column - 1);
+    const indent = _.repeat(' ', node.loc.end.column - 1);
     replacement = `\n${indent}  ${code}`;
     if (node.elements.length) {
       replacement = `,${replacement}`;
@@ -86,8 +86,8 @@ function addToArrayByNode(node, code) {
     {
       start: insertPos,
       end: insertPos,
-      replacement
-    }
+      replacement,
+    },
   ];
 }
 
@@ -102,22 +102,17 @@ function removeFromArrayByNode(node, eleNode) {
   const elements = node.elements;
 
   if (!elements.includes(eleNode)) {
-    logger.warn(
-      "Failed to find element when trying to remove element from array."
-    );
+    logger.warn('Failed to find element when trying to remove element from array.');
     return [];
   }
 
   if (!node._filePath) {
-    logger.fatalError(
-      "No _filePath property found on node when removing element from array"
-    );
-    return null;
+    throw new Error('No _filePath property found on node when removing element from array');
   }
 
   const content = vio.getContent(node._filePath);
 
-  let startPos = nearestCharBefore(",", content, eleNode.start);
+  let startPos = nearestCharBefore(',', content, eleNode.start);
   let isFirstElement = false;
   if (startPos < 0) {
     // it's the first element
@@ -129,7 +124,7 @@ function removeFromArrayByNode(node, eleNode) {
 
   if (elements.length === 1 || isFirstElement) {
     // if the element is the only element, try to remove the trailing comma if exists
-    const nextComma = nearestCharAfter(",", content, endPos - 1);
+    const nextComma = nearestCharAfter(',', content, endPos - 1);
     if (nextComma >= 0) endPos = nextComma + 1;
   }
 
@@ -137,8 +132,8 @@ function removeFromArrayByNode(node, eleNode) {
     {
       start: startPos,
       end: endPos,
-      replacement: ""
-    }
+      replacement: '',
+    },
   ];
 }
 
@@ -162,15 +157,12 @@ function addToArray(ast, varName, identifierName) {
   traverse(ast, {
     VariableDeclarator(path) {
       const node = path.node;
-      if (
-        _.get(node, "id.name") !== varName ||
-        _.get(node, "init.type") !== "ArrayExpression"
-      )
+      if (_.get(node, 'id.name') !== varName || _.get(node, 'init.type') !== 'ArrayExpression')
         return;
       node.init._filePath = ast._filePath;
       changes = addToArrayByNode(node.init, identifierName);
       path.stop();
-    }
+    },
   });
   return changes;
 }
@@ -195,19 +187,13 @@ function removeFromArray(ast, varName, identifierName) {
   traverse(ast, {
     VariableDeclarator(path) {
       const node = path.node;
-      if (
-        _.get(node, "id.name") !== varName ||
-        _.get(node, "init.type") !== "ArrayExpression"
-      )
+      if (_.get(node, 'id.name') !== varName || _.get(node, 'init.type') !== 'ArrayExpression')
         return;
       node.init._filePath = ast._filePath;
-      const toRemove = _.find(
-        node.init.elements,
-        ele => ele.name === identifierName
-      );
+      const toRemove = _.find(node.init.elements, ele => ele.name === identifierName);
       changes = removeFromArrayByNode(node.init, toRemove);
       path.stop();
-    }
+    },
   });
   return changes;
 }
@@ -218,5 +204,5 @@ module.exports = {
   addToArrayByNode,
   removeFromArrayByNode,
   addToArray: common.acceptFilePathForAst(addToArray),
-  removeFromArray: common.acceptFilePathForAst(removeFromArray)
+  removeFromArray: common.acceptFilePathForAst(removeFromArray),
 };

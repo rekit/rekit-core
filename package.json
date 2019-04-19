@@ -53,10 +53,12 @@
     "diff": "^4.0.1",
     "download-git-repo": "^1.1.0",
     "download-npm-package": "^3.1.12",
+    "fast-safe-stringify": "^2.0.6",
     "fs-extra": "^7.0.1",
     "lodash": "^4.17.11",
     "minimatch": "^3.0.4",
-    "prettier": "^1.16.4"
+    "prettier": "^1.16.4",
+    "winston": "^3.2.1"
   },
   "devDependencies": {
     "chai": "^4.2.0",
