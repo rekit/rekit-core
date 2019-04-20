@@ -15,6 +15,7 @@ describe('refactor common tests', function() {
   it('isLocalModule', () => {
     expect(refactorCommon.isLocalModule('../f-2/redux/actions')).to.be.true;
     expect(refactorCommon.isLocalModule('src/common/routeConfig')).to.be.true;
+    expect(refactorCommon.isLocalModule('src2/common/routeConfig')).to.be.false;
     expect(refactorCommon.isLocalModule('react')).to.be.false;
   });
 

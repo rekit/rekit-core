@@ -72,7 +72,7 @@ function getModuleResolverAlias() {
 function isLocalModule(modulePath) {
   // TODO: handle alias module path like src
   const alias = getModuleResolverAlias();
-  return /^\./.test(modulePath) || _.keys(alias).some(a => _.startsWith(modulePath, a));
+  return /^\./.test(modulePath) || _.keys(alias).some(a => modulePath === a || _.startsWith(modulePath, a + '/'));
 }
 
 /**
