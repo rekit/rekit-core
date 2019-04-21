@@ -1,6 +1,6 @@
 {
   "name": "rekit-core",
-  "version": "3.0.0-beta.4",
+  "version": "3.0.0-beta.5",
   "description": "Rekit core functions.",
   "author": "Nate Wang <supnate@gmail.com>",
   "license": "MIT",
@@ -45,8 +45,8 @@
   ],
   "dependencies": {
     "@babel/generator": "^7.4.0",
-    "@babel/parser": "^7.4.2",
-    "@babel/traverse": "^7.4.0",
+    "@babel/parser": "^7.4.3",
+    "@babel/traverse": "^7.4.3",
     "@babel/types": "^7.4.0",
     "chalk": "^2.4.2",
     "chokidar": "^2.1.5",
