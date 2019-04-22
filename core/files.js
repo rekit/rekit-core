@@ -144,7 +144,6 @@ function onUnlinkDir(file) {
 }
 
 function getDirElement(dir, theElementById) {
-  if (!theElementById) theElementById = allElementById;
   if (!path.isAbsolute(dir)) dir = paths.map(dir);
   const prjRoot = paths.getProjectRoot();
   let rDir = dir.replace(prjRoot, '');
@@ -155,7 +154,8 @@ function getDirElement(dir, theElementById) {
     id: rDir,
     children: [],
   };
-  theElementById[rDir] = dirEle;
+  allElementById[rDir] = dirEle;
+  if (theElementById) theElementById[rDir] = dirEle;
 
   const exclude = [
     '**/node_modules',
@@ -180,10 +180,10 @@ function getDirElement(dir, theElementById) {
         getFileElement(file, theElementById);
       }
     });
-  if (Object.keys(theElementById).length > MAX_FILES) {
+  if (Object.keys(allElementById).length > MAX_FILES) {
     console.log(
       `Rekit does'nt support a project with too many files. The project contains ${
-        Object.keys(theElementById).length
+        Object.keys(allElementById).length
       } files, the max size is ${MAX_FILES}. Consider exclude some in rekit.json.`,
     );
     throw new Error('OVER_MAX_FILES');
@@ -195,7 +195,6 @@ function getDirElement(dir, theElementById) {
 }
 
 function getFileElement(file, theElementById) {
-  if (!theElementById) theElementById = allElementById;
   const prjRoot = paths.getProjectRoot();
   const rFile = file.replace(prjRoot, '');
   const ext = path.extname(file).replace('.', '');
@@ -207,7 +206,9 @@ function getFileElement(file, theElementById) {
     size,
     id: rFile,
   };
-  theElementById[rFile] = fileEle;
+
+  allElementById[rFile] = fileEle;
+  if (theElementById) theElementById[rFile] = fileEle;
   const fileDeps = size < 50000 ? deps.getDeps(rFile) : null;
   if (fileDeps) {
     fileEle.views = [
@@ -225,11 +226,11 @@ function getFileElement(file, theElementById) {
 }
 
 function sortElements(elements) {
-  elements.sort((a, b) => {
-    a = byId(a);
-    b = byId(b);
+  elements.sort((a1, b1) => {
+    const a = byId(a1);
+    const b = byId(b1);
     if (!a || !b) {
-      console.log('Error in sortElement'); // should not happen?
+      console.log('Error in sortElement: ', a1, b1); // should not happen?
       return 0;
     }
     if (a.children && !b.children) return -1;
