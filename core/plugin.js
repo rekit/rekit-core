@@ -266,27 +266,46 @@ function installPlugin(name) {
   if (!/^rekit-plugin-/.test(name)) {
     name = 'rekit-plugin-' + name;
   }
-
-  downloadNpmPackage({ arg: name, dir: paths.configFile('plugins2') }).then(() => {
+  logger.info('Installing plugin: ', name);
+  const destDir = paths.configFile('plugins/' + name);
+  if (fs.existsSync(destDir)) {
+    logger.info('Plugin already installed, reinstalling it...');
+    fs.removeSync(destDir);
+  }
+  downloadNpmPackage({ arg: name, dir: paths.configFile('plugins') }).then(() => {
     console.log('Plugin downloaded, installing its dependencies...');
     const npmCmd = process.platform === 'win32' ? 'npm.cmd' : 'npm';
     const child = spawn(npmCmd, ['install', '--colors', '--only=production'], {
       stdio: 'inherit',
-      cwd: paths.configFile(`plugins2/${name}`),
+      cwd: destDir,
     });
     let failed = false;
     child.on('exit', () => {
-      if (!failed) console.log('npm install success');
+      if (!failed) logger.info('Plugin installed successfully.');
     });
-    child.on('error', () => {
+    child.on('error', (err) => {
       failed = true;
-      console.log('npm install failed');
+      logger.error('Failed to install deps of the plugin. Remove plugin.', err);
+      fs.removeSync(destDir);
     });
+  }).catch(err => {
+    logger.error('Failed to download plugin.', err);
   });
 }
 
-function uninstallPlugin(name) {}
-function updatePlugin(name) {}
+function uninstallPlugin(name) {
+  if (!/^rekit-plugin-/.test(name)) {
+    name = 'rekit-plugin-' + name;
+  }
+  logger.info('Uninstalling plugin: ', name);
+  const destDir = paths.configFile('plugins/' + name);
+  if (fs.existsSync(destDir)) {
+    fs.removeSync(destDir);
+    logger.info('Done.');
+  } else {
+    logger.info('Plugin not exist: ' + name);
+  }
+}
 
 module.exports = {
   getPlugins,
@@ -299,6 +318,5 @@ module.exports = {
   addPluginsDir,
   installPlugin,
   uninstallPlugin,
-  updatePlugin,
   listInstalledPlugins,
 };
