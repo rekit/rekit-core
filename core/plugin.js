@@ -81,10 +81,12 @@ function filterPluginsIfNecessary() {
   }
   const appType = rekitConfig.appType;
   appliedPlugins = appliedPlugins.filter(
-    p => (!p.shouldUse || p.shouldUse(paths.getProjectRoot())) && (!p.appType || _.castArray(p.appType).includes(appType)),
+    p =>
+      (!p.shouldUse || p.shouldUse(paths.getProjectRoot())) &&
+      (!p.appType || _.castArray(p.appType).includes(appType)),
   );
   logger.info('Applied plugins for appType ' + appType + ': ', appliedPlugins.map(p => p.name));
-  
+
   // logger.error(new Error('abc'))
   needFilterPlugin = false;
 }
@@ -137,11 +139,6 @@ function getPlugin(name) {
 function loadPlugin(pluginRoot, noUI) {
   // noUI flag is used for loading dev plugins whose ui is from webpack dev server
   try {
-    const pkgJsonPath = path.join(pluginRoot, 'package.json');
-    let pkgJson = null;
-    if (fs.existsSync(pkgJsonPath)) {
-      pkgJson = fs.readJsonSync(pkgJsonPath);
-    }
     // const pkgJson = require(paths.join(pluginRoot, 'package.json'));
     const pluginInstance = {};
     // Core part
@@ -158,7 +155,10 @@ function loadPlugin(pluginRoot, noUI) {
     }
 
     // Plugin meta defined in package.json
-    if (pkgJson) {
+    const pkgJsonPath = path.join(pluginRoot, 'package.json');
+    let pkgJson = null;
+    if (fs.existsSync(pkgJsonPath)) {
+      pkgJson = fs.readJsonSync(pkgJsonPath);
       ['appType', 'name', 'isAppPlugin', 'featureFiles'].forEach(key => {
         if (!pluginInstance.hasOwnProperty(key) && pkgJson.hasOwnProperty(key)) {
           if (key === 'name') {
@@ -170,6 +170,13 @@ function loadPlugin(pluginRoot, noUI) {
           }
         }
       });
+      if (pkgJson.rekitPlugin) {
+        Object.keys(pkgJson.rekitPlugin).forEach(key => {
+          if (!pluginInstance.hasOwnProperty(key)) {
+            pluginInstance[key] = pkgJson.rekitPlugin[key];
+          }
+        });
+      }
     }
     return pluginInstance;
   } catch (e) {
@@ -272,25 +279,27 @@ function installPlugin(name) {
     logger.info('Plugin already installed, reinstalling it...');
     fs.removeSync(destDir);
   }
-  downloadNpmPackage({ arg: name, dir: paths.configFile('plugins') }).then(() => {
-    console.log('Plugin downloaded, installing its dependencies...');
-    const npmCmd = process.platform === 'win32' ? 'npm.cmd' : 'npm';
-    const child = spawn(npmCmd, ['install', '--colors', '--only=production'], {
-      stdio: 'inherit',
-      cwd: destDir,
+  downloadNpmPackage({ arg: name, dir: paths.configFile('plugins') })
+    .then(() => {
+      console.log('Plugin downloaded, installing its dependencies...');
+      const npmCmd = process.platform === 'win32' ? 'npm.cmd' : 'npm';
+      const child = spawn(npmCmd, ['install', '--colors', '--only=production'], {
+        stdio: 'inherit',
+        cwd: destDir,
+      });
+      let failed = false;
+      child.on('exit', () => {
+        if (!failed) logger.info('Plugin installed successfully.');
+      });
+      child.on('error', err => {
+        failed = true;
+        logger.error('Failed to install deps of the plugin. Remove plugin.', err);
+        fs.removeSync(destDir);
+      });
+    })
+    .catch(err => {
+      logger.error('Failed to download plugin.', err);
     });
-    let failed = false;
-    child.on('exit', () => {
-      if (!failed) logger.info('Plugin installed successfully.');
-    });
-    child.on('error', (err) => {
-      failed = true;
-      logger.error('Failed to install deps of the plugin. Remove plugin.', err);
-      fs.removeSync(destDir);
-    });
-  }).catch(err => {
-    logger.error('Failed to download plugin.', err);
-  });
 }
 
 function uninstallPlugin(name) {
