@@ -12,7 +12,7 @@ export class ${ele.name} extends Component {
 
   render() {
     return (
-      <div className="${_.kebabCase(ele.path)}">
+      <div className="${prefix}${_.kebabCase(ele.path)}">
         Page Content: ${ele.path}
       </div>
     );

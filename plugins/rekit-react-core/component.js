@@ -4,7 +4,7 @@ const entry = require('./entry');
 const route = require('./route');
 const style = require('./style');
 const utils = require('./utils');
-const test = require('./test');
+const prefix = require('./prefix');
 
 const { vio, template, refactor } = rekit.core;
 const { parseElePath, getTplPath } = utils;
@@ -16,14 +16,15 @@ function add(elePath, args) {
   const ele = parseElePath(elePath, 'component');
   const tplFile = getTplPath(connect ? 'ConnectedComponent.js.tpl' : 'Component.js.tpl');
   if (vio.fileExists(ele.modulePath)) {
-    throw new Error(`Failed to add component: target file already exsited: ${ele.modulePath}`)
+    throw new Error(`Failed to add component: target file already exsited: ${ele.modulePath}`);
   }
   if (vio.fileExists(ele.stylePath)) {
-    throw new Error(`Failed to add component: target file already exsited: ${ele.stylePath}`)
+    throw new Error(`Failed to add component: target file already exsited: ${ele.stylePath}`);
   }
+  const pre = _.kebabCase(prefix.getPrefix()) + '_';
   template.generate(ele.modulePath, {
     templateFile: tplFile,
-    context: Object.assign({ ele }, args.context || {}),
+    context: Object.assign({ ele, prefix: pre }, args.context || {}),
   });
 
   style.add(ele, args);
@@ -47,9 +48,9 @@ function move(source, target, args) {
   const sourceEle = parseElePath(source, 'component');
   const targetEle = parseElePath(target, 'component');
   vio.move(sourceEle.modulePath, targetEle.modulePath);
-
-  const oldCssClass = `${sourceEle.feature}-${_.kebabCase(sourceEle.name)}`;
-  const newCssClass = `${targetEle.feature}-${_.kebabCase(targetEle.name)}`;
+  const pre = _.kebabCase(prefix.getPrefix()) + '_';
+  const oldCssClass = `${pre}${sourceEle.feature}-${_.kebabCase(sourceEle.name)}`;
+  const newCssClass = `${pre}${targetEle.feature}-${_.kebabCase(targetEle.name)}`;
 
   refactor.updateFile(targetEle.modulePath, ast =>
     [].concat(

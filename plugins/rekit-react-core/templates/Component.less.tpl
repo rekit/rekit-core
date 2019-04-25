@@ -1,5 +1,5 @@
 @import '../../styles/mixins';
 
-.${_.kebabCase(ele.path)} {
+.${prefix}${_.kebabCase(ele.path)} {
 
 }

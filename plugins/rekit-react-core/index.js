@@ -10,6 +10,7 @@ module.exports = {
   isAppPlugin: true,
   app,
   hooks,
+  prefix: require('./prefix'),
   elements: {
     feature,
     component,

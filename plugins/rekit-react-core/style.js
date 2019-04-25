@@ -7,6 +7,7 @@
 const path = require('path');
 const _ = require('lodash');
 const entry = require('./entry');
+const prefix = require('./prefix');
 
 const { vio, template } = rekit.core;
 
@@ -25,6 +26,7 @@ const { vio, template } = rekit.core;
 function add(ele, args) {
   // Create style file for a component
   // const ele = utils.parseElePath(elePath, 'style');
+  const pre = _.kebabCase(prefix.getPrefix()) + '_';
   template.generate(
     ele.stylePath,
     Object.assign({}, args, {
@@ -32,6 +34,7 @@ function add(ele, args) {
       context: Object.assign(
         {
           ele,
+          prefix: pre,
         },
         args.context || {}
       ),
@@ -75,10 +78,11 @@ function move(sourceEle, targetEle) {
   // const srcPath = utils.mapComponent(source.feature, source.name) + '.' + utils.getCssExt();
   // const targetPath = utils.mapComponent(target.feature, target.name) + '.' + utils.getCssExt();
   vio.move(sourceEle.stylePath, targetEle.stylePath);
+  const pre = _.kebabCase(prefix.getPrefix()) + '_';
 
   let lines = vio.getLines(targetEle.stylePath);
-  const oldCssClass = `${_.kebabCase(sourceEle.feature)}-${_.kebabCase(sourceEle.name)}`;
-  const newCssClass = `${_.kebabCase(targetEle.feature)}-${_.kebabCase(targetEle.name)}`;
+  const oldCssClass = `${pre}${_.kebabCase(sourceEle.feature)}-${_.kebabCase(sourceEle.name)}`;
+  const newCssClass = `${pre}${_.kebabCase(targetEle.feature)}-${_.kebabCase(targetEle.name)}`;
 
   lines = lines.map(line => line.replace(`.${oldCssClass}`, `.${newCssClass}`));
   vio.save(targetEle.stylePath, lines);

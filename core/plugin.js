@@ -58,6 +58,12 @@ function getPlugins(prop) {
     loaded = true;
   }
   filterPluginsIfNecessary();
+  appliedPlugins.forEach(p => {
+    if (p.initialize && !p.__initialized) {
+      p.initialize();
+      p.__initialized = true;
+    }
+  });
   return prop ? appliedPlugins.filter(_.property(prop)) : appliedPlugins;
 }
 
