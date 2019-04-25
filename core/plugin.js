@@ -8,9 +8,15 @@
 const utils = require('./utils');
 const nodeModulesPath = require.resolve('lodash').replace('/lodash/lodash.js', '');
 utils.addNodePath(nodeModulesPath);
-// console.log('node modules path: ', nodeModulesPath);
-// process.env.NODE_PATH = nodeModulesPath;
-// require('module').Module._initPaths();
+try {
+  // If rekit studio is installed globally, add rekit-studio's deps to NODE_PATH
+  const rsPath = require.resolve('rekit-studio/package.json').replace(/[/\\]package\.json$/, '');
+  utils.addNodePath(rsPath + '/node_modules');
+  utils.addNodePath(rsPath.replace(/[/\\]rekit-studio$/, ''));
+}
+catch(err) {
+  // Do nothing if not found rekit studio
+}
 
 const fs = require('fs-extra');
 const path = require('path');
@@ -196,7 +202,6 @@ function loadPlugins(dir) {
 // Dynamically add an plugin
 function addPlugin(plugin) {
   if (!plugin) {
-    console.warn('adding none plugin, ignored: ', plugin);
     return;
   }
   if (!needFilterPlugin) {

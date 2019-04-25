@@ -10,16 +10,14 @@ function execHooks(beforeAfter, action, type) {
   hooksPlugins.forEach(p => p.hooks[methodName].apply(p.hook, args));
 }
 
-function execBeforeHooks() {
-  const args = _.toArray(arguments);
+function execBeforeHooks(...args) {
   args.unshift('before');
-  execHooks.apply(null, args);
+  execHooks(...args);
 }
 
-function execAfterHooks() {
-  const args = _.toArray(arguments);
+function execAfterHooks(...args) {
   args.unshift('after');
-  execHooks.apply(null, args);
+  execHooks(...args);
 }
 
 function add(type, name, args) {

@@ -1,5 +1,6 @@
 const fs = require('fs-extra');
 const paths = require('./paths');
+const logger = require('./logger');
 
 module.exports = {
   fatal(code, msg) {
