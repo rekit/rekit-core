@@ -6,4 +6,5 @@ module.exports = {
   isAppPlugin: true,
   inherit: 'rekit-react-core',
   app,
+  hooks: require('./hooks'),
 };

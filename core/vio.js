@@ -240,7 +240,8 @@ function reset() {
   mvDirs = {};
 }
 
-function flush() {
+function flush(args = {}) {
+  const myLog = args.silent ? () => {} : log;
   const prjRoot = paths.getProjectRoot();
   const res = [];
   Object.keys(dirs).forEach(dir => {
@@ -259,7 +260,7 @@ function flush() {
   Object.keys(mvDirs).forEach(oldDir => {
     const absOldDir = paths.map(oldDir);
     if (!fs.existsSync(absOldDir)) {
-      log('Warning: no dir to move: ', 'yellow', absOldDir);
+      myLog('Warning: no dir to move: ', 'yellow', absOldDir);
       res.push({
         type: 'mv-file-warning',
         warning: 'no-file',
@@ -267,7 +268,7 @@ function flush() {
       });
     } else {
       fs.renameSync(absOldDir, paths.map(mvDirs[oldDir]));
-      log('Moved dir: ', 'green', oldDir, mvDirs[oldDir]);
+      myLog('Moved dir: ', 'green', oldDir, mvDirs[oldDir]);
       res.push({
         type: 'mv-file',
         file: oldDir,
@@ -279,7 +280,7 @@ function flush() {
   Object.keys(toDel).forEach(filePath => {
     const absFilePath = paths.map(filePath);
     if (!fs.existsSync(absFilePath)) {
-      if (toDel[filePath] !== 'no-warning') log('Warning: no file to delete: ', 'yellow', filePath);
+      if (toDel[filePath] !== 'no-warning') myLog('Warning: no file to delete: ', 'yellow', filePath);
       res.push({
         type: 'del-file-warning',
         warning: 'no-file',
@@ -288,7 +289,7 @@ function flush() {
     } else {
       // fs.unlinkSync(absFilePath);
       fs.removeSync(absFilePath);
-      log('Deleted: ', 'magenta', filePath);
+      myLog('Deleted: ', 'magenta', filePath);
       res.push({
         type: 'del-file',
         file: filePath,
@@ -300,7 +301,7 @@ function flush() {
   Object.keys(mvs).forEach(filePath => {
     const absFilePath = paths.map(filePath);
     if (!fs.existsSync(absFilePath)) {
-      log('Warning: no file to move: ', 'yellow', absFilePath);
+      myLog('Warning: no file to move: ', 'yellow', absFilePath);
       res.push({
         type: 'mv-file-warning',
         warning: 'no-file',
@@ -309,7 +310,7 @@ function flush() {
     } else {
       ensurePathDir(mvs[filePath]);
       fs.renameSync(filePath, mvs[filePath]);
-      log('Moved: ', 'green', filePath, mvs[filePath]);
+      myLog('Moved: ', 'green', filePath, mvs[filePath]);
       res.push({
         type: 'mv-file',
         file: filePath.replace(prjRoot, ''),
@@ -330,17 +331,17 @@ function flush() {
       if (oldContent === newContent) {
         return;
       }
-      log('Updated: ', 'cyan', filePath);
+      myLog('Updated: ', 'cyan', filePath);
       const diff = jsdiff.diffLines(oldContent, newContent);
       res.push({
         type: 'update-file',
         diff,
         file: filePath,
       });
-      printDiff(diff);
+      if (!args.silent) printDiff(diff);
     } else {
       ensurePathDir(filePath);
-      log('Created: ', 'blue', filePath);
+      myLog('Created: ', 'blue', filePath);
       res.push({
         type: 'create-file',
         file: filePath,
