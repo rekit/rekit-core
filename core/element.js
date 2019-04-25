@@ -3,9 +3,9 @@ const plugin = require('./plugin');
 
 function execHooks(beforeAfter, action, type) {
   const methodName = _.camelCase(`${beforeAfter}-${action}-${type}`);
-  console.log('exec hooks: ', beforeAfter, action, type, methodName);
+  // console.log('exec hooks: ', beforeAfter, action, type, methodName);
   const hooksPlugins = plugin.getPlugins(`hooks.${methodName}`);
-  console.log('hooks plugins: ', `hooks.${methodName}`, hooksPlugins.length);
+  // console.log('hooks plugins: ', `hooks.${methodName}`, hooksPlugins.length);
   const args = _.toArray(arguments).slice(3);
   hooksPlugins.forEach(p => p.hooks[methodName](...args));
 }

@@ -21,7 +21,7 @@ function add(elePath, args) {
   if (vio.fileExists(ele.stylePath)) {
     throw new Error(`Failed to add component: target file already exsited: ${ele.stylePath}`);
   }
-  const pre = _.kebabCase(prefix.getPrefix()) + '_';
+  const pre = prefix.getPrefix() ? _.kebabCase(prefix.getPrefix()) + '_' : '';
   template.generate(ele.modulePath, {
     templateFile: tplFile,
     context: Object.assign({ ele, prefix: pre }, args.context || {}),
@@ -48,7 +48,7 @@ function move(source, target, args) {
   const sourceEle = parseElePath(source, 'component');
   const targetEle = parseElePath(target, 'component');
   vio.move(sourceEle.modulePath, targetEle.modulePath);
-  const pre = _.kebabCase(prefix.getPrefix()) + '_';
+  const pre = prefix.getPrefix() ? _.kebabCase(prefix.getPrefix()) + '_' : '';
   const oldCssClass = `${pre}${sourceEle.feature}-${_.kebabCase(sourceEle.name)}`;
   const newCssClass = `${pre}${targetEle.feature}-${_.kebabCase(targetEle.name)}`;
 

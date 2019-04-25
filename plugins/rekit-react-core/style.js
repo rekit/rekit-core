@@ -26,7 +26,7 @@ const { vio, template } = rekit.core;
 function add(ele, args) {
   // Create style file for a component
   // const ele = utils.parseElePath(elePath, 'style');
-  const pre = _.kebabCase(prefix.getPrefix()) + '_';
+  const pre = prefix.getPrefix() ? _.kebabCase(prefix.getPrefix()) + '_' : '';
   template.generate(
     ele.stylePath,
     Object.assign({}, args, {
@@ -78,7 +78,7 @@ function move(sourceEle, targetEle) {
   // const srcPath = utils.mapComponent(source.feature, source.name) + '.' + utils.getCssExt();
   // const targetPath = utils.mapComponent(target.feature, target.name) + '.' + utils.getCssExt();
   vio.move(sourceEle.stylePath, targetEle.stylePath);
-  const pre = _.kebabCase(prefix.getPrefix()) + '_';
+  const pre = prefix.getPrefix() ? _.kebabCase(prefix.getPrefix()) + '_' : '';
 
   let lines = vio.getLines(targetEle.stylePath);
   const oldCssClass = `${pre}${_.kebabCase(sourceEle.feature)}-${_.kebabCase(sourceEle.name)}`;

@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const _ = require('lodash');
+const prefix = require('./prefix');
 
 const { config, paths } = rekit.core;
 
@@ -52,7 +53,8 @@ function parseElePath(elePath, type = 'component') {
  * // => HOME_DO_SOMETHING
  **/
 function getActionType(feature, action) {
-  return `${upperSnakeCase(feature)}_${upperSnakeCase(action)}`;
+  const pre = prefix.getPrefix() ? upperSnakeCase(prefix.getPrefix()) + '$' : '';
+  return `${pre}${upperSnakeCase(feature)}_${upperSnakeCase(action)}`;
 }
 
 /**
@@ -74,12 +76,13 @@ function getActionType(feature, action) {
 function getAsyncActionTypes(feature, action) {
   const f = upperSnakeCase(feature);
   const a = upperSnakeCase(action);
+  const pre = prefix.getPrefix() ? upperSnakeCase(prefix.getPrefix()) + '$' : '';
   return {
     normal: getActionType(feature, action),
-    begin: `${f}_${a}_BEGIN`,
-    success: `${f}_${a}_SUCCESS`,
-    failure: `${f}_${a}_FAILURE`,
-    dismissError: `${f}_${a}_DISMISS_ERROR`,
+    begin: `${pre}${f}_${a}_BEGIN`,
+    success: `${pre}${f}_${a}_SUCCESS`,
+    failure: `${pre}${f}_${a}_FAILURE`,
+    dismissError: `${pre}${f}_${a}_DISMISS_ERROR`,
   };
 }
 
