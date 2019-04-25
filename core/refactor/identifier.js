@@ -46,7 +46,7 @@ function renameIdentifier(ast, oldName, newName, defNode) {
         }
       },
     });
-    if (!scope) return;
+    if (!scope) return changes;
     defNode = getDefNode(oldName, scope);
   }
 
