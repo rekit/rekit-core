@@ -4,7 +4,7 @@ const fs = require('fs-extra');
 // const shell = require('shelljs');
 const traverse = require('@babel/traverse').default;
 
-const { ast, paths, vio, app, config, files } = rekit.core;
+const { ast, paths, vio, config, files } = rekit.core;
 
 let elementById = {};
 const filePropsCache = {};
@@ -21,7 +21,7 @@ function getFileProps(file) {
   // If it's pascal case and has same style file, it's a component
   if (
     /^[A-Z][a-zA-Z0-9]*\.jsx?$/.test(name) &&
-    vio.fileExists(file.replace(/\.jsx?$/, `.${config.style}`))
+    vio.fileExists(file.replace(/\.jsx?$/, `.${config.getRekitConfig().css}`))
   ) {
     isComponent = true;
   }
@@ -101,7 +101,7 @@ function getComponents(feature) {
   const eleFolder = elementById[`src/features/${feature}`];
   eleFolder.children.map(eid => elementById[eid]).forEach(ele => {
     if (ele.type === 'file' && /\.jsx?$/.test(ele.name) && getFileProps(ele.id).component) {
-      const styleFile = ele.id.replace(/\.jsx?$/, `.${rekit.core.config.style}`);
+      const styleFile = ele.id.replace(/\.jsx?$/, `.${rekit.core.config.getRekitConfig().css}`);
       const testFile = ele.id.replace(/^src\//, 'tests/').replace(/\.jsx?$/, '.test.js');
       const views = [
         { key: 'diagram', name: 'Diagram' },

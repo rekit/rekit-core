@@ -34,7 +34,7 @@ function parseElePath(elePath, type = 'component') {
   if (type === 'component') {
     ele.modulePath = `src/features/${elePath}.js`;
     ele.testPath = `tests/features/${elePath}.test.js`;
-    ele.stylePath = `src/features/${elePath}.${config.style}`;
+    ele.stylePath = `src/features/${elePath}.${config.getRekitConfig().css}`;
   } else if (type === 'action') {
     ele.modulePath = `src/features/${feature}/redux/${name}.js`;
     ele.testPath = `tests/features/${feature}/redux/${name}.test.js`;
