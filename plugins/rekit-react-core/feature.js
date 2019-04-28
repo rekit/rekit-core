@@ -96,7 +96,7 @@ function move(oldName, newName) {
             ), // rename css class name
           ),
         );
-      } else if (/\.less$|\.scss$/.test(filePath)) {
+      } else if (/\.less$|\.s?css$/.test(filePath)) {
         // For style update
         let lines = vio.getLines(filePath);
         const oldCssClass = `${oldName}-${_.kebabCase(moduleName)}`;

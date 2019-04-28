@@ -99,29 +99,31 @@ function getFileProps(file) {
 function getComponents(feature) {
   const components = [];
   const eleFolder = elementById[`src/features/${feature}`];
-  eleFolder.children.map(eid => elementById[eid]).forEach(ele => {
-    if (ele.type === 'file' && /\.jsx?$/.test(ele.name) && getFileProps(ele.id).component) {
-      const styleFile = ele.id.replace(/\.jsx?$/, `.${rekit.core.config.getRekitConfig().css}`);
-      const testFile = ele.id.replace(/^src\//, 'tests/').replace(/\.jsx?$/, '.test.js');
-      const views = [
-        { key: 'diagram', name: 'Diagram' },
-        { key: 'code', name: 'Code', target: ele.id, isDefault: true },
-        { key: 'style', name: 'Style', target: styleFile },
-        { key: 'test', name: 'Test', target: testFile },
-      ];
-      const id = `v:${ele.id}`;
-      const parts = [ele.id, styleFile, testFile];
-      const name = ele.name.replace(/\.[^.]*$/, '');
-      components.push({
-        type: 'component',
-        id,
-        name,
-        props: getFileProps(ele.id).component,
-        views,
-        parts,
-      });
-    }
-  });
+  eleFolder.children
+    .map(eid => elementById[eid])
+    .forEach(ele => {
+      if (ele.type === 'file' && /\.jsx?$/.test(ele.name) && getFileProps(ele.id).component) {
+        const styleFile = ele.id.replace(/\.jsx?$/, `.${rekit.core.config.getRekitConfig().css}`);
+        const testFile = ele.id.replace(/^src\//, 'tests/').replace(/\.jsx?$/, '.test.js');
+        const views = [
+          { key: 'diagram', name: 'Diagram' },
+          { key: 'code', name: 'Code', target: ele.id, isDefault: true },
+          { key: 'style', name: 'Style', target: styleFile },
+          { key: 'test', name: 'Test', target: testFile },
+        ];
+        const id = `v:${ele.id}`;
+        const parts = [ele.id, styleFile, testFile];
+        const name = ele.name.replace(/\.[^.]*$/, '');
+        components.push({
+          type: 'component',
+          id,
+          name,
+          props: getFileProps(ele.id).component,
+          views,
+          parts,
+        });
+      }
+    });
 
   components.forEach(c => {
     elementById[c.id] = c;
@@ -133,26 +135,28 @@ function getActions(feature) {
   const actions = [];
   const eleFolder = elementById[`src/features/${feature}/redux`];
   if (!eleFolder) return [];
-  eleFolder.children.map(eid => elementById[eid]).forEach(ele => {
-    if (ele.type === 'file' && /\.js$/.test(ele.name) && getFileProps(ele.id).action) {
-      const testFile = ele.id.replace(/^src\//, 'tests/').replace(/\.js$/, '.test.js');
-      const views = [
-        { key: 'diagram', name: 'Diagram' },
-        { key: 'code', name: 'Code', target: ele.id, isDefault: true },
-        { key: 'test', name: 'Test', target: testFile },
-      ];
-      const id = `v:${ele.id}`;
-      const parts = [ele.id, testFile];
-      actions.push({
-        type: 'action',
-        id,
-        name: ele.name.replace(/\.[^.]*$/, ''),
-        props: getFileProps(ele.id).action,
-        views,
-        parts,
-      });
-    }
-  });
+  eleFolder.children
+    .map(eid => elementById[eid])
+    .forEach(ele => {
+      if (ele.type === 'file' && /\.js$/.test(ele.name) && getFileProps(ele.id).action) {
+        const testFile = ele.id.replace(/^src\//, 'tests/').replace(/\.js$/, '.test.js');
+        const views = [
+          { key: 'diagram', name: 'Diagram' },
+          { key: 'code', name: 'Code', target: ele.id, isDefault: true },
+          { key: 'test', name: 'Test', target: testFile },
+        ];
+        const id = `v:${ele.id}`;
+        const parts = [ele.id, testFile];
+        actions.push({
+          type: 'action',
+          id,
+          name: ele.name.replace(/\.[^.]*$/, ''),
+          props: getFileProps(ele.id).action,
+          views,
+          parts,
+        });
+      }
+    });
 
   actions.forEach(c => {
     elementById[c.id] = c;
@@ -315,21 +319,25 @@ function getFeatures() {
 
     const toRemoveFromMisc = {};
     const generateToRemoveFromMisc = children =>
-      children.map(eid => (typeof eid === 'string' ? elementById[eid] : eid)).forEach(ele => {
-        if (ele.parts) {
-          ele.parts.forEach(p => {
-            toRemoveFromMisc[p] = true;
-          });
-        }
-        if (ele.children) generateToRemoveFromMisc(ele.children);
-      });
+      children
+        .map(eid => (typeof eid === 'string' ? elementById[eid] : eid))
+        .forEach(ele => {
+          if (ele.parts) {
+            ele.parts.forEach(p => {
+              toRemoveFromMisc[p] = true;
+            });
+          }
+          if (ele.children) generateToRemoveFromMisc(ele.children);
+        });
     generateToRemoveFromMisc(children);
 
     const filterNonMisc = children => {
       const filtered = children.filter(cid => !toRemoveFromMisc[cid]);
-      filtered.map(cid => elementById[cid]).forEach(c => {
-        if (c.children) c.children = filterNonMisc(c.children);
-      });
+      filtered
+        .map(cid => elementById[cid])
+        .forEach(c => {
+          if (c.children) c.children = filterNonMisc(c.children);
+        });
       return filtered;
     };
     const misc = filterNonMisc(elementById[`src/features/${f}`].children);
@@ -388,7 +396,7 @@ function getProjectData(args) {
     if (!fs.existsSync(paths.map(f))) return;
     const res = files.readDir(paths.map(f));
     Object.assign(elementById, res.elementById);
-    
+
     const folderEle = {
       type: 'folder-alias',
       id: 'v:folder-' + f,
