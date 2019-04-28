@@ -3,61 +3,104 @@ const path = require('path');
 const paths = require('./paths');
 const chokidar = require('chokidar');
 const EventEmitter = require('events');
+const _ = require('lodash');
+const logger = require('./logger');
 
 const config = new EventEmitter();
 
+const debouncedEmit = _.debounce(evt => {
+  config.emit(evt);
+}, 50);
+
 let appRegistry = 'rekit/app-registry';
 let pluginRegistry = 'rekit/plugin-registry';
-let appType;
 if (fs.existsSync(paths.configFile('config.json'))) {
   try {
     const rekitConfig = require(paths.configFile('config.json'));
     appRegistry = rekitConfig.appRegistry;
     pluginRegistry = rekitConfig.pluginRegistry;
   } catch (err) {
-    // Do nothing if config.json broken or not exists
+    // Do nothing if config.json broken
+    logger.warn('Failed to load config.json, maybe there is some syntax error.');
   }
 }
+
+let pkgJson = null;
+let pkgJsonWatcher = null;
 function getPkgJson(noCache, prjRoot) {
   const pkgJsonPath = prjRoot ? paths.join(prjRoot, 'package.json') : paths.map('package.json');
   if (!fs.existsSync(pkgJsonPath)) return null;
-  if (noCache) delete require.cache[pkgJsonPath];
-  return require(pkgJsonPath);
+  const refreshPkgJson = () => {
+    try {
+      pkgJson = fs.readJsonSync(pkgJsonPath);
+    } catch (err) {
+      logger.warn('Failed to load package.json, maybe there is some syntax error.');
+      pkgJson = null;
+    }
+  };
+  if (noCache || !pkgJson) {
+    refreshPkgJson();
+  }
+
+  if (!pkgJsonWatcher && !global.__REKIT_NO_WATCH) {
+    pkgJsonWatcher = chokidar.watch([pkgJsonPath], { persistent: true });
+    pkgJsonWatcher.on('all', () => {
+      refreshPkgJson();
+      debouncedEmit('change');
+    });
+  }
+
+  return pkgJson;
 }
 
 let rekitConfig = null;
 let rekitConfigWatcher = null;
 function getRekitConfig(noCache, prjRoot) {
   const rekitConfigFile = prjRoot ? paths.join(prjRoot, 'rekit.json') : paths.map('rekit.json');
-  const pkgJsonPath = prjRoot ? paths.join(prjRoot, 'package.json') : paths.map('package.json');
+
+  const refreshRekitConfig = () => {
+    try {
+      rekitConfig = fs.readJsonSync(rekitConfigFile);
+    } catch (e) {
+      // Do nothing if rekit config is broken. Will use the last available one
+      logger.warn('Failed to load rekit.json, maybe there is some syntax error.');
+    }
+  };
   if (!rekitConfigWatcher && !global.__REKIT_NO_WATCH) {
-    rekitConfigWatcher = chokidar.watch([rekitConfigFile, pkgJsonPath], { persistent: true });
+    rekitConfigWatcher = chokidar.watch([rekitConfigFile], { persistent: true });
     rekitConfigWatcher.on('all', () => {
-      try {
-        rekitConfig = fs.readJsonSync(rekitConfigFile);
-        config.emit('change');
-      }catch(e) {
-        // Do nothing if rekit config is broken. Will use the last available one
-      }
+      refreshRekitConfig();
+      debouncedEmit('change');
     });
   }
 
-  if (rekitConfig) return rekitConfig;
-
-  if (fs.existsSync(rekitConfigFile)) {
-    try {
-      rekitConfig = fs.readJsonSync(rekitConfigFile);
-    } catch (err) {
-      throw new Error('Config file broken: failed to parse rekit.json');
-    }
-  } else {
-    const pkgJson = getPkgJson(true, prjRoot);
-    rekitConfig = (pkgJson && pkgJson.rekit) || {};
+  if (!rekitConfig) {
+    refreshRekitConfig();
   }
 
-  const c = rekitConfig || {};
-  c.appType = appType || c.appType;
-  return c;
+  if (!rekitConfig) {
+    // config broken or not exist
+    if (fs.existsSync(rekitConfigFile)) {
+      // when rekit starts but config file is invalid, throw error.
+      throw new Error('Config file broken: failed to parse rekit.json');
+    } else {
+      // Support rekit 2.x project.
+      const pkgJson = getPkgJson();
+      if (pkgJson && pkgJson.rekit) {
+        rekitConfig = {
+          appType: 'rekit-react',
+          devPort: pkgJson.rekit.devPort,
+          css: pkgJson.rekit.css || 'less',
+        };
+      } else {
+        // normal project
+        rekitConfig = {
+          appType: 'common',
+        };
+      }
+    }
+  }
+  return rekitConfig;
 }
 
 function getAppName() {
@@ -65,10 +108,10 @@ function getAppName() {
   return pkgJson ? pkgJson.name : path.basename(paths.getProjectRoot());
 }
 
-function setAppType(_appType) {
-  if (rekitConfig) rekitConfig.appType = _appType;
-  appType = _appType;
-}
+// function setAppType(_appType) {
+//   if (rekitConfig) rekitConfig.appType = _appType;
+//   appType = _appType;
+// }
 
 function setAppRegistry(reg) {
   appRegistry = reg;
@@ -88,12 +131,9 @@ function getPluginRegistry() {
 
 // Load rekit configuration from package.json
 Object.assign(config, {
-  css: 'less',
-  style: 'less',
   getAppName,
   getPkgJson,
   getRekitConfig,
-  setAppType,
   setAppRegistry,
   setPluginRegistry,
   getAppRegistry,
