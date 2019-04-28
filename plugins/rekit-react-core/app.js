@@ -388,7 +388,7 @@ function getProjectData(args) {
     if (!fs.existsSync(paths.map(f))) return;
     const res = files.readDir(paths.map(f));
     Object.assign(elementById, res.elementById);
-
+    
     const folderEle = {
       type: 'folder-alias',
       id: 'v:folder-' + f,

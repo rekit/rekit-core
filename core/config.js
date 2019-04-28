@@ -34,7 +34,7 @@ function getPkgJson(noCache, prjRoot) {
     try {
       pkgJson = fs.readJsonSync(pkgJsonPath);
     } catch (err) {
-      logger.warn('Failed to load package.json, maybe there is some syntax error.');
+      logger.warn('Failed to load package.json, maybe there is some syntax error.', err);
       pkgJson = null;
     }
   };

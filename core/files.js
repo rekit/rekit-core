@@ -40,6 +40,9 @@ function readDir(dir, args = {}) {
   const elementById = {};
   const dirEle = cache[dir];
   const children = [...dirEle.children];
+  const prjRoot = paths.getProjectRoot();
+  const rDir = dir.replace(prjRoot, '');
+  elementById[rDir] = dirEle;
   while (children.length) {
     // Get elementById
     const cid = children.pop();
