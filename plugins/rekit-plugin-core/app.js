@@ -11,16 +11,16 @@ function getProjectData(args) {
 
   if (vio.dirExists('core')) {
     const id = 'v:_plugin-ext-core';
-    const dirEle = files.getDirElement('core', elementById);
+    const res = files.readDir('core');
+    Object.assign(elementById, res.elementById);
     elementById[id] = {
       id,
       name: 'Ext Core',
       target: 'core',
       type: 'folder-alias',
       icon: 'core',
-      children: dirEle.children,
+      children: res.elements,
     }
-    elementById['core'] = dirEle;
     elements.splice(1, 0, id);
   }
 
