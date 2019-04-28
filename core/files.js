@@ -30,6 +30,7 @@ function readDir(dir, args = {}) {
     allElementById = {};
   }
   dir = dir || paths.map('src');
+  if (!path.isAbsolute(dir)) dir = paths.map(dir);
   if (!fs.existsSync(dir)) {
     return { elements: [], elementById: {} };
   }
