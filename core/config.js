@@ -100,6 +100,9 @@ function getRekitConfig(noCache, prjRoot) {
       }
     }
   }
+  if (!rekitConfig.appType) {
+    rekitConfig.appType = 'common'; // app type not defined
+  }
   return rekitConfig;
 }
 
