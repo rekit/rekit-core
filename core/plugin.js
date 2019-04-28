@@ -75,22 +75,6 @@ function filterPluginsIfNecessary() {
   // A plugin could decide if it's fit for the current project by feature files
   appliedPlugins = allPlugins.filter(checkFeatureFiles);
   logger.info('All plugins:', allPlugins.map(p => p.name));
-  // if (!rekitConfig.appType) {
-  //   // This is used to support Rekit 2.x project which are all rekit-react project
-  //   // Otherwise every project should have appType configured.
-  //   if (
-  //     [
-  //       'src/Root.js',
-  //       'src/features',
-  //       'src/common/rootReducer.js',
-  //       'src/common/routeConfig.js',
-  //     ].every(f => fs.existsSync(paths.map(f)))
-  //   ) {
-  //     config.setAppType('rekit-react');
-  //   } else {
-  //     config.setAppType('common');
-  //   }
-  // }
   const appType = rekitConfig.appType;
   appliedPlugins = appliedPlugins.filter(
     p =>
@@ -171,7 +155,7 @@ function loadPlugin(pluginRoot, noUI) {
     let pkgJson = null;
     if (fs.existsSync(pkgJsonPath)) {
       pkgJson = fs.readJsonSync(pkgJsonPath);
-      ['appType', 'name', 'isAppPlugin', 'featureFiles'].forEach(key => {
+      ['appType', 'name', 'featureFiles'].forEach(key => {
         if (!pluginInstance.hasOwnProperty(key) && pkgJson.hasOwnProperty(key)) {
           if (key === 'name') {
             let name = pkgJson.name;
