@@ -63,7 +63,7 @@ function getRekitConfig(noCache, prjRoot) {
       rekitConfig = fs.readJsonSync(rekitConfigFile);
     } catch (e) {
       // Do nothing if rekit config is broken. Will use the last available one
-      logger.warn('Failed to load rekit.json, maybe there is some syntax error.');
+      logger.info('Failed to load rekit.json, it doesn\'t exist or there is some syntax error.');
     }
   };
   if (!rekitConfigWatcher && !global.__REKIT_NO_WATCH) {
