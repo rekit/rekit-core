@@ -73,10 +73,10 @@ function filterPluginsIfNecessary() {
   const rekitConfig = config.getRekitConfig();
 
   // A plugin could decide if it's fit for the current project by feature files
-  appliedPlugins = allPlugins.filter(checkFeatureFiles);
+  // appliedPlugins = allPlugins.filter(checkFeatureFiles);
   logger.info('All plugins:', allPlugins.map(p => p.name));
   const appType = rekitConfig.appType;
-  appliedPlugins = appliedPlugins.filter(
+  appliedPlugins = allPlugins.filter(
     p =>
       (!p.shouldUse || p.shouldUse(paths.getProjectRoot())) &&
       (!p.appType || _.castArray(p.appType).includes(appType)),
@@ -112,20 +112,20 @@ function initPluginsIfNecessary() {
   });
 }
 
-function checkFeatureFiles(plugin) {
-  // Detect if folder structure is for the plugin
-  if (
-    _.isArray(plugin.featureFiles) &&
-    !plugin.featureFiles.every(f =>
-      f.startsWith('!')
-        ? !fs.existsSync(paths.map(f.replace('!', '')))
-        : fs.existsSync(paths.map(f)),
-    )
-  ) {
-    return false;
-  }
-  return true;
-}
+// function checkFeatureFiles(plugin) {
+//   // Detect if folder structure is for the plugin
+//   if (
+//     _.isArray(plugin.featureFiles) &&
+//     !plugin.featureFiles.every(f =>
+//       f.startsWith('!')
+//         ? !fs.existsSync(paths.map(f.replace('!', '')))
+//         : fs.existsSync(paths.map(f)),
+//     )
+//   ) {
+//     return false;
+//   }
+//   return true;
+// }
 
 function getPlugin(name) {
   return _.find(allPlugins, { name }) || null;
