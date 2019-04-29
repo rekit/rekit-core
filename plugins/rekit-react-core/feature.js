@@ -23,7 +23,7 @@ function add(feature) {
   [
     'index.js',
     'route.js',
-    'style.' + config.style,
+    'style.' + config.getRekitConfig().css,
     'redux/actions.js',
     'redux/reducer.js',
     'redux/constants.js',

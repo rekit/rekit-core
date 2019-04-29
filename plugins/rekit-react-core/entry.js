@@ -297,34 +297,34 @@ function removeFromRouteConfig(feature) {
 }
 
 function addToStyle(ele) {
-  const targetPath = `src/features/${ele.feature}/style.${config.style}`;
+  const targetPath = `src/features/${ele.feature}/style.${config.getRekitConfig().css}`;
   const modulePath = `.${ele.path.substring(ele.path.indexOf('/'))}`;
   refactor.addStyleImport(targetPath, modulePath);
 }
 
 function removeFromStyle(ele) {
-  const targetPath = `src/features/${ele.feature}/style.${config.style}`;
+  const targetPath = `src/features/${ele.feature}/style.${config.getRekitConfig().css}`;
   const modulePath = `.${ele.path.substring(ele.path.indexOf('/'))}`;
   refactor.removeStyleImport(targetPath, modulePath);
 }
 
 function renameInStyle(feature, oldName, newName) {
-  const targetPath = `src/features/${feature}/style.${config.style}`;
+  const targetPath = `src/features/${feature}/style.${config.getRekitConfig().css}`;
   refactor.renameStyleImport(targetPath, `./${oldName}`, `./${newName}`);
 }
 
 function addToRootStyle(feature) {
-  const targetPath = `src/styles/index.${config.style}`;
+  const targetPath = `src/styles/index.${config.getRekitConfig().css}`;
   refactor.addStyleImport(targetPath, `../features/${feature}/style`);
 }
 
 function removeFromRootStyle(feature) {
-  const targetPath = `src/styles/index.${config.style}`;
+  const targetPath = `src/styles/index.${config.getRekitConfig().css}`;
   refactor.removeStyleImport(targetPath, `../features/${feature}/style`);
 }
 
 function renameInRootStyle(oldFeature, newFeature) {
-  const targetPath = `src/styles/index.${config.style}`;
+  const targetPath = `src/styles/index.${config.getRekitConfig().css}`;
   refactor.renameStyleImport(
     targetPath,
     `../features/${oldFeature}/style`,
