@@ -1,9 +1,9 @@
 const _ = require('lodash');
 
-const getParentPlugin = () => rekit.core.plugin.getPlugin('rekit-react-core');
+const getParentPlugin = () => rekit.core.plugin.getPlugin('rekit-react');
 function getProjectData(args) {
   const pp = getParentPlugin();
-  if (!pp) throw new Error('Plugin not found: rekit-react-core');
+  if (!pp) throw new Error('Plugin not found: rekit-react');
   const prjData = pp.app.getProjectData(args);
   const { elements, elementById } = prjData;
 
@@ -20,7 +20,7 @@ function getProjectData(args) {
       type: 'folder-alias',
       icon: 'core',
       children: res.elements,
-    }
+    };
     elements.splice(1, 0, id);
   }
 
