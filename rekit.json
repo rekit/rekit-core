@@ -1,6 +1,6 @@
 {
   "include": [],
-  "exclude": [".git"],
+  "exclude": [".nyc_output"],
   "appType": "common",
   "astFolders": [],
   "excludeAstFolders": []

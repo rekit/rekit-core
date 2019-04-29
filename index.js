@@ -44,8 +44,9 @@ global.rekit = {
   },
 };
 
+// Core part of built-in plugins
 plugin.addPlugin(require('./plugins/common-core'));
-plugin.addPlugin(require('./plugins/rekit-react-core'));
-plugin.addPlugin(require('./plugins/rekit-plugin-core'));
+plugin.addPlugin(require('./plugins/rekit-react'));
+plugin.addPlugin(require('./plugins/rekit-plugin'));
 
 module.exports = global.rekit;

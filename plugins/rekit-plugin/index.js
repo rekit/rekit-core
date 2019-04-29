@@ -1,12 +1,12 @@
 const app = require('./app');
 
 module.exports = {
-  name: 'rekit-plugin-core',
+  name: 'rekit-plugin',
   appType: 'rekit-plugin',
-  inherit: 'rekit-react-core',
+  inherit: 'rekit-react',
   app,
   initialize() {
-    // inherited from rekit-react-core
+    // inherited from rekit-react
     this.prefix.setPrefix(rekit.core.config.getAppName().replace(/^rekit-plugin-/, ''));
   },
 };
