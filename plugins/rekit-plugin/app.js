@@ -43,7 +43,7 @@ function getProjectData(args) {
   return prjData;
 }
 function getFileProps(...args) {
-  return rekit.core.plugin.getPlugin('rekit-react-core').app.getFileProps(...args);
+  return getParentPlugin().app.getFileProps(...args);
 }
 
 module.exports = {

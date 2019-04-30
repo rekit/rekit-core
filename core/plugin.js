@@ -56,6 +56,7 @@ function getPlugins(prop) {
     if (fs.existsSync(DEFAULT_PLUGIN_DIR)) loadPlugins(DEFAULT_PLUGIN_DIR);
     loaded = true;
   }
+
   filterPluginsIfNecessary();
   appliedPlugins.forEach(p => {
     if (p.initialize && !p.__initialized) {
@@ -183,7 +184,7 @@ function loadPlugins(dir) {
   fs.readdirSync(dir)
     .map(d => path.join(dir, d))
     .filter(d => fs.statSync(d).isDirectory())
-    .forEach(addPluginByPath);
+    .forEach(d => addPluginByPath(d));
 }
 
 // Dynamically add an plugin
