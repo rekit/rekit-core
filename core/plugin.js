@@ -13,8 +13,7 @@ try {
   const rsPath = require.resolve('rekit-studio/package.json').replace(/[/\\]package\.json$/, '');
   utils.addNodePath(rsPath + '/node_modules');
   utils.addNodePath(rsPath.replace(/[/\\]rekit-studio$/, ''));
-}
-catch(err) {
+} catch (err) {
   // Do nothing if not found rekit studio
 }
 
@@ -34,15 +33,15 @@ let loaded = false;
 let needFilterPlugin = true;
 
 const DEFAULT_PLUGIN_DIR = path.join(os.homedir(), '.rekit/plugins');
-const BUILT_IN_UI_PLUGINS = [
-  'rekit-react-ui',
-  'rekit-plugin-ui',
-  'default',
-  'test',
-  'terminal',
-  'scripts',
-  'git-manager',
-];
+// const BUILT_IN_UI_PLUGINS = [
+//   'rekit-react',
+//   'rekit-plugin',
+//   'default',
+//   'test',
+//   'terminal',
+//   'scripts',
+//   'git-manager',
+// ];
 
 const pluginsDirs = [DEFAULT_PLUGIN_DIR];
 function addPluginsDir(dir) {
@@ -89,26 +88,21 @@ function filterPluginsIfNecessary() {
 
 function initPluginsIfNecessary() {
   allPlugins = allPlugins.map(plugin => {
-    if (plugin.inherit) {
-      const newPlugin = {};
-      _.castArray(plugin.inherit).forEach(name => {
-        const p = getPlugin(name);
-        if (!p) {
-          if (_.includes(BUILT_IN_UI_PLUGINS, name)) {
-            if (!newPlugin.uiInherit) newPlugin.uiInherit = [];
-            newPlugin.uiInherit.push(name);
-          } else {
-            throw new Error('INHERIT_PLUGIN_NOT_FOUND: ' + name + ' inherited by ' + plugin.name);
-          }
-        }
-        _.merge(newPlugin, p);
-      });
-      _.merge(newPlugin, plugin);
-      newPlugin.__originalInherit = plugin.inherit;
-      delete newPlugin.inherit; // only inherit once
-      return newPlugin;
-    }
-    return plugin;
+    if (!plugin.inherit) return plugin;
+    const newPlugin = { uiInherit: [] };
+    _.castArray(plugin.inherit).forEach(name => {
+      // currently only one level inherit supported?
+      const p = getPlugin(name);
+      if (!p) {
+        throw new Error('INHERIT_PLUGIN_NOT_FOUND: ' + name + ' inherited by ' + plugin.name);
+      }
+      newPlugin.uiInherit.push(name);
+      _.merge(newPlugin, p);
+    });
+    _.merge(newPlugin, plugin);
+    newPlugin.__originalInherit = plugin.inherit;
+    delete newPlugin.inherit; // only inherit once
+    return newPlugin;
   });
 }
 
@@ -279,21 +273,24 @@ function installPlugin(name) {
   }
   downloadNpmPackage({ arg: name, dir: paths.configFile('plugins') })
     .then(() => {
-      console.log('Plugin downloaded, installing its dependencies...');
-      const npmCmd = process.platform === 'win32' ? 'npm.cmd' : 'npm';
-      const child = spawn(npmCmd, ['install', '--colors', '--only=production'], {
-        stdio: 'inherit',
-        cwd: destDir,
-      });
-      let failed = false;
-      child.on('exit', () => {
-        if (!failed) logger.info('Plugin installed successfully.');
-      });
-      child.on('error', err => {
-        failed = true;
-        logger.error('Failed to install deps of the plugin. Remove plugin.', err);
-        fs.removeSync(destDir);
-      });
+      const pkgJson = require(path.join(destDir, 'package.json'));
+      if (!_.isEmpty(pkgJson.dependencies)) {
+        console.log('Plugin downloaded, installing its dependencies...');
+        const npmCmd = process.platform === 'win32' ? 'npm.cmd' : 'npm';
+        const child = spawn(npmCmd, ['install', '--colors', '--only=production'], {
+          stdio: 'inherit',
+          cwd: destDir,
+        });
+        let failed = false;
+        child.on('exit', () => {
+          if (!failed) logger.info('Plugin installed successfully.');
+        });
+        child.on('error', err => {
+          failed = true;
+          logger.error('Failed to install deps of the plugin. Remove plugin.', err);
+          fs.removeSync(destDir);
+        });
+      }
     })
     .catch(err => {
       logger.error('Failed to download plugin.', err);
