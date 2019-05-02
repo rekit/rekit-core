@@ -2,6 +2,10 @@
   "include": [],
   "exclude": [".nyc_output", "tmp"],
   "appType": "common",
-  "astFolders": [],
-  "excludeAstFolders": []
+  "diagram": {
+    "include": [],
+    "exclude": []
+  },
+  "astFoldersForDiagram": [],
+  "astFolders": []
 }
