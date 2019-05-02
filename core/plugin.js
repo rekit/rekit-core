@@ -33,15 +33,6 @@ let loaded = false;
 let needFilterPlugin = true;
 
 const DEFAULT_PLUGIN_DIR = path.join(os.homedir(), '.rekit/plugins');
-// const BUILT_IN_UI_PLUGINS = [
-//   'rekit-react',
-//   'rekit-plugin',
-//   'default',
-//   'test',
-//   'terminal',
-//   'scripts',
-//   'git-manager',
-// ];
 
 const pluginsDirs = [DEFAULT_PLUGIN_DIR];
 function addPluginsDir(dir) {
@@ -83,7 +74,6 @@ function filterPluginsIfNecessary() {
   );
   logger.info('Applied plugins for appType ' + appType + ': ', appliedPlugins.map(p => p.name));
 
-  // logger.error(new Error('abc'))
   needFilterPlugin = false;
 }
 
@@ -106,21 +96,6 @@ function initPluginsIfNecessary() {
     return newPlugin;
   });
 }
-
-// function checkFeatureFiles(plugin) {
-//   // Detect if folder structure is for the plugin
-//   if (
-//     _.isArray(plugin.featureFiles) &&
-//     !plugin.featureFiles.every(f =>
-//       f.startsWith('!')
-//         ? !fs.existsSync(paths.map(f.replace('!', '')))
-//         : fs.existsSync(paths.map(f)),
-//     )
-//   ) {
-//     return false;
-//   }
-//   return true;
-// }
 
 function getPlugin(name) {
   return _.find(allPlugins, { name }) || null;
@@ -217,25 +192,6 @@ function removePlugin(pluginName) {
   if (!removed.length) console.warn('No plugin was removed: ' + pluginName);
 }
 
-// Load plugins from a plugin project
-// function loadDevPlugins(prjRoot) {
-//   const devPort = config.getRekitConfig(false, prjRoot).devPort;
-//   const featuresDir = path.join(prjRoot, 'src/features');
-
-//   fs.readdirSync(featuresDir)
-//     .map(p => path.join(featuresDir, p))
-//     .forEach(pluginRoot => {
-//       const p = loadPlugin(pluginRoot, true);
-//       if (!p) return;
-//       if (fs.existsSync(path.join(pluginRoot, 'entry.js'))) {
-//         p.ui = {
-//           root: path.join(pluginRoot, 'public'),
-//           rootLink: `http://localhost:${devPort}/static/js/${p.name}.bundle.js`,
-//         };
-//       }
-//       addPlugin(p);
-//     });
-// }
 
 function listInstalledPlugins() {
   // Only get plugins from standard rekit plugin folder
