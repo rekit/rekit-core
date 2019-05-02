@@ -26,6 +26,11 @@ function map() {
   return join.apply(null, args);
 }
 
+function relativePath(file) {
+  if (!path.isAbsolute(file)) return file;
+  return file.replace(/\\/g, '/').replace(getProjectRoot(), '');
+}
+
 function relative(from, to) {
   return path.relative(from, to).replace(/\\/g, '/');
 }
@@ -59,6 +64,7 @@ module.exports = {
   relative,
   rekitDir,
   configFile,
+  relativePath,
   relativeModuleSource,
   getLocalPluginRoot: () => map('tools/plugins'),
 };
