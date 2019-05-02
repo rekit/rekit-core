@@ -44,6 +44,13 @@ function getPluginsDir() {
 
 function getPlugins(prop) {
   if (!loaded) {
+    // load built-in plugins
+    fs.readdirSync(path.join(__dirname, '../plugins')).forEach(d => {
+      d = path.join(__dirname, '../plugins', d);
+      if (fs.statSync(d).isDirectory() && fs.existsSync(path.join(d, 'index.js'))) {
+        addPlugin(require(d));
+      }
+    });
     if (fs.existsSync(DEFAULT_PLUGIN_DIR)) loadPlugins(DEFAULT_PLUGIN_DIR);
     loaded = true;
   }
@@ -191,7 +198,6 @@ function removePlugin(pluginName) {
   needFilterPlugin = true;
   if (!removed.length) console.warn('No plugin was removed: ' + pluginName);
 }
-
 
 function listInstalledPlugins() {
   // Only get plugins from standard rekit plugin folder
