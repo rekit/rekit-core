@@ -1,6 +1,6 @@
 {
   "include": [],
-  "exclude": [".nyc_output"],
+  "exclude": [".nyc_output", "tmp"],
   "appType": "common",
   "astFolders": [],
   "excludeAstFolders": []

@@ -23,6 +23,13 @@ const emitChange = _.debounce(() => {
   files.emit('change');
 }, 100);
 
+config.on('change', () => {
+  // when config change, cache should be clear because include/exclude may changed.
+  cache = {};
+  parentHash = {};
+  allElementById = {};
+});
+
 function readDir(dir, args = {}) {
   if (args.force) {
     cache = {};
@@ -77,8 +84,25 @@ const setLastChangeTime = () => {
   files.lastChangeTime = Date.now();
 };
 
+function getExInclude() {
+  const exclude = [
+    '**/node_modules',
+    '**/.DS_Store',
+    '**/.git',
+    ...(config.getRekitConfig().exclude || []),
+  ];
+  const include = config.getRekitConfig().include || [];
+  return { include, exclude };
+}
+
+function shouldShow(file) {
+  if (path.isAbsolute(file)) file = paths.relativePath(file);
+  const { include, exclude } = getExInclude();
+  return !exclude.some(p => minimatch(file, p)) || include.some(p => minimatch(file, p));
+}
+
 function onAdd(file) {
-  // console.log('on add', file);
+  if (!shouldShow(file)) return;
   const prjRoot = paths.getProjectRoot();
   const rFile = file.replace(prjRoot, '');
   allElementById[rFile] = getFileElement(file);
@@ -122,6 +146,7 @@ function onChange(file) {
   emitChange();
 }
 function onAddDir(file) {
+  if (!shouldShow(file)) return;
   const prjRoot = paths.getProjectRoot();
   const rFile = file.replace(prjRoot, '');
   if (byId(rFile)) return; // already exists
@@ -161,19 +186,9 @@ function getDirElement(dir, theElementById) {
   allElementById[rDir] = dirEle;
   if (theElementById) theElementById[rDir] = dirEle;
 
-  const exclude = [
-    '**/node_modules',
-    '**/.DS_Store',
-    '**/.git',
-    ...(config.getRekitConfig().exclude || []),
-  ];
-  const include = config.getRekitConfig().include || [];
   fs.readdirSync(dir)
     .map(name => path.join(dir, name))
-    .filter(file => {
-      const rFile = file.replace(prjRoot, '');
-      return !exclude.some(p => minimatch(rFile, p)) || include.some(p => minimatch(rFile, p));
-    })
+    .filter(shouldShow)
     .forEach(file => {
       const rFile = file.replace(prjRoot, '');
       dirEle.children.push(rFile);
