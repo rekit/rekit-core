@@ -5,6 +5,7 @@ module.exports = {
   appType: 'rekit-plugin',
   inherit: 'rekit-react',
   app,
+  hooks: require('./hooks'),
   initialize() {
     // inherited from rekit-react
     this.prefix.setPrefix(rekit.core.config.getAppName().replace(/^rekit-plugin-/, ''));
