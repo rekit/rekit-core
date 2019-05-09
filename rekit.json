@@ -1,6 +1,6 @@
 {
   "include": [],
-  "exclude": [".nyc_output", "tmp"],
+  "exclude": ["tmp"],
   "appType": "common",
   "diagram": {
     "include": [],
