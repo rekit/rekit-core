@@ -52,6 +52,12 @@ function getPlugins(prop) {
       }
     });
     if (fs.existsSync(DEFAULT_PLUGIN_DIR)) loadPlugins(DEFAULT_PLUGIN_DIR);
+    // load plugin from environment variable: REKIT_PLUGIN_DIR , used in plugin dev time
+    if (process.env.REKIT_PLUGIN_DIR) {
+      const d = process.env.REKIT_PLUGIN_DIR;
+      if (!path.isAbsolute(d)) throw new Error(`REKIT_PLUGIN_DIR should be absolute path, got: ${d}`);
+      addPluginByPath(d, true);
+    }
     loaded = true;
   }
 
