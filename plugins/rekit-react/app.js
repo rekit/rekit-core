@@ -365,9 +365,11 @@ function getFeatures() {
 }
 
 function getProjectData(args) {
-  const srcFiles = files.readDir(paths.map('src'), args);
-  const testFiles = files.readDir(paths.map('tests'), args);
-  elementById = { ...srcFiles.elementById, ...testFiles.elementById };
+  const allFiles = files.readDir(paths.getProjectRoot(), args);
+  elementById = allFiles.elementById;
+  // const srcFiles = files.readDir(paths.map('src'), args);
+  // const testFiles = files.readDir(paths.map('tests'), args);
+  // elementById = { ...srcFiles.elementById, ...testFiles.elementById };
 
   const eleFeatures = {
     type: 'features',
@@ -376,49 +378,50 @@ function getProjectData(args) {
     children: getFeatures(),
   };
 
-  const eleMisc = {
+  const eleSrc = {
     type: 'folder-alias',
     id: 'v:_src-misc',
     name: 'src',
     target: 'src',
     icon: 'src-folder',
-    children: srcFiles.elements.filter(eid => eid !== 'src/features'),
+    children: elementById['src'].children.filter(eid => eid !== 'src/features'),
   };
 
-  const elements = [];
+  const elements = allFiles.elements;
+  _.pull(elements, 'tests');
 
-  [eleFeatures, eleMisc].forEach(ele => {
-    elements.push(ele.id);
+  [eleSrc, eleFeatures].forEach(ele => {
+    elements.unshift(ele.id);
     elementById[ele.id] = ele;
   });
-  const folders = config.getRekitConfig().folders || [];
-  folders.forEach(f => {
-    if (!fs.existsSync(paths.map(f))) return;
-    const res = files.readDir(paths.map(f));
-    Object.assign(elementById, res.elementById);
+  // const folders = config.getRekitConfig().folders || [];
+  // folders.forEach(f => {
+  //   if (!fs.existsSync(paths.map(f))) return;
+  //   const res = files.readDir(paths.map(f));
+  //   Object.assign(elementById, res.elementById);
 
-    const folderEle = {
-      type: 'folder-alias',
-      id: 'v:folder-' + f,
-      name: f,
-      target: f,
-      children: res.elements,
-    };
-    if (!elementById[folderEle.id]) {
-      elementById[folderEle.id] = folderEle;
-      elements.push(folderEle.id);
-    }
-  });
+  //   const folderEle = {
+  //     type: 'folder-alias',
+  //     id: 'v:folder-' + f,
+  //     name: f,
+  //     target: f,
+  //     children: res.elements,
+  //   };
+  //   if (!elementById[folderEle.id]) {
+  //     elementById[folderEle.id] = folderEle;
+  //     elements.unshift(folderEle.id);
+  //   }
+  // });
 
-  const extraFiles = config.getRekitConfig().files || [];
-  extraFiles.forEach(f => {
-    if (!fs.existsSync(paths.map(f))) return;
-    const fileEle = files.getFileElement(paths.map(f));
-    if (!elementById[fileEle.id]) {
-      elementById[fileEle.id] = fileEle;
-      elements.push(fileEle.id);
-    }
-  });
+  // const extraFiles = config.getRekitConfig().files || [];
+  // extraFiles.forEach(f => {
+  //   if (!fs.existsSync(paths.map(f))) return;
+  //   const fileEle = files.getFileElement(paths.map(f));
+  //   if (!elementById[fileEle.id]) {
+  //     elementById[fileEle.id] = fileEle;
+  //     elements.unshift(fileEle.id);
+  //   }
+  // });
 
   return { elements, elementById };
 }
