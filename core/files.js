@@ -93,8 +93,10 @@ const setLastChangeTime = () => {
 function getExInclude() {
   const exclude = [
     '**/node_modules',
+    '**/node_modules/**',
     '**/.DS_Store',
     '**/.git',
+    '**/.git/**',
     ...(config.getRekitConfig().exclude || []),
   ];
   const include = config.getRekitConfig().include || [];
@@ -108,7 +110,9 @@ function shouldShow(file) {
 }
 
 function onAdd(file) {
+  console.log('on add file: ', file);
   if (!shouldShow(file)) return;
+  console.log('show');
   const prjRoot = paths.getProjectRoot();
   const rFile = file.replace(prjRoot, '');
   allElementById[rFile] = getFileElement(file);
