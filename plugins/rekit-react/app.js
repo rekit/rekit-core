@@ -389,6 +389,7 @@ function getProjectData(args) {
 
   const elements = allFiles.elements;
   _.pull(elements, 'tests');
+  _.pull(elements, 'src');
 
   [eleSrc, eleFeatures].forEach(ele => {
     elements.unshift(ele.id);
