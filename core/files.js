@@ -15,8 +15,6 @@ let parentHash = {};
 let allElementById = {};
 const byId = id => allElementById[id];
 
-const watchers = {};
-
 const files = new EventEmitter();
 
 const emitChange = _.debounce(() => {
@@ -30,7 +28,15 @@ config.on('change', () => {
   allElementById = {};
 });
 
+// let watcher = null;
+// function startWatch() {
+//   if (!watcher) {
+
+//   }
+// }
+
 function readDir(dir, args = {}) {
+  ensureWatch();
   if (args.force) {
     cache = {};
     parentHash = {};
@@ -41,7 +47,6 @@ function readDir(dir, args = {}) {
   if (!fs.existsSync(dir)) {
     return { elements: [], elementById: {} };
   }
-  if (!watchers[dir]) startWatch(dir);
   if (!cache[dir]) {
     cache[dir] = getDirElement(dir);
   }
@@ -63,21 +68,22 @@ function readDir(dir, args = {}) {
   return res;
 }
 
-function startWatch(dir) {
+let watcher = null;
+function ensureWatch() {
+  if (watcher) return;
   if (global.__REKIT_NO_WATCH) return;
-  const w = chokidar.watch(dir, {
+  watcher = chokidar.watch(paths.getProjectRoot(), {
     persistent: true,
-    ignored: /node_modules/,
+    ignored: getExInclude().exclude,///node_modules/,
     awaitWriteFinish: true,
   });
-  w.on('ready', () => {
-    w.on('add', onAdd);
-    w.on('change', onChange);
-    w.on('unlink', onUnlink);
-    w.on('addDir', onAddDir);
-    w.on('unlinkDir', onUnlinkDir);
+  watcher.on('ready', () => {
+    watcher.on('add', onAdd);
+    watcher.on('change', onChange);
+    watcher.on('unlink', onUnlink);
+    watcher.on('addDir', onAddDir);
+    watcher.on('unlinkDir', onUnlinkDir);
   });
-  watchers[dir] = w;
 }
 
 const setLastChangeTime = () => {
@@ -120,6 +126,7 @@ function onAdd(file) {
   emitChange();
 }
 function onUnlink(file) {
+  if (!shouldShow(file)) return;
   // console.log('on unlink', file);
   const prjRoot = paths.getProjectRoot();
   const rFile = file.replace(prjRoot, '');
@@ -138,6 +145,7 @@ function onUnlink(file) {
   emitChange();
 }
 function onChange(file) {
+  if (!shouldShow(file)) return;
   const prjRoot = paths.getProjectRoot();
   const rFile = file.replace(prjRoot, '');
   allElementById[rFile] = getFileElement(file);
@@ -173,6 +181,7 @@ function onUnlinkDir(file) {
 }
 
 function getDirElement(dir, theElementById) {
+  ensureWatch();
   if (!path.isAbsolute(dir)) dir = paths.map(dir);
   const prjRoot = paths.getProjectRoot();
   let rDir = dir.replace(prjRoot, '');
