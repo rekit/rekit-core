@@ -74,7 +74,7 @@ function ensureWatch() {
   if (global.__REKIT_NO_WATCH) return;
   watcher = chokidar.watch(paths.getProjectRoot(), {
     persistent: true,
-    ignored: getExInclude().exclude,///node_modules/,
+    ignored: /[/\\]node_modules[/\\]|[/\\]\.git[/\\]/,
     awaitWriteFinish: true,
   });
   watcher.on('ready', () => {

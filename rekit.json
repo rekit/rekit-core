@@ -1,11 +1,10 @@
 {
   "include": [],
-  "exclude": ["tmp"],
+  "exclude": ["tmp", ".nyc_output", ".*", "package-lock.json", "coverage"],
   "appType": "common",
   "diagram": {
     "include": [],
     "exclude": []
   },
-  "astFoldersForDiagram": [],
   "astFolders": []
 }
