@@ -119,8 +119,10 @@ function onAdd(file) {
 
   const dir = path.dirname(rFile);
   if (!byId(dir)) {
-    onAddDir(dir);
+    return;
+    // onAddDir(dir);
   }
+
   const children = byId(dir).children;
   children.push(rFile);
 
