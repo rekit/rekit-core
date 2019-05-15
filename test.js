@@ -1,4 +1,4 @@
-const rekit = require('./');
+// const rekit = require('./');
 
 // rekit.core.paths.setProjectRoot('C:/Users/pwang7/rekit-org/rekit-core');
 // // rekit.core.paths.setProjectRoot('/Users/pwang7/workspace/rekitebaynode');
@@ -43,18 +43,30 @@ const rekit = require('./');
 //   if (ele.id.endsWith('.marko')) console.log(ele);
 // });
 global.__REKIT_NO_WATCH = true;
-function installPluginTest() {
-  rekit.core.plugin.installPlugin('redux-saga');
-}
-function listPlugins() {
-  console.log(rekit.core.plugin.listInstalledPlugins());
-}
-function testAst() {
-  console.log(rekit.core.ast.getAst('test.js'));
-  console.log('abc');
-}
+// function installPluginTest() {
+//   rekit.core.plugin.installPlugin('redux-saga');
+// }
+// function listPlugins() {
+//   console.log(rekit.core.plugin.listInstalledPlugins());
+// }
+// function testAst() {
+//   console.log(rekit.core.ast.getAst('test.js'));
+//   console.log('abc');
+// }
 
-// listPlugins();
-testAst();
+// // listPlugins();
+// testAst();
 
 // installPluginTest();
+
+const chokidar = require('chokidar');
+const w = chokidar.watch('/Users/pwang7/rekit-org/app1', { ignored: /node_modules/, awaitWriteFinish: true });
+w.on('ready', () => {
+  console.log('ready');
+
+  w.on('add', (...args) => console.log('add: ', args));
+  w.on('change', (...args) => console.log('change: ', args));
+  w.on('addDir', (...args) => console.log('addDir: ', args));
+  w.on('unlink', (...args) => console.log('unlink: ', args));
+  w.on('unlinkDir', (...args) => console.log('unlinkDir: ', args));
+});

@@ -7,6 +7,7 @@ const deps = require('./deps');
 const chokidar = require('chokidar');
 const EventEmitter = require('events');
 const minimatch = require('minimatch');
+const logger = require('./logger');
 
 const MAX_FILES = 3000;
 
@@ -16,6 +17,10 @@ let allElementById = {};
 const byId = id => allElementById[id];
 
 const files = new EventEmitter();
+
+// const emitChange = () => {
+//   files.emit('change');
+// };
 
 const emitChange = _.debounce(() => {
   files.emit('change');
@@ -75,7 +80,7 @@ function ensureWatch() {
   watcher = chokidar.watch(paths.getProjectRoot(), {
     persistent: true,
     ignored: /[/\\]node_modules[/\\]|[/\\]\.git[/\\]/,
-    awaitWriteFinish: true,
+    awaitWriteFinish: false,
   });
   watcher.on('ready', () => {
     watcher.on('add', onAdd);
@@ -110,9 +115,7 @@ function shouldShow(file) {
 }
 
 function onAdd(file) {
-  console.log('on add file: ', file);
   if (!shouldShow(file)) return;
-  console.log('show');
   const prjRoot = paths.getProjectRoot();
   const rFile = file.replace(prjRoot, '');
   allElementById[rFile] = getFileElement(file);
