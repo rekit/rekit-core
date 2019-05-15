@@ -9,6 +9,7 @@ function join(...args) {
 
 let projectRoot;
 function setProjectRoot(prjRoot) {
+  if (!path.isAbsolute(prjRoot)) prjRoot = path.join(process.cwd(), prjRoot);
   prjRoot = path.normalize(prjRoot).replace(/\\/g, '/');
   projectRoot = /\/$/.test(prjRoot) ? prjRoot : prjRoot + '/';
 }
