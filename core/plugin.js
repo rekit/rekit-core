@@ -76,6 +76,35 @@ function getPlugins(prop) {
 
 function sortPlugins() {
   // Sort plugins according dep relations and Rekit config.
+  const rekitConfig = config.getRekitConfig();
+  const pluginOrder = rekitConfig.pluginOrder || [];
+
+  allPlugins.sort((p1, p2) => {
+    const p1Index = pluginOrder.indexOf(p1.name);
+    const p2Index = pluginOrder.indexOf(p2.name);
+    if (p1.dependencies && p1.dependencies.includes(p2.name)) {
+      // If p1 depends on p2, load p2 first
+      return 1;
+    }
+    if (p2.dependencies && p2.dependencies.includes(p1.name)) {
+      // If p2 depends on p1, load p1 first
+      return -1;
+    }
+    if (p1Index >= 0 && p2Index === -1) {
+      // If only p1 configed, load it first
+      return -1;
+    }
+    if (p2Index >= 0 && p1Index === -1) {
+      // If only p2 configed, load it first
+      return 1;
+    }
+    if (p1Index >= 0 && p2Index >= 0) {
+      // If both configed, load before first
+      return p1Index - p2Index;
+    }
+    // No order specified.
+    return 0;
+  });
 }
 
 function filterPluginsIfNecessary() {
