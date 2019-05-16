@@ -1,10 +1,10 @@
 const _ = require('lodash');
 
 const getParentPlugin = () => rekit.core.plugin.getPlugin('rekit-react');
-function getProjectData(args) {
+function processProjectData(prjData, args) {
   const pp = getParentPlugin();
   if (!pp) throw new Error('Plugin not found: rekit-react');
-  const prjData = pp.app.getProjectData(args);
+  pp.app.processProjectData(prjData, args);
   const { elements, elementById } = prjData;
 
   const { files, vio } = rekit.core;
@@ -39,14 +39,12 @@ function getProjectData(args) {
     elements.splice(2, 0, id);
     _.pull(elementById['v:_src-misc'].children, 'src/ext');
   }
-
-  return prjData;
 }
 function getFileProps(...args) {
   return getParentPlugin().app.getFileProps(...args);
 }
 
 module.exports = {
-  getProjectData,
+  processProjectData,
   getFileProps,
 };

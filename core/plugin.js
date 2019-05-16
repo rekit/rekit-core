@@ -213,9 +213,9 @@ function loadPlugin(pluginRoot, noUI) {
 }
 
 function loadPlugins(dir) {
-  // At dev time, do not load dist plugins from dir.
+  // At rekit studio dev time, do not load dist plugins from dir.
   // Because Rekit Studio doesn't support it at dev time.
-  // if (process.env.NODE_ENV === 'development') return;
+  if (process.env.REKIT_STUDIO_DEVELOPMENT) return;
   fs.readdirSync(dir)
     .map(d => path.join(dir, d))
     .filter(d => fs.statSync(d).isDirectory())

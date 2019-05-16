@@ -1,12 +1,10 @@
 const _ = require('lodash');
 const path = require('path');
-const fs = require('fs-extra');
-// const shell = require('shelljs');
 const traverse = require('@babel/traverse').default;
 
-const { ast, paths, vio, config, files } = rekit.core;
+const { ast, vio, config } = rekit.core;
 
-let elementById = {};
+// let elementById = {};
 const filePropsCache = {};
 
 function getFileProps(file) {
@@ -96,7 +94,7 @@ function getFileProps(file) {
   return props;
 }
 
-function getComponents(feature) {
+function getComponents(feature, elementById) {
   const components = [];
   const eleFolder = elementById[`src/features/${feature}`];
   eleFolder.children
@@ -131,7 +129,7 @@ function getComponents(feature) {
   return components.map(c => c.id);
 }
 
-function getActions(feature) {
+function getActions(feature, elementById) {
   const actions = [];
   const eleFolder = elementById[`src/features/${feature}/redux`];
   if (!eleFolder) return [];
@@ -256,7 +254,7 @@ function getRoutes(feature) {
 //   return res.elements;
 // }
 
-function getInitialState(feature) {
+function getInitialState(feature, elementById) {
   const id = `v:${feature}-initial-state`;
   const codeFile = `src/features/${feature}/redux/initialState.js`;
   const ele = {
@@ -270,7 +268,7 @@ function getInitialState(feature) {
   return ele;
 }
 
-function getFeatures() {
+function getFeatures(elementById) {
   // return _.toArray(shell.ls(rekit.core.paths.map('src/features')));
   const elements = [];
   if (!elementById['src/features']) return [];
@@ -282,11 +280,11 @@ function getFeatures() {
     }
     // feature name
     const f = ele.id.split('/').pop();
-    const routes = getRoutes(f);
-    const actions = getActions(f);
-    const components = getComponents(f);
+    const routes = getRoutes(f, elementById);
+    const actions = getActions(f, elementById);
+    const components = getComponents(f, elementById);
 
-    actions.unshift(getInitialState(f).id);
+    actions.unshift(getInitialState(f, elementById).id);
 
     const routeFilePath = `src/features/${f}/route.js`;
     const children = [
@@ -364,18 +362,13 @@ function getFeatures() {
   return elements;
 }
 
-function getProjectData(args) {
-  const allFiles = files.readDir(paths.getProjectRoot(), args);
-  elementById = allFiles.elementById;
-  // const srcFiles = files.readDir(paths.map('src'), args);
-  // const testFiles = files.readDir(paths.map('tests'), args);
-  // elementById = { ...srcFiles.elementById, ...testFiles.elementById };
-
+function processProjectData(prjData) {
+  const { elements, elementById } = prjData;
   const eleFeatures = {
     type: 'features',
     id: 'v:features',
     name: 'Features',
-    children: getFeatures(),
+    children: getFeatures(elementById),
   };
 
   const eleSrc = {
@@ -387,7 +380,6 @@ function getProjectData(args) {
     children: elementById['src'].children.filter(eid => eid !== 'src/features'),
   };
 
-  const elements = allFiles.elements;
   _.pull(elements, 'tests');
   _.pull(elements, 'src');
 
@@ -395,39 +387,9 @@ function getProjectData(args) {
     elements.unshift(ele.id);
     elementById[ele.id] = ele;
   });
-  // const folders = config.getRekitConfig().folders || [];
-  // folders.forEach(f => {
-  //   if (!fs.existsSync(paths.map(f))) return;
-  //   const res = files.readDir(paths.map(f));
-  //   Object.assign(elementById, res.elementById);
-
-  //   const folderEle = {
-  //     type: 'folder-alias',
-  //     id: 'v:folder-' + f,
-  //     name: f,
-  //     target: f,
-  //     children: res.elements,
-  //   };
-  //   if (!elementById[folderEle.id]) {
-  //     elementById[folderEle.id] = folderEle;
-  //     elements.unshift(folderEle.id);
-  //   }
-  // });
-
-  // const extraFiles = config.getRekitConfig().files || [];
-  // extraFiles.forEach(f => {
-  //   if (!fs.existsSync(paths.map(f))) return;
-  //   const fileEle = files.getFileElement(paths.map(f));
-  //   if (!elementById[fileEle.id]) {
-  //     elementById[fileEle.id] = fileEle;
-  //     elements.unshift(fileEle.id);
-  //   }
-  // });
-
-  return { elements, elementById };
 }
 
 module.exports = {
-  getProjectData,
+  processProjectData,
   getFileProps,
 };

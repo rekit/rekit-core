@@ -7,9 +7,9 @@ const deps = require('./deps');
 const chokidar = require('chokidar');
 const EventEmitter = require('events');
 const minimatch = require('minimatch');
-const logger = require('./logger');
+// const logger = require('./logger');
 
-const MAX_FILES = 3000;
+const MAX_FILES = 4000;
 
 let cache = {};
 let parentHash = {};
@@ -47,7 +47,9 @@ function readDir(dir, args = {}) {
     parentHash = {};
     allElementById = {};
   }
-  dir = dir || paths.map('src');
+  const prjRoot = paths.getProjectRoot();
+
+  dir = dir || prjRoot;
   if (!path.isAbsolute(dir)) dir = paths.map(dir);
   if (!fs.existsSync(dir)) {
     return { elements: [], elementById: {} };
@@ -58,7 +60,6 @@ function readDir(dir, args = {}) {
   const elementById = {};
   const dirEle = cache[dir];
   const children = [...dirEle.children];
-  const prjRoot = paths.getProjectRoot();
   const rDir = dir.replace(prjRoot, '');
   elementById[rDir] = dirEle;
   while (children.length) {
