@@ -55,7 +55,8 @@ function getPlugins(prop) {
     // load plugin from environment variable: REKIT_PLUGIN_DIR , used in plugin dev time
     if (process.env.REKIT_PLUGIN_DIR) {
       const d = process.env.REKIT_PLUGIN_DIR;
-      if (!path.isAbsolute(d)) throw new Error(`REKIT_PLUGIN_DIR should be absolute path, got: ${d}`);
+      if (!path.isAbsolute(d))
+        throw new Error(`REKIT_PLUGIN_DIR should be absolute path, got: ${d}`);
       addPluginByPath(d, true);
     }
     loaded = true;
@@ -127,10 +128,17 @@ function loadPlugin(pluginRoot, noUI) {
     }
 
     // UI part
-    if (!noUI && fs.existsSync(path.join(pluginRoot, 'build/main.js'))) {
-      pluginInstance.ui = {
-        root: path.join(pluginRoot, 'build'),
-      };
+    if (!noUI) {
+      let entry = 'main.js';
+      if (process.env.NODE_ENV === 'development' && fs.existsSync(path.join(pluginRoot, 'build', 'main-dev.js'))) {
+        entry = 'main-dev.js';
+      }
+      if (fs.existsSync(path.join(pluginRoot, 'build', entry))) {
+        pluginInstance.ui = {
+          root: path.join(pluginRoot, 'build'),
+          entry,
+        };
+      }
     }
 
     // Plugin meta defined in package.json
@@ -138,7 +146,8 @@ function loadPlugin(pluginRoot, noUI) {
     let pkgJson = null;
     if (fs.existsSync(pkgJsonPath)) {
       pkgJson = fs.readJsonSync(pkgJsonPath);
-      ['appType', 'name', 'featureFiles'].forEach(key => {
+
+      ['appType', 'name', 'version'].forEach(key => {
         if (!pluginInstance.hasOwnProperty(key) && pkgJson.hasOwnProperty(key)) {
           if (key === 'name') {
             let name = pkgJson.name;
@@ -157,6 +166,7 @@ function loadPlugin(pluginRoot, noUI) {
         });
       }
     }
+    if (!pluginInstance.version) pluginInstance.version = '0.0.1';
     return pluginInstance;
   } catch (e) {
     logger.warn(`Failed to load plugin: ${pluginRoot}`, e);
@@ -168,7 +178,7 @@ function loadPlugin(pluginRoot, noUI) {
 function loadPlugins(dir) {
   // At dev time, do not load dist plugins from dir.
   // Because Rekit Studio doesn't support it at dev time.
-  if (process.env.NODE_ENV === 'development') return;
+  // if (process.env.NODE_ENV === 'development') return;
   fs.readdirSync(dir)
     .map(d => path.join(dir, d))
     .filter(d => fs.statSync(d).isDirectory())
