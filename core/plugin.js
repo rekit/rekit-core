@@ -52,13 +52,15 @@ function getPlugins(prop) {
       }
     });
     if (fs.existsSync(DEFAULT_PLUGIN_DIR)) loadPlugins(DEFAULT_PLUGIN_DIR);
-    // load plugin from environment variable: REKIT_PLUGIN_DIR , used in plugin dev time
+    // Load plugin from environment variable: REKIT_PLUGIN_DIR , used in plugin dev time
+    // This doesn't load UI part, only for cli testing purpose
     if (process.env.REKIT_PLUGIN_DIR) {
       const d = process.env.REKIT_PLUGIN_DIR;
       if (!path.isAbsolute(d))
         throw new Error(`REKIT_PLUGIN_DIR should be absolute path, got: ${d}`);
       addPluginByPath(d, true);
     }
+    sortPlugins();
     loaded = true;
   }
 
@@ -72,22 +74,25 @@ function getPlugins(prop) {
   return prop ? appliedPlugins.filter(_.property(prop)) : appliedPlugins;
 }
 
+function sortPlugins() {
+  // Sort plugins according dep relations and Rekit config.
+}
+
 function filterPluginsIfNecessary() {
   initPluginsIfNecessary();
   if (!needFilterPlugin) return;
   const rekitConfig = config.getRekitConfig();
 
   // A plugin could decide if it's fit for the current project by feature files
-  // appliedPlugins = allPlugins.filter(checkFeatureFiles);
   logger.info('All plugins:', allPlugins.map(p => p.name));
   const appType = rekitConfig.appType;
   appliedPlugins = allPlugins.filter(
     p =>
       (!p.shouldUse || p.shouldUse(paths.getProjectRoot())) &&
-      (!p.appType || _.castArray(p.appType).includes(appType)),
+      (!p.appType || _.castArray(p.appType).includes(appType)) &&
+      !(rekitConfig.excludePlugins || []).map(s => s.replace('rekit-plugin', '')).includes(p.name),
   );
   logger.info('Applied plugins for appType ' + appType + ': ', appliedPlugins.map(p => p.name));
-
   needFilterPlugin = false;
 }
 
@@ -130,7 +135,10 @@ function loadPlugin(pluginRoot, noUI) {
     // UI part
     if (!noUI) {
       let entry = 'main.js';
-      if (process.env.NODE_ENV === 'development' && fs.existsSync(path.join(pluginRoot, 'build', 'main-dev.js'))) {
+      if (
+        process.env.NODE_ENV === 'development' &&
+        fs.existsSync(path.join(pluginRoot, 'build', 'main-dev.js'))
+      ) {
         entry = 'main-dev.js';
       }
       if (fs.existsSync(path.join(pluginRoot, 'build', entry))) {
