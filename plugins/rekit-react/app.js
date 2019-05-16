@@ -259,6 +259,7 @@ function getInitialState(feature, elementById) {
   const codeFile = `src/features/${feature}/redux/initialState.js`;
   const ele = {
     id,
+    order: 0,
     type: 'initial-state',
     target: codeFile,
     parts: [codeFile],
@@ -284,7 +285,7 @@ function getFeatures(elementById) {
     const actions = getActions(f, elementById);
     const components = getComponents(f, elementById);
 
-    actions.unshift(getInitialState(f, elementById).id);
+    actions.push(getInitialState(f, elementById).id);
 
     const routeFilePath = `src/features/${f}/route.js`;
     const children = [
