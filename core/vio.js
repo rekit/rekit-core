@@ -122,6 +122,7 @@ function mkdir(dir) {
 }
 
 function save(filePath, lines) {
+  filePath = paths.relativePath(filePath);
   if (_.isString(lines) || _.isArray(lines)) {
     put(filePath, lines);
   }

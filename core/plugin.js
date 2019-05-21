@@ -277,11 +277,11 @@ function listInstalledPlugins() {
 
   return plugins;
 }
-function installPlugin(name) {
+function installPlugin(name, args) {
   if (!/^rekit-plugin-/.test(name)) {
     name = 'rekit-plugin-' + name;
   }
-  logger.info('Installing plugin: ', name);
+  logger.info('Installing plugin: ', name, args.registry || '');
   const destDir = paths.configFile('plugins/' + name);
   if (fs.existsSync(destDir)) {
     logger.info('Plugin already installed, reinstalling it...');

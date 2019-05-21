@@ -117,7 +117,7 @@ function shouldShow(file) {
 
 function onAdd(file) {
   if (!shouldShow(file)) return;
-  if (!fs.exclude(file)) return;
+  if (!fs.existsSync(file)) return;
   const prjRoot = paths.getProjectRoot();
   const rFile = file.replace(prjRoot, '');
   allElementById[rFile] = getFileElement(file);
