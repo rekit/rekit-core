@@ -10,6 +10,7 @@ const config = require('./core/config');
 const ast = require('./core/ast');
 const refactor = require('./core/refactor');
 const deps = require('./core/deps');
+const dependents = require('./core/dependents');
 const handleCommand = require('./core/handleCommand');
 const create = require('./core/create');
 const utils = require('./core/utils');
@@ -37,6 +38,7 @@ global.rekit = {
     refactor,
     ast,
     deps,
+    dependents,
     handleCommand,
     create,
     utils,

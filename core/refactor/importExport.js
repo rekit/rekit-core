@@ -8,6 +8,9 @@ const format = require('./format');
 const common = require('./common');
 const identifier = require('./identifier');
 const generate = require('./generate');
+const paths = require('../paths');
+
+const { resolveModulePath } = common;
 
 // NOTE: comments set to false to avoid leadingComments and tailingComments be output.
 // So that comments will not be duplicated.
@@ -258,11 +261,18 @@ function renameImportSpecifier(ast, oldName, newName, moduleSource) {
 
   let defNode = null;
   let changes = [];
+  const contextFilePath = ast._filePath;
+  moduleSource = moduleSource.replace(/\.[jt]sx?$/, '');
 
   traverse(ast, {
     ImportDeclaration(path) {
       const node = path.node;
-      if (moduleSource && _.get(node, 'source.value') !== moduleSource) return;
+      if (
+        moduleSource &&
+        resolveModulePath(contextFilePath, _.get(node, 'source.value')) !==
+          resolveModulePath(contextFilePath, moduleSource)
+      )
+        return;
       node.specifiers.forEach(specifier => {
         if (
           (specifier.type === 'ImportDefaultSpecifier' ||
@@ -325,10 +335,20 @@ function renameModuleSource(ast, oldModuleSource, newModuleSource) {
   //  It only compares the string rather that resolve to the absolute path.
 
   const changes = [];
+  oldModuleSource = oldModuleSource.replace(/\.[jt]sx?$/, '');
+  newModuleSource = newModuleSource.replace(/\.[jt]sx?$/, '');
+  if (!newModuleSource.startsWith('.'))
+    newModuleSource = paths.relativeModuleSource(ast._filePath, newModuleSource);
+
+  const contextFilePath = ast._filePath;
 
   function renameSource(path) {
     const node = path.node;
-    if (node.source && node.source.value === oldModuleSource) {
+    if (
+      node.source &&
+      resolveModulePath(contextFilePath, node.source.value) ===
+        resolveModulePath(contextFilePath, oldModuleSource)
+    ) {
       changes.push({
         start: node.source.start + 1,
         end: node.source.end - 1,

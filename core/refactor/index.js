@@ -17,6 +17,7 @@ const func = require('./func');
 const lines = require('./lines');
 const format = require('./format');
 const generate = require('./generate');
+const updateRefs = require('./updateRefs');
 
 module.exports = {
   // Common
@@ -27,6 +28,7 @@ module.exports = {
   resolveModulePath: common.resolveModulePath,
   acceptFilePathForAst: common.acceptFilePathForAst,
   acceptFilePathForLines: common.acceptFilePathForLines,
+  updateRefs,
 
   // Identifier
   renameIdentifier: identifier.renameIdentifier,
