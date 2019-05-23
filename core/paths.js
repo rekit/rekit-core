@@ -56,6 +56,9 @@ const rekitDir = path.join(os.homedir(), '.rekit');
 function configFile(file) {
   return path.join(rekitDir, file);
 }
+
+const configPath = configFile;
+
 module.exports = {
   join,
   map,
@@ -65,6 +68,7 @@ module.exports = {
   relative,
   rekitDir,
   configFile,
+  configPath,
   relativePath,
   relativeModuleSource,
   getLocalPluginRoot: () => map('tools/plugins'),
