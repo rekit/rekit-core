@@ -1,0 +1,23 @@
+{
+  "id": "rekit-react",
+  "name": "Rekit React",
+  "repo": "rekit/boilerplate-rekit-react#master",
+  "description": "Feature oriented SPA application with React, Redux and React Router.",
+  "args": [
+    {
+      "id": "css",
+      "label": "CSS Transpiler",
+      "type": "string",
+      "widget": "radio-group",
+      "initialValue": "less",
+      "options": [["less", "Less"], ["scss", "Sass"]]
+    },
+    {
+      "id": "examples",
+      "label": "Examples",
+      "tooltip": "Whether to include examples code in the project.",
+      "widget": "checkbox",
+      "initialValue": true
+    }
+  ]
+}

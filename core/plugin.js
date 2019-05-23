@@ -277,11 +277,11 @@ function listInstalledPlugins() {
 
   return plugins;
 }
-function installPlugin(name, args) {
+function installPlugin(name) {
   if (!/^rekit-plugin-/.test(name)) {
     name = 'rekit-plugin-' + name;
   }
-  logger.info('Installing plugin: ', name, args.registry || '');
+  logger.info('Installing plugin: ' + name);
   const destDir = paths.configFile('plugins/' + name);
   if (fs.existsSync(destDir)) {
     logger.info('Plugin already installed, reinstalling it...');
@@ -299,13 +299,15 @@ function installPlugin(name, args) {
         });
         let failed = false;
         child.on('exit', () => {
-          if (!failed) logger.info('Plugin installed successfully.');
+          if (!failed) logger.info(`Plugin installed successfully: ${name}@${pkgJson.version}.`);
         });
         child.on('error', err => {
           failed = true;
           logger.error('Failed to install deps of the plugin. Remove plugin.', err);
           fs.removeSync(destDir);
         });
+      } else {
+        logger.info(`Plugin installed successfully: ${name}@${pkgJson.version}.`);
       }
     })
     .catch(err => {

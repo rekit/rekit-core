@@ -11,13 +11,12 @@
  */
 
 const path = require('path');
-const https = require('https');
 const _ = require('lodash');
 const fs = require('fs-extra');
-const download = require('download-git-repo');
 const config = require('./config');
 const paths = require('./paths');
-
+const repo = require('./repo');
+const app = require('./app');
 /*
   options: {
     status: callback
@@ -53,7 +52,9 @@ function create(options) {
             : path.join(process.cwd(), options.source);
           options.status('CREATE_APP_COPY_FILES', `Copy files from ${srcDir}...`);
           await fs.copy(srcDir, prjDir, {
-            filter: src => !/\/(\.git|node_modules\/|node_modules$)/.test(src) || path.basename(src) === '.gitignore',
+            filter: src =>
+              !/\/(\.git|node_modules\/|node_modules$)/.test(src) ||
+              path.basename(src) === '.gitignore',
           });
         }
       } else if (options.type) {
@@ -62,7 +63,8 @@ function create(options) {
           'QUERY_APP_TYPES_GIT_REPO',
           `Looking for the git repo for app type ${options.type}...`,
         );
-        const appTypes = await getAppTypes();
+        const appTypes = app.getAppTypes();
+        console.log('appTypes:', appTypes);
         const appType = _.find(appTypes, { id: options.type });
         if (!appType) reject('APP_TYPE_NOT_SUPPORTED');
         gitRepo = appType.repo;
@@ -73,7 +75,7 @@ function create(options) {
 
       if (gitRepo) {
         options.status('CLONE_PROJECT', `Downloading project from ${gitRepo}...`);
-        await cloneRepo(gitRepo, prjDir);
+        await repo.clone(gitRepo, prjDir);
       }
 
       postCreate(prjDir, options);
@@ -87,35 +89,18 @@ function create(options) {
   });
 }
 
-function getAppTypes() {
-  return new Promise((resolve, reject) => {
-    syncAppRegistryRepo()
-      .then(() => {
-        resolve(fs.readJsonSync(paths.configFile('app-registry/appTypes.json')));
-      })
-      .catch(err => {
-        console.log('Failed to get app types: ', err);
-        reject('GET_APP_TYPES_FAILED');
-      });
-  });
-}
-
-function cloneRepo(gitRepo, prjDir) {
-  return new Promise((resolve, reject) => {
-    const isDirect = /^https?:/.test(gitRepo);
-    download(isDirect ? `direct:${gitRepo}` : gitRepo, prjDir, { clone: isDirect }, err => {
-      if (err) {
-        console.log(
-          'Failed to download the boilerplate. The project was not created. Please check and retry.',
-        );
-        console.log(err);
-        reject('CLONE_REPO_FAILED');
-        return;
-      }
-      resolve();
-    });
-  });
-}
+// function getAppTypes() {
+//   return new Promise((resolve, reject) => {
+//     syncAppRegistryRepo()
+//       .then(() => {
+//         resolve(fs.readJsonSync(paths.configFile('app-registry/appTypes.json')));
+//       })
+//       .catch(err => {
+//         console.log('Failed to get app types: ', err);
+//         reject('GET_APP_TYPES_FAILED');
+//       });
+//   });
+// }
 
 function postCreate(prjDir, options) {
   const postCreateScript = path.join(prjDir, 'postCreate.js');
@@ -128,67 +113,17 @@ function postCreate(prjDir, options) {
 
 function syncAppRegistryRepo() {
   const registryDir = paths.configFile('app-registry');
-  return new Promise((resolve, reject) => {
-    const appRegistry = config.getAppRegistry();
-    if (path.isAbsolute(appRegistry)) {
-      // if it's local folder, copy to it
-      console.log('Sync app registry from local folder.');
-      fs.removeSync(registryDir);
-      fs.copySync(appRegistry, registryDir);
-      resolve();
-      return;
-    }
-    const arr = appRegistry.split('/');
-    const owner = arr[0];
-    const arr2 = arr[1].split('#');
-    const repo = arr2[0];
-    const branch = arr2[1] || 'master';
-    https
-      .get(
-        // url,
-        {
-          hostname: 'api.github.com',
-          path: `/repos/${owner}/${repo}/git/refs/heads/${branch}`,
-          port: 443,
-          headers: { 'User-Agent': 'rekit-core' },
-        },
-        resp => {
-          let data = '';
-
-          // A chunk of data has been recieved.
-          resp.on('data', chunk => {
-            data += chunk;
-          });
-
-          // The whole response has been received. Print out the result.
-          resp.on('end', () => {
-            try {
-              const ref = JSON.parse(data);
-              const lastCommit = ref.object.sha;
-              if (!fs.existsSync(path.join(registryDir, lastCommit))) {
-                fs.removeSync(registryDir);
-                cloneRepo(appRegistry, registryDir)
-                  .then(() => {
-                    fs.writeFileSync(path.join(registryDir, lastCommit), '');
-                    resolve(lastCommit);
-                  })
-                  .catch(reject);
-              } else {
-                resolve();
-              }
-            } catch (err) {
-              reject(err);
-            }
-          });
-        },
-      )
-      .on('error', err => {
-        console.log('Failed to get last commit of app registry: ', err);
-        reject('FAILED_CHECK_APP_REGISTRY_LATEST_COMMIT');
-      });
-  });
+  const appRegistry = config.getAppRegistry();
+  if (path.isAbsolute(appRegistry)) {
+    // if it's local folder, copy to it
+    console.log('Sync app registry from local folder.');
+    fs.removeSync(registryDir);
+    fs.copySync(appRegistry, registryDir);
+    return Promise.resolve();
+  }
+  return repo.sync(appRegistry, registryDir);
 }
 
 module.exports = create;
 module.exports.syncAppRegistryRepo = syncAppRegistryRepo;
-module.exports.getAppTypes = getAppTypes;
+// module.exports.getAppTypes = getAppTypes;

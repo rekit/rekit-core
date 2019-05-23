@@ -1,0 +1,6 @@
+{
+  "id": "rekit-plugin",
+  "name": "Rekit Plugin",
+  "repo": "rekit/boilerplate-rekit-plugin#master",
+  "description": "A Rekit plugin project."
+}
