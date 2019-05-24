@@ -8,13 +8,14 @@ const logger = require('./logger');
 function clone(gitRepo, destDir, errMsg) {
   fs.ensureDirSync(destDir);
   return new Promise((resolve, reject) => {
-    const isDirect = /^https?:/.test(gitRepo);
+    const isDirect = /^https?:|^git@/.test(gitRepo);
     download(isDirect ? `direct:${gitRepo}` : gitRepo, destDir, { clone: isDirect }, err => {
       if (err) {
         console.log(
           errMsg ||
             'Failed to download the boilerplate. The project was not created. Please check and retry.',
         );
+        console.log(err);
         logger.info(err);
         reject('CLONE_REPO_FAILED');
         return;

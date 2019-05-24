@@ -42,7 +42,7 @@ function create(options) {
       fs.mkdirSync(prjDir);
       let gitRepo;
       if (options.source) {
-        if (/^https?:/.test(options.source)) {
+        if (/^https?:|^git@|^direct:/.test(options.source)) {
           // It's a git repo
           gitRepo = options.source;
         } else {
@@ -64,7 +64,6 @@ function create(options) {
           `Looking for the git repo for app type ${options.type}...`,
         );
         const appTypes = app.getAppTypes();
-        console.log('appTypes:', appTypes);
         const appType = _.find(appTypes, { id: options.type });
         if (!appType) reject('APP_TYPE_NOT_SUPPORTED');
         gitRepo = appType.repo;
