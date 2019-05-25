@@ -10,6 +10,7 @@ module.exports = {
   app,
   hooks,
   prefix: require('./prefix'),
+  cli: require('./cli'),
   elements: {
     feature,
     component,
