@@ -28,6 +28,7 @@ function clone(gitRepo, destDir, errMsg) {
 // gitRepo: owner/repo#branch , only supports github.com.
 // branch defaults to master
 function sync(gitRepo, destDir) {
+  logger.info(`sync repo: ${gitRepo} to ${destDir}`)
   return new Promise((resolve, reject) => {
     const arr = gitRepo.split('/');
     const owner = arr[0];
