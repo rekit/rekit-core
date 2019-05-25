@@ -5,7 +5,6 @@ function updateRefs(src, dest) {
   console.log('updateRefs: ', src, dest);
   const app = require('../app');
   const refactor = require('./');
-  const vio = require('../vio');
   const { elementById } = app.getProjectData();
   const dependents = require('../dependents').getDependents(elementById);
   const byId = id => elementById[id];

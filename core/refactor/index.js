@@ -70,6 +70,7 @@ module.exports = {
   addStyleImport: style.addStyleImport,
   removeStyleImport: style.removeStyleImport,
   renameStyleImport: style.renameStyleImport,
+  renameCssClassInStyle: style.renameCssClassInStyle,
 
   // String
   renameStringLiteral: string.renameStringLiteral,
