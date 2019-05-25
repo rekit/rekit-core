@@ -262,7 +262,7 @@ function renameImportSpecifier(ast, oldName, newName, moduleSource) {
   let defNode = null;
   let changes = [];
   const contextFilePath = ast._filePath;
-  moduleSource = moduleSource.replace(/\.[jt]sx?$/, '');
+  if (moduleSource) moduleSource = moduleSource.replace(/\.[jt]sx?$/, '');
 
   traverse(ast, {
     ImportDeclaration(path) {
