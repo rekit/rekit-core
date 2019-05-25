@@ -21,6 +21,7 @@ function processProjectData(prjData, args) {
       icon: 'core',
       children: res.elements,
     };
+    _.pull(elements, 'core');
     elements.splice(1, 0, id);
   }
 
