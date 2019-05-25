@@ -309,12 +309,12 @@ function flush(args = {}) {
         file: filePath,
       });
     } else {
-      ensurePathDir(mvs[filePath]);
-      fs.renameSync(filePath, mvs[filePath]);
+      ensurePathDir(paths.map(mvs[filePath]));
+      fs.renameSync(absFilePath, paths.map(mvs[filePath]));
       myLog('Moved: ', 'green', filePath, mvs[filePath]);
       res.push({
         type: 'mv-file',
-        file: filePath.replace(prjRoot, ''),
+        file: filePath,
       });
     }
   });
