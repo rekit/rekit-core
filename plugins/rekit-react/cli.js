@@ -1,5 +1,6 @@
 module.exports = {
-  defineArguments({ addCmd }) {
+  defineArgs({ addCmd }) {
+
     // TODO: move to rekit-react plugin
     addCmd.addArgument(['--connect', '-c'], {
       help: 'Whether to connect to the Redux store. Only used for component.',
