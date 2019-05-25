@@ -154,7 +154,11 @@ function loadPlugin(pluginRoot, noUI) {
   // noUI flag is used for loading dev plugins whose ui is from webpack dev server
   try {
     // const pkgJson = require(paths.join(pluginRoot, 'package.json'));
-    const pluginInstance = {};
+    const pluginInstance = {
+      getModule(mid) {
+        return require(path.join(pluginRoot, mid));
+      }
+    };
     // Core part
     const coreIndex = paths.join(pluginRoot, 'core/index.js');
     if (fs.existsSync(coreIndex)) {
