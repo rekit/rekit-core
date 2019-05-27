@@ -10,6 +10,9 @@ if (!path.isAbsolute(destPrj)) destPrj = path.join(process.cwd(), destPrj);
 
 const dest = path.join(destPrj, 'node_modules/rekit-core');
 
+if (!fs.existsSync(dest)) {
+  throw new Error('Dest folder not exists: ' + dest);
+}
 const src = path.join(__dirname, '..');
 
 fs.copySync(src, dest, {

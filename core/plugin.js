@@ -48,7 +48,9 @@ function getPlugins(prop) {
     fs.readdirSync(path.join(__dirname, '../plugins')).forEach(d => {
       d = path.join(__dirname, '../plugins', d);
       if (fs.statSync(d).isDirectory() && fs.existsSync(path.join(d, 'index.js'))) {
-        addPlugin(require(d));
+        const p = require(d);
+        p.root = d;
+        addPlugin(p);
       }
     });
     if (fs.existsSync(DEFAULT_PLUGIN_DIR)) loadPlugins(DEFAULT_PLUGIN_DIR);
@@ -154,16 +156,7 @@ function loadPlugin(pluginRoot, noUI) {
   // noUI flag is used for loading dev plugins whose ui is from webpack dev server
   try {
     // const pkgJson = require(paths.join(pluginRoot, 'package.json'));
-    const pluginInstance = {
-      getModule(mid) {
-        try {
-          return require(path.join(pluginRoot, mid));
-        } catch (err) {
-          logger.debug('Faied to load module: ' + mid, err);
-          return null;
-        }
-      },
-    };
+    const pluginInstance = { root: pluginRoot };
     // Core part
     const coreIndex = paths.join(pluginRoot, 'core/index.js');
     if (fs.existsSync(coreIndex)) {
@@ -239,9 +232,19 @@ function addPlugin(plugin) {
   if (!needFilterPlugin) {
     console.warn('You are adding a plugin after getPlugins is called.');
   }
+  if (!plugin.getModule) {
+    plugin.getModule = mid => {
+      try {
+        return require(path.join(plugin.root, mid));
+      } catch (err) {
+        logger.debug('Faied to load module: ' + mid, err);
+        return null;
+      }
+    };
+  }
   needFilterPlugin = true;
   if (!plugin.name) {
-    console.log('plugin: ', plugin);
+    logger.info('plugin: ', plugin);
     throw new Error('Each plugin should have a name.');
   }
   if (_.find(allPlugins, { name: plugin.name })) {
