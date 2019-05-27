@@ -1,6 +1,7 @@
 const path = require('path');
 const os = require('os');
 const _ = require('lodash');
+const fs = require('fs-extra');
 
 function join(...args) {
   // A consistent and normalized version of path.join cross platforms
@@ -58,6 +59,7 @@ function configFile(file) {
 }
 
 const configPath = configFile;
+fs.ensureDirSync(configPath('plugins')); // ensure plugins folder exists
 
 module.exports = {
   join,

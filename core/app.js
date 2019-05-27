@@ -31,7 +31,7 @@ function syncAppRegistryRepo() {
 
 function getAppTypes(args) {
   if (args && !args.noSync) syncAppRegistryRepo();
-  // const pluginsDir =
+  fs.ensureDirSync(paths.configPath('plugins'));
   const appTypes = ['rekit-react', 'rekit-plugin']
     .map(dir => path.join(__dirname, '../plugins', dir))
     .concat(
