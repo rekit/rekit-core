@@ -156,8 +156,13 @@ function loadPlugin(pluginRoot, noUI) {
     // const pkgJson = require(paths.join(pluginRoot, 'package.json'));
     const pluginInstance = {
       getModule(mid) {
-        return require(path.join(pluginRoot, mid));
-      }
+        try {
+          return require(path.join(pluginRoot, mid));
+        } catch (err) {
+          logger.debug('Faied to load module: ' + mid, err);
+          return null;
+        }
+      },
     };
     // Core part
     const coreIndex = paths.join(pluginRoot, 'core/index.js');

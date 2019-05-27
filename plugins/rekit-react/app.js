@@ -293,6 +293,7 @@ function getFeatures(elementById) {
         id: `v:${f}-routes`,
         type: 'routes',
         name: 'Routes',
+        order: 1,
         feature: f,
         parts: [routeFilePath],
         views: [
@@ -306,12 +307,14 @@ function getFeatures(elementById) {
         id: `v:${f}-actions`,
         type: 'actions',
         name: 'Actions',
+        order: 10,
         children: actions,
       },
       {
         id: `v:${f}-components`,
         type: 'components',
         name: 'Components',
+        order: 20,
         children: components,
       },
     ];
@@ -345,6 +348,7 @@ function getFeatures(elementById) {
       target: `src/features/${f}`,
       type: 'folder-alias',
       name: 'Others',
+      order: 100,
       children: misc,
     });
 
