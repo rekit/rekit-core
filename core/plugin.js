@@ -43,28 +43,7 @@ function getPluginsDir() {
 }
 
 function getPlugins(prop) {
-  if (!loaded) {
-    // load built-in plugins
-    fs.readdirSync(path.join(__dirname, '../plugins')).forEach(d => {
-      d = path.join(__dirname, '../plugins', d);
-      if (fs.statSync(d).isDirectory() && fs.existsSync(path.join(d, 'index.js'))) {
-        const p = require(d);
-        p.root = d;
-        addPlugin(p);
-      }
-    });
-    if (fs.existsSync(DEFAULT_PLUGIN_DIR)) loadPlugins(DEFAULT_PLUGIN_DIR);
-    // Load plugin from environment variable: REKIT_PLUGIN_DIR , used in plugin dev time
-    // This doesn't load UI part, only for cli testing purpose
-    if (process.env.REKIT_PLUGIN_DIR) {
-      const d = process.env.REKIT_PLUGIN_DIR;
-      if (!path.isAbsolute(d))
-        throw new Error(`REKIT_PLUGIN_DIR should be absolute path, got: ${d}`);
-      addPluginByPath(d, true);
-    }
-    sortPlugins();
-    loaded = true;
-  }
+  getAllPlugins();
 
   filterPluginsIfNecessary();
   appliedPlugins.forEach(p => {
@@ -289,6 +268,36 @@ function listInstalledPlugins() {
 
   return plugins;
 }
+
+const getInstalledPlugins = listInstalledPlugins;
+
+function getAllPlugins() {
+  if (!loaded) {
+    // load built-in plugins
+    fs.readdirSync(path.join(__dirname, '../plugins')).forEach(d => {
+      d = path.join(__dirname, '../plugins', d);
+      if (fs.statSync(d).isDirectory() && fs.existsSync(path.join(d, 'index.js'))) {
+        const p = require(d);
+        p.root = d;
+        addPlugin(p);
+      }
+    });
+    if (fs.existsSync(DEFAULT_PLUGIN_DIR)) loadPlugins(DEFAULT_PLUGIN_DIR);
+    // Load plugin from environment variable: REKIT_PLUGIN_DIR , used in plugin dev time
+    // This doesn't load UI part, only for cli testing purpose
+    if (process.env.REKIT_PLUGIN_DIR) {
+      const d = process.env.REKIT_PLUGIN_DIR;
+      if (!path.isAbsolute(d))
+        throw new Error(`REKIT_PLUGIN_DIR should be absolute path, got: ${d}`);
+      addPluginByPath(d, true);
+    }
+    sortPlugins();
+    loaded = true;
+  }
+
+  return allPlugins;
+}
+
 function installPlugin(name) {
   if (!/^rekit-plugin-/.test(name)) {
     name = 'rekit-plugin-' + name;
@@ -353,4 +362,6 @@ module.exports = {
   installPlugin,
   uninstallPlugin,
   listInstalledPlugins,
+  getInstalledPlugins,
+  getAllPlugins,
 };
