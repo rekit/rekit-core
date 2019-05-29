@@ -142,6 +142,10 @@ function loadPlugin(pluginRoot, noUI) {
       Object.assign(pluginInstance, require(coreIndex));
     }
 
+    if (fs.existsSync(path.join(pluginRoot, 'logo.png'))) {
+      pluginInstance.logo = path.join(pluginRoot, 'logo.png');
+    }
+
     // UI part
     if (!noUI) {
       let entry = 'main.js';
@@ -165,7 +169,7 @@ function loadPlugin(pluginRoot, noUI) {
     if (fs.existsSync(pkgJsonPath)) {
       pkgJson = fs.readJsonSync(pkgJsonPath);
 
-      ['appType', 'name', 'version'].forEach(key => {
+      ['appType', 'name', 'version', 'description', 'author', 'homepage', 'repository'].forEach(key => {
         if (!pluginInstance.hasOwnProperty(key) && pkgJson.hasOwnProperty(key)) {
           if (key === 'name') {
             let name = pkgJson.name;
