@@ -179,7 +179,7 @@ function onAddDir(file) {
     children: [],
   };
   const dir = path.dirname(rFile);
-  if (!byId(dir)) {
+  if (!byId(dir) || !byId(dir).children) {
     console.warn('files.onAddDir: dir not exists: ', file);
     return;
   }
