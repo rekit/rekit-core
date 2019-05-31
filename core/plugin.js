@@ -43,7 +43,28 @@ function getPluginsDir() {
 }
 
 function getPlugins(prop) {
-  getAllPlugins();
+  if (!loaded) {
+    // load built-in plugins
+    fs.readdirSync(path.join(__dirname, '../plugins')).forEach(d => {
+      d = path.join(__dirname, '../plugins', d);
+      if (fs.statSync(d).isDirectory() && fs.existsSync(path.join(d, 'index.js'))) {
+        const p = require(d);
+        p.root = d;
+        addPlugin(p);
+      }
+    });
+    if (fs.existsSync(DEFAULT_PLUGIN_DIR)) loadPlugins(DEFAULT_PLUGIN_DIR);
+    // Load plugin from environment variable: REKIT_PLUGIN_DIR , used in plugin dev time
+    // This doesn't load UI part, only for cli testing purpose
+    if (process.env.REKIT_PLUGIN_DIR) {
+      const d = process.env.REKIT_PLUGIN_DIR;
+      if (!path.isAbsolute(d))
+        throw new Error(`REKIT_PLUGIN_DIR should be absolute path, got: ${d}`);
+      addPluginByPath(d, true);
+    }
+    sortPlugins();
+    loaded = true;
+  }
 
   filterPluginsIfNecessary();
   appliedPlugins.forEach(p => {
@@ -142,9 +163,9 @@ function loadPlugin(pluginRoot, noUI) {
       Object.assign(pluginInstance, require(coreIndex));
     }
 
-    if (fs.existsSync(path.join(pluginRoot, 'logo.png'))) {
-      pluginInstance.logo = path.join(pluginRoot, 'logo.png');
-    }
+    // if (fs.existsSync(path.join(pluginRoot, 'logo.png'))) {
+    //   pluginInstance.logo = path.join(pluginRoot, 'logo.png');
+    // }
 
     // UI part
     if (!noUI) {
@@ -249,9 +270,9 @@ function removePlugin(pluginName) {
   if (!removed.length) console.warn('No plugin was removed: ' + pluginName);
 }
 
-function listInstalledPlugins() {
+function getInstalledPlugins() {
   // Only get plugins from standard rekit plugin folder
-  const dir = paths.configFile('plugins2');
+  const dir = paths.configFile('plugins');
   const plugins = [];
 
   if (fs.existsSync(dir))
@@ -265,7 +286,10 @@ function listInstalledPlugins() {
           // Plugin info
           const pluginInfo = {};
           Object.assign(pluginInfo, pkgJson);
-
+          if (fs.existsSync(path.join(pluginRoot, 'logo.png'))) {
+            pluginInfo.logo = path.join(pluginRoot, 'logo.png');
+          }
+          pluginInfo.name = pluginInfo.name.replace(/^rekit-plugin-/, '');
           plugins.push(pluginInfo);
         } catch (err) {
           console.log('Failed to load plugin info: ', pluginRoot);
@@ -275,34 +299,34 @@ function listInstalledPlugins() {
   return plugins;
 }
 
-const getInstalledPlugins = listInstalledPlugins;
+// const getInstalledPlugins = listInstalledPlugins;
+// const getAllPlugins = getInstalledPlugins;
 
-function getAllPlugins() {
-  if (!loaded) {
-    // load built-in plugins
-    fs.readdirSync(path.join(__dirname, '../plugins')).forEach(d => {
-      d = path.join(__dirname, '../plugins', d);
-      if (fs.statSync(d).isDirectory() && fs.existsSync(path.join(d, 'index.js'))) {
-        const p = require(d);
-        p.root = d;
-        addPlugin(p);
-      }
-    });
-    if (fs.existsSync(DEFAULT_PLUGIN_DIR)) loadPlugins(DEFAULT_PLUGIN_DIR);
-    // Load plugin from environment variable: REKIT_PLUGIN_DIR , used in plugin dev time
-    // This doesn't load UI part, only for cli testing purpose
-    if (process.env.REKIT_PLUGIN_DIR) {
-      const d = process.env.REKIT_PLUGIN_DIR;
-      if (!path.isAbsolute(d))
-        throw new Error(`REKIT_PLUGIN_DIR should be absolute path, got: ${d}`);
-      addPluginByPath(d, true);
-    }
-    sortPlugins();
-    loaded = true;
-  }
+// // This is used to list all plugins for plugin manager
+// function getAllPlugins() {
 
-  return allPlugins;
-}
+//     // load built-in plugins
+//     fs.readdirSync(path.join(__dirname, '../plugins')).forEach(d => {
+//       d = path.join(__dirname, '../plugins', d);
+//       if (fs.statSync(d).isDirectory() && fs.existsSync(path.join(d, 'index.js'))) {
+//         const p = require(d);
+//         p.root = d;
+//         addPlugin(p);
+//       }
+//     });
+//     if (fs.existsSync(DEFAULT_PLUGIN_DIR)) loadPlugins(DEFAULT_PLUGIN_DIR);
+//     // Load plugin from environment variable: REKIT_PLUGIN_DIR , used in plugin dev time
+//     // This doesn't load UI part, only for cli testing purpose
+//     if (process.env.REKIT_PLUGIN_DIR) {
+//       const d = process.env.REKIT_PLUGIN_DIR;
+//       if (!path.isAbsolute(d))
+//         throw new Error(`REKIT_PLUGIN_DIR should be absolute path, got: ${d}`);
+//       addPluginByPath(d, true);
+//     }
+//     sortPlugins();
+//     loaded = true;
+
+// }
 
 function installPlugin(name) {
   return new Promise((resolve, reject) => {
@@ -375,7 +399,7 @@ module.exports = {
   addPluginsDir,
   installPlugin,
   uninstallPlugin,
-  listInstalledPlugins,
+  // listInstalledPlugins,
   getInstalledPlugins,
-  getAllPlugins,
+  // getAllPlugins,
 };
