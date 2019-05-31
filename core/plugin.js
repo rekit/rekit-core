@@ -342,6 +342,14 @@ function installPlugin(name) {
     downloadNpmPackage({ arg: name, dir: paths.configFile('plugins') })
       .then(() => {
         const pkgJson = require(path.join(destDir, 'package.json'));
+        const installSuccess = () => {
+          logger.info(`Plugin installed successfully: ${name}@${pkgJson.version}.`);
+          if (fs.existsSync(path.join(destDir, 'logo.png'))) {
+            pkgJson.logo = path.join(pkgJson, 'logo.png');
+          }
+          pkgJson.name = pkgJson.name.replace(/^rekit-plugin-/, '');
+          resolve(pkgJson);
+        };
         if (!_.isEmpty(pkgJson.dependencies)) {
           console.log('Plugin downloaded, installing its dependencies...');
           const npmCmd = process.platform === 'win32' ? 'npm.cmd' : 'npm';
@@ -351,7 +359,10 @@ function installPlugin(name) {
           });
           let failed = false;
           child.on('exit', () => {
-            if (!failed) logger.info(`Plugin installed successfully: ${name}@${pkgJson.version}.`);
+            if (!failed) {
+              logger.info(`Plugin installed successfully: ${name}@${pkgJson.version}.`);
+              installSuccess();
+            }
           });
           child.on('error', err => {
             failed = true;
@@ -360,12 +371,7 @@ function installPlugin(name) {
             reject(err);
           });
         } else {
-          logger.info(`Plugin installed successfully: ${name}@${pkgJson.version}.`);
-          if (fs.existsSync(path.join(destDir, 'logo.png'))) {
-            pkgJson.logo = path.join(pkgJson, 'logo.png');
-          }
-          pkgJson.name = pkgJson.name.replace(/^rekit-plugin-/, '');
-          resolve(pkgJson);
+          installSuccess();
         }
       })
       .catch(err => {
