@@ -169,17 +169,19 @@ function loadPlugin(pluginRoot, noUI) {
     if (fs.existsSync(pkgJsonPath)) {
       pkgJson = fs.readJsonSync(pkgJsonPath);
 
-      ['appType', 'name', 'version', 'description', 'author', 'homepage', 'repository'].forEach(key => {
-        if (!pluginInstance.hasOwnProperty(key) && pkgJson.hasOwnProperty(key)) {
-          if (key === 'name') {
-            let name = pkgJson.name;
-            if (name.startsWith('rekit-plugin')) name = name.replace('rekit-plugin-', '');
-            pluginInstance.name = name;
-          } else {
-            pluginInstance[key] = pkgJson[key] || null;
+      ['appType', 'name', 'version', 'description', 'author', 'homepage', 'repository'].forEach(
+        key => {
+          if (!pluginInstance.hasOwnProperty(key) && pkgJson.hasOwnProperty(key)) {
+            if (key === 'name') {
+              let name = pkgJson.name;
+              if (name.startsWith('rekit-plugin')) name = name.replace('rekit-plugin-', '');
+              pluginInstance.name = name;
+            } else {
+              pluginInstance[key] = pkgJson[key] || null;
+            }
           }
-        }
-      });
+        },
+      );
       if (pkgJson.rekitPlugin) {
         Object.keys(pkgJson.rekitPlugin).forEach(key => {
           if (!pluginInstance.hasOwnProperty(key)) {
@@ -303,55 +305,63 @@ function getAllPlugins() {
 }
 
 function installPlugin(name) {
-  if (!/^rekit-plugin-/.test(name)) {
-    name = 'rekit-plugin-' + name;
-  }
-  logger.info('Installing plugin: ' + name);
-  const destDir = paths.configFile('plugins/' + name);
-  if (fs.existsSync(destDir)) {
-    logger.info('Plugin already installed, reinstalling it...');
-    fs.removeSync(destDir);
-  }
-  downloadNpmPackage({ arg: name, dir: paths.configFile('plugins') })
-    .then(() => {
-      const pkgJson = require(path.join(destDir, 'package.json'));
-      if (!_.isEmpty(pkgJson.dependencies)) {
-        console.log('Plugin downloaded, installing its dependencies...');
-        const npmCmd = process.platform === 'win32' ? 'npm.cmd' : 'npm';
-        const child = spawn(npmCmd, ['install', '--colors', '--only=production'], {
-          stdio: 'inherit',
-          cwd: destDir,
-        });
-        let failed = false;
-        child.on('exit', () => {
-          if (!failed) logger.info(`Plugin installed successfully: ${name}@${pkgJson.version}.`);
-        });
-        child.on('error', err => {
-          failed = true;
-          logger.error('Failed to install deps of the plugin. Remove plugin.', err);
-          fs.removeSync(destDir);
-        });
-      } else {
-        logger.info(`Plugin installed successfully: ${name}@${pkgJson.version}.`);
-      }
-    })
-    .catch(err => {
-      logger.error('Failed to download plugin.', err);
-    });
+  return new Promise((resolve, reject) => {
+    if (!/^rekit-plugin-/.test(name)) {
+      name = 'rekit-plugin-' + name;
+    }
+    logger.info('Installing plugin: ' + name);
+    const destDir = paths.configFile('plugins/' + name);
+    if (fs.existsSync(destDir)) {
+      logger.info('Plugin already installed, reinstalling it...');
+      fs.removeSync(destDir);
+    }
+    downloadNpmPackage({ arg: name, dir: paths.configFile('plugins') })
+      .then(() => {
+        const pkgJson = require(path.join(destDir, 'package.json'));
+        if (!_.isEmpty(pkgJson.dependencies)) {
+          console.log('Plugin downloaded, installing its dependencies...');
+          const npmCmd = process.platform === 'win32' ? 'npm.cmd' : 'npm';
+          const child = spawn(npmCmd, ['install', '--colors', '--only=production'], {
+            stdio: 'inherit',
+            cwd: destDir,
+          });
+          let failed = false;
+          child.on('exit', () => {
+            if (!failed) logger.info(`Plugin installed successfully: ${name}@${pkgJson.version}.`);
+          });
+          child.on('error', err => {
+            failed = true;
+            logger.error('Failed to install deps of the plugin. Remove plugin.', err);
+            fs.removeSync(destDir);
+            reject(err);
+          });
+        } else {
+          logger.info(`Plugin installed successfully: ${name}@${pkgJson.version}.`);
+          resolve(name);
+        }
+      })
+      .catch(err => {
+        logger.error('Failed to download plugin.', err);
+        reject(err);
+      });
+  });
 }
 
 function uninstallPlugin(name) {
-  if (!/^rekit-plugin-/.test(name)) {
-    name = 'rekit-plugin-' + name;
-  }
-  logger.info('Uninstalling plugin: ', name);
-  const destDir = paths.configFile('plugins/' + name);
-  if (fs.existsSync(destDir)) {
-    fs.removeSync(destDir);
-    logger.info('Done.');
-  } else {
-    logger.info('Plugin not exist: ' + name);
-  }
+  return new Promise(resolve => {
+    if (!/^rekit-plugin-/.test(name)) {
+      name = 'rekit-plugin-' + name;
+    }
+    logger.info('Uninstalling plugin: ', name);
+    const destDir = paths.configFile('plugins/' + name);
+    if (fs.existsSync(destDir)) {
+      fs.removeSync(destDir);
+      logger.info('Done.');
+    } else {
+      logger.info('Plugin not exist: ' + name);
+    }
+    resolve();
+  });
 }
 
 module.exports = {
