@@ -361,7 +361,11 @@ function installPlugin(name) {
           });
         } else {
           logger.info(`Plugin installed successfully: ${name}@${pkgJson.version}.`);
-          resolve(name);
+          if (fs.existsSync(path.join(destDir, 'logo.png'))) {
+            pkgJson.logo = path.join(pkgJson, 'logo.png');
+          }
+          pkgJson.name = pkgJson.name.replace(/^rekit-plugin-/, '');
+          resolve(pkgJson);
         }
       })
       .catch(err => {
