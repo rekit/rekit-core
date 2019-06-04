@@ -298,8 +298,8 @@ function getFeatures(elementById) {
         parts: [routeFilePath],
         views: [
           { key: 'diagram', name: 'Diagram' },
-          { key: 'rules', name: 'Rules' },
-          { key: 'code', name: 'Code', target: routeFilePath, isDefault: true },
+          { key: 'rules', name: 'Rules', isDefault: true },
+          { key: 'code', name: 'Code', target: routeFilePath },
         ],
         routes,
       },
