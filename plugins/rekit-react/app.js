@@ -2,7 +2,7 @@ const _ = require('lodash');
 const path = require('path');
 const traverse = require('@babel/traverse').default;
 
-const { ast, vio, config } = rekit.core;
+const { ast, vio, config, logger } = rekit.core;
 
 // let elementById = {};
 const filePropsCache = {};
@@ -392,6 +392,16 @@ function processProjectData(prjData) {
     elements.unshift(ele.id);
     elementById[ele.id] = ele;
   });
+
+  // Get dev port from start script, used by RoutesView
+  try {
+    const s = config.getPkgJson().scripts.start;
+    if (s && /PORT=(\d+)/.test(s)) {
+      prjData.devPort = RegExp.$1;
+    }
+  }catch(err) {
+    logger.info('Failed to get devPort from scripts', err);
+  }// eslint-disable-line
 }
 
 module.exports = {
