@@ -25,7 +25,7 @@ _.upperSnakeCase = _.flow(
 
 function getTemplatePath(templateFile) {
   if (path.isAbsolute(templateFile)) return templateFile;
-  const [pluginName, tplFile] = templateFile.splite(':');
+  const [pluginName, tplFile] = templateFile.split(':');
 
   const p = plugin.getPlugin(pluginName);
   if (!p) throw new Error('Unknown template file: ' + templateFile + ' because plugin not found.');
@@ -38,7 +38,8 @@ function getTemplatePath(templateFile) {
   if (!customTplDir) customTplDir = paths.map('rekit-templates/' + pluginName);
 
   let realTplFile;
-  [customTplDir, pluginTplDir].some(d => { // First find user customized template, then find plugin template
+  [customTplDir, pluginTplDir].some(d => {
+    // First find user customized template, then find plugin template
     const f = path.join(d, tplFile);
     if (fs.existsSync(f)) {
       realTplFile = f;
@@ -71,13 +72,11 @@ function getTemplatePath(templateFile) {
  * // NOTE the result is only in vio, you need to call vio.flush() to write to disk.
  **/
 function generate(targetPath, args) {
-  if (
-    !args.template &&
-    (!args.templateFile || (args.templateFile && !vio.fileExists(args.templateFile)))
-  ) {
-    const err = new Error(`No template file found: ${args.templateFile}`);
-    err.code = 'TEMPLATE_FILE_NOT_FOUND';
-    throw err;
+  if (!args.template && !args.templateFile) {
+    throw new Error('No template or templateFile provided.');
+  }
+  if (args.throwIfExists && vio.fileExists(targetPath)) {
+    throw new Error('File already exists: ' + targetPath);
   }
   const tpl = args.template || vio.getContent(getTemplatePath(args.templateFile));
   const compiled = _.template(tpl, args.templateOptions || {});
