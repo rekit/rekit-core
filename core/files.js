@@ -118,8 +118,7 @@ function shouldShow(file) {
 function onAdd(file) {
   if (!shouldShow(file)) return;
   if (!fs.existsSync(file)) return;
-  const prjRoot = paths.getProjectRoot();
-  const rFile = file.replace(prjRoot, '');
+  const rFile = paths.relativePath(file);
   allElementById[rFile] = getFileElement(file);
 
   const dir = path.dirname(rFile);
@@ -140,7 +139,7 @@ function onUnlink(file) {
   if (!shouldShow(file)) return;
   // console.log('on unlink', file);
   const prjRoot = paths.getProjectRoot();
-  const rFile = file.replace(prjRoot, '');
+  const rFile = paths.relativePath(file);
   delete allElementById[rFile];
 
   const dir = path.dirname(rFile);
@@ -159,7 +158,7 @@ function onChange(file) {
   if (!shouldShow(file)) return;
   if (!fs.existsSync(file)) return;
   const prjRoot = paths.getProjectRoot();
-  const rFile = file.replace(prjRoot, '');
+  const rFile = paths.relativePath(file);
   allElementById[rFile] = getFileElement(file);
 
   setLastChangeTime();
@@ -169,7 +168,7 @@ function onAddDir(file) {
   if (!shouldShow(file)) return;
   if (!fs.existsSync(file)) return;
   const prjRoot = paths.getProjectRoot();
-  const rFile = file.replace(prjRoot, '');
+  const rFile = paths.relativePath(file);
   if (byId(rFile)) return; // already exists
   // suppose it's always empty, children will be added by other events
   allElementById[rFile] = {
@@ -197,7 +196,7 @@ function getDirElement(dir, theElementById) {
   ensureWatch();
   if (!path.isAbsolute(dir)) dir = paths.map(dir);
   const prjRoot = paths.getProjectRoot();
-  let rDir = dir.replace(prjRoot, '');
+  let rDir = paths.relativePath(dir);// dir.replace(prjRoot, '');
   if (!rDir) rDir = '.'; // root dir
   const dirEle = {
     name: path.basename(dir),
@@ -212,7 +211,7 @@ function getDirElement(dir, theElementById) {
     .map(name => path.join(dir, name))
     .filter(shouldShow)
     .forEach(file => {
-      const rFile = file.replace(prjRoot, '');
+      const rFile = paths.relativePath(file);
       dirEle.children.push(rFile);
       parentHash[rFile] = rDir;
       if (fs.statSync(file).isDirectory()) {
@@ -237,7 +236,7 @@ function getDirElement(dir, theElementById) {
 
 function getFileElement(file, theElementById) {
   const prjRoot = paths.getProjectRoot();
-  const rFile = file.replace(prjRoot, '');
+  const rFile = paths.relativePath(file);
   const ext = path.extname(file).replace('.', '');
   const size = fs.statSync(file).size;
   const fileEle = {

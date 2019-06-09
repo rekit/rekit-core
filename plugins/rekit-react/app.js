@@ -382,7 +382,9 @@ function processProjectData(prjData) {
     name: 'src',
     target: 'src',
     icon: 'src-folder',
-    children: elementById['src'].children.filter(eid => eid !== 'src/features'),
+    children: elementById['src']
+      ? elementById['src'].children.filter(eid => eid !== 'src/features')
+      : [],
   };
 
   _.pull(elements, 'tests');
