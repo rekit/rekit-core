@@ -29,7 +29,7 @@ function getTemplatePath(templateFile) {
 
   const p = plugin.getPlugin(pluginName);
   if (!p) throw new Error('Unknown template file: ' + templateFile + ' because plugin not found.');
-  if (!p.root) throw new Error('No phsical dir of the plugin: ' + pluginName);
+  if (!p.root) throw new Error('No physical folder of the plugin: ' + pluginName);
   const tplDir1 = path.join(p.root, 'core/templates');
   const tplDir2 = path.join(p.root, 'templates'); // for built-in core plugins
   const pluginTplDir = fs.existsSync(tplDir1) ? tplDir1 : tplDir2;
@@ -47,7 +47,7 @@ function getTemplatePath(templateFile) {
     }
     return false;
   });
-  if (!realTplFile) throw new Error('Template file not found: ', templateFile);
+  if (!realTplFile) throw new Error('Template file not found: ' + templateFile);
   return realTplFile;
 }
 

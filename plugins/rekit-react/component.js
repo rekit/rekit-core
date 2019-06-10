@@ -7,14 +7,14 @@ const utils = require('./utils');
 const prefix = require('./prefix');
 
 const { vio, template, refactor } = rekit.core;
-const { parseElePath, getTplPath } = utils;
+const { parseElePath } = utils;
 
 // Add a component
 // elePath format: home/MyComponent, home/subFolder/MyComponent
 function add(elePath, args) {
   const { connect, urlPath } = args;
   const ele = parseElePath(elePath, 'component');
-  const tplFile = getTplPath(connect ? 'ConnectedComponent.js.tpl' : 'Component.js.tpl');
+  const tplFile = connect ? 'ConnectedComponent.js.tpl' : 'Component.js.tpl';
   if (vio.fileExists(ele.modulePath)) {
     throw new Error(`Failed to add component: target file already exsited: ${ele.modulePath}`);
   }
@@ -23,8 +23,8 @@ function add(elePath, args) {
   }
   const pre = prefix.getPrefix() ? _.kebabCase(prefix.getPrefix()) + '_' : '';
   template.generate(ele.modulePath, {
-    templateFile: tplFile,
-    context: Object.assign({ ele, prefix: pre }, args.context || {}),
+    templateFile: args.templateFiles[tplFile] || 'rekit-react:' + tplFile,
+    context: { ele, prefix: pre, ...args },
   });
 
   style.add(ele, args);
