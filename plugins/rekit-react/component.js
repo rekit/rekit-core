@@ -23,7 +23,8 @@ function add(elePath, args) {
   }
   const pre = prefix.getPrefix() ? _.kebabCase(prefix.getPrefix()) + '_' : '';
   template.generate(ele.modulePath, {
-    templateFile: args.templateFiles[tplFile] || 'rekit-react:' + tplFile,
+    templateFile: tplFile,
+    cwd: __dirname,
     context: { ele, prefix: pre, ...args },
   });
 

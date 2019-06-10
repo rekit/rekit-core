@@ -5,7 +5,7 @@ const constant = require('./constant');
 const app = require('./app');
 
 const { vio, template, refactor } = rekit.core;
-const { pascalCase, getTplPath, parseElePath, getActionType, getAsyncActionTypes } = utils;
+const { pascalCase, parseElePath, getActionType, getAsyncActionTypes } = utils;
 
 function add(elePath, args) {
   if (args.async) return addAsync(elePath, args);
@@ -14,10 +14,10 @@ function add(elePath, args) {
     throw new Error(`Failed to add action: target file already exsited: ${ele.modulePath}`)
   }
   const actionType = getActionType(ele.feature, ele.name);
-  const tplFile = getTplPath('redux/action.js.tpl');
   template.generate(ele.modulePath, {
-    templateFile: tplFile,
-    context: Object.assign({ ele, actionType }, args.context || {}),
+    templateFile: 'redux/action.js.tpl',
+    cwd: __dirname,
+    context: { ele, actionType, ...args },
   });
 
   constant.add(ele.feature, actionType);
@@ -81,16 +81,15 @@ function addAsync(elePath, args = {}) {
     throw new Error(`Failed to add action: target file already exsited: ${ele.modulePath}`)
   }
   const actionTypes = getAsyncActionTypes(ele.feature, ele.name);
-  const tplFile = getTplPath('redux/asyncAction.js.tpl');
-
   template.generate(ele.modulePath, {
-    templateFile: tplFile,
+    templateFile: 'redux/asyncAction.js.tpl',
     ...args,
+    cwd: __dirname,
     context: {
       ele,
       actionTypes,
       utils,
-      ...args.context,
+      ...args,
     },
   });
 
@@ -106,7 +105,7 @@ function addAsync(elePath, args = {}) {
   entry.addToInitialState(ele.feature, `${ele.name}Error`, 'null');
 }
 
-function removeAsync(elePath, args = {}) {
+function removeAsync(elePath) {
   const ele = parseElePath(elePath, 'action');
   const actionTypes = getAsyncActionTypes(ele.feature, ele.name);
 
@@ -123,7 +122,7 @@ function removeAsync(elePath, args = {}) {
   entry.removeFromInitialState(ele.feature, `${ele.name}Error`, 'null');
 }
 
-function moveAsync(source, target, args) {
+function moveAsync(source, target) {
   const sourceEle = parseElePath(source, 'action');
   const targetEle = parseElePath(target, 'action');
 

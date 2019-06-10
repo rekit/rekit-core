@@ -48,16 +48,16 @@ function addComponentTest(name, args) {
   const { connect } = args;
   const ele = parseElePath(name, 'component');
   if (vio.fileExists(ele.testPath)) {
-    throw new Error(`Failed to add component: target file already exsited: ${ele.testPath}`)
+    throw new Error(`Failed to add component: target file already exsited: ${ele.testPath}`);
   }
-  const tplFile = getTplPath(connect ? 'ConnectedComponent.test.js.tpl' : 'Component.test.js.tpl');
   template.generate(ele.testPath, {
-    templateFile: tplFile,
-    context: Object.assign({ ele }, args.context || {}),
+    templateFile: connect ? 'ConnectedComponent.test.js.tpl' : 'Component.test.js.tpl',
+    cwd: __dirname,
+    context: { ele, ...args },
   });
 }
 
-function removeComponentTest(elePath, args) {
+function removeComponentTest(elePath) {
   const ele = parseElePath(elePath, 'component');
   vio.del(ele.testPath);
 }
@@ -105,22 +105,20 @@ function moveComponentTest(source, target) {
 function addActionTest(elePath, args) {
   const ele = parseElePath(elePath, 'action');
   if (vio.fileExists(ele.testPath)) {
-    throw new Error(`Failed to add action: target file already exsited: ${ele.testPath}`)
+    throw new Error(`Failed to add action: target file already exsited: ${ele.testPath}`);
   }
-  const tplFile = getTplPath(
-    args.async ? 'redux/asyncAction.test.js.tpl' : 'redux/action.test.js.tpl',
-  );
 
   const actionType = getActionType(ele.feature, ele.name);
   const asyncActionTypes = getAsyncActionTypes(ele.feature, ele.name);
 
   template.generate(ele.testPath, {
-    templateFile: tplFile,
-    context: Object.assign({ ele, actionType, asyncActionTypes }, args.context || {}),
+    templateFile: args.async ? 'redux/asyncAction.test.js.tpl' : 'redux/action.test.js.tpl',
+    cwd: __dirname,
+    context: { ele, actionType, asyncActionTypes, ...args },
   });
 }
 
-function removeActionTest(elePath, args) {
+function removeActionTest(elePath) {
   const ele = parseElePath(elePath, 'action');
   vio.del(ele.testPath);
 }

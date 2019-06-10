@@ -4,7 +4,6 @@
  * Style manager. It manage style files for components. Usually used with component manage.
  * @module
  **/
-const path = require('path');
 const _ = require('lodash');
 const entry = require('./entry');
 const prefix = require('./prefix');
@@ -18,14 +17,13 @@ function add(ele, args) {
   template.generate(
     ele.stylePath,
     Object.assign({}, args, {
-      templateFile: path.join(__dirname, './templates/Component.less.tpl'),
-      context: Object.assign(
-        {
-          ele,
-          prefix: pre,
-        },
-        args.context || {},
-      ),
+      templateFile: 'Component.less.tpl',
+      cwd: __dirname,
+      context: {
+        ele,
+        prefix: pre,
+        ...args,
+      },
     }),
   );
 

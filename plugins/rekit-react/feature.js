@@ -9,7 +9,7 @@ const constant = require('./constant');
 const { vio, refactor, config, template, ast } = rekit.core;
 const { getTplPath, upperSnakeCase } = utils;
 
-function add(feature) {
+function add(feature, args = {}) {
   feature = _.kebabCase(feature);
   const targetDir = `src/features/${feature}`;
   if (vio.dirExists(targetDir)) throw new Error('Feature folder already existed: ' + targetDir);
@@ -30,8 +30,9 @@ function add(feature) {
     'redux/initialState.js',
   ].forEach(fileName => {
     template.generate(`src/features/${feature}/${fileName}`, {
-      templateFile: getTplPath(fileName + '.tpl'),
-      context: { feature },
+      templateFile: fileName + '.tpl',
+      cwd: __dirname,
+      context: { feature, ...args },
     });
   });
 

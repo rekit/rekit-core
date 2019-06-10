@@ -23,9 +23,24 @@ _.upperSnakeCase = _.flow(
   _.toUpper,
 );
 
-function getTemplatePath(templateFile) {
+function getTemplatePath(templateFile, args) {
+  // Get real template path when generate a file from template
+  // If templateFile is absolute path, use it directly
+  // Otherwise it provides general customizable template discovery mechanism in below prioirty
+  //  1. args.context.templateFiles[templateFile]
+  //  2. [rekit.json:templateDir || <prj-root>/rekit-templates]/<plugin-name>/templateFile
+  //  3. <args.cwd>/templates/templateFile
+
   if (path.isAbsolute(templateFile)) return templateFile;
+  if (args.context && args.context.templateFiles && args.context.templateFiles[templateFile]) {
+    templateFile = args.context.templateFiles[templateFile]; // customize which template file is used
+  }
   const [pluginName, tplFile] = templateFile.split(':');
+  if (!tplFile) {
+    // no plugin specified, should look for template in args.cwd
+    if (!args.cwd) throw new Error('No args.cwd for template ' + templateFile);
+    return path.join(args.cwd, 'templates', templateFile);
+  }
 
   const p = plugin.getPlugin(pluginName);
   if (!p) throw new Error('Unknown template file: ' + templateFile + ' because plugin not found.');
@@ -78,7 +93,7 @@ function generate(targetPath, args) {
   if (args.throwIfExists && vio.fileExists(targetPath)) {
     throw new Error('File already exists: ' + targetPath);
   }
-  const tpl = args.template || vio.getContent(getTemplatePath(args.templateFile));
+  const tpl = args.template || vio.getContent(getTemplatePath(args.templateFile, args));
   const compiled = _.template(tpl, args.templateOptions || {});
   const result = compiled(args.context || {});
 
