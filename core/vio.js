@@ -61,6 +61,8 @@ function getLines(filePath) {
     if (!fs.existsSync(absPath)) {
       throw new Error("Can't find such file: " + realFilePath + '(' + absPath + ')');
     }
+    const stat = fs.statSync(absPath);
+    if (stat.size > 10000000) throw new Error('File size is too large to read.');
     fileLines[filePath] = fs
       .readFileSync(absPath)
       .toString()
