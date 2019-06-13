@@ -345,7 +345,7 @@ function installPlugin(name) {
         const installSuccess = () => {
           logger.info(`Plugin installed successfully: ${name}@${pkgJson.version}.`);
           if (fs.existsSync(path.join(destDir, 'logo.png'))) {
-            pkgJson.logo = path.join(pkgJson, 'logo.png');
+            pkgJson.logo = path.join(destDir, 'logo.png');
           }
           pkgJson.name = pkgJson.name.replace(/^rekit-plugin-/, '');
           resolve(pkgJson);
