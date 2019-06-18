@@ -122,7 +122,7 @@ function onAdd(file) {
   allElementById[rFile] = getFileElement(file);
 
   const dir = path.dirname(rFile);
-  if (!byId(dir)) {
+  if (!byId(dir) || !byId(dir).children) {
     return;
     // onAddDir(dir);
   }

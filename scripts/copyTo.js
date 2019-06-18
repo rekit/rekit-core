@@ -17,7 +17,7 @@ const src = path.join(__dirname, '..');
 
 fs.copySync(src, dest, {
   filter(srcFile) {
-    return !/node_modules|package\.json/.test(srcFile);//src.includes('node_modules');
+    return !/node_modules|package\.json|\.git/.test(srcFile);//src.includes('node_modules');
   }
 })
 console.log('Done. SDK copied to: ', dest);
