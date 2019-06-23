@@ -29,7 +29,7 @@ function getDeps(filePath, originalFilePath) {
     if (deps) return deps;
   }
 
-  if (!filePath.endsWith('.js') && !filePath.endsWith('.jsx')) {
+  if (!/\.(jsx|js|ts|tsx)$/.test(filePath)){//!filePath.endsWith('.js') && !filePath.endsWith('.jsx')) {
     return null;
   }
 
@@ -49,7 +49,15 @@ function getDeps(filePath, originalFilePath) {
     }
     let modulePath = refactor.resolveModulePath(filePath, moduleSource);
     // maybe modulePath is json/img or others.
-    if (!vio.fileExists(modulePath)) modulePath += '.js';
+    if (!vio.fileExists(modulePath)) {
+      ['.js', '.jsx', '.ts', '.tsx'].some(ext => {
+        if (vio.fileExists(modulePath + ext)) {
+          modulePath += ext;
+          return true;
+        }
+        return false;
+      });
+    }
     deps.push({ id: modulePath, type: 'file', ...args });
   };
   const ast2 = ast.getAst(filePath);

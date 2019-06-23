@@ -259,7 +259,7 @@ function getInitialState(feature, elementById) {
   const codeFile = `src/features/${feature}/redux/initialState.js`;
   const ele = {
     id,
-    order: 0,
+    order: 1,
     type: 'initial-state',
     target: codeFile,
     parts: [codeFile],

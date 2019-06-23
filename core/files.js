@@ -167,7 +167,6 @@ function onChange(file) {
 function onAddDir(file) {
   if (!shouldShow(file)) return;
   if (!fs.existsSync(file)) return;
-  const prjRoot = paths.getProjectRoot();
   const rFile = paths.relativePath(file);
   if (byId(rFile)) return; // already exists
   // suppose it's always empty, children will be added by other events
@@ -195,7 +194,6 @@ function onUnlinkDir(file) {
 function getDirElement(dir, theElementById) {
   ensureWatch();
   if (!path.isAbsolute(dir)) dir = paths.map(dir);
-  const prjRoot = paths.getProjectRoot();
   let rDir = paths.relativePath(dir);// dir.replace(prjRoot, '');
   if (!rDir) rDir = '.'; // root dir
   const dirEle = {
@@ -235,7 +233,6 @@ function getDirElement(dir, theElementById) {
 }
 
 function getFileElement(file, theElementById) {
-  const prjRoot = paths.getProjectRoot();
   const rFile = paths.relativePath(file);
   const ext = path.extname(file).replace('.', '');
   const size = fs.statSync(file).size;
