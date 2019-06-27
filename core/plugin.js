@@ -76,6 +76,21 @@ function getPlugins(prop) {
   return prop ? appliedPlugins.filter(_.property(prop)) : appliedPlugins;
 }
 
+function invoke(prop, ...args) {
+  if (!prop) throw new Error('Invoke on plugin should have prop argument');
+  const arr = prop.split('.');
+  arr.pop();
+  const obj = arr.join('.');
+  getPlugins(prop).forEach(p => {
+    const method = _.get(p, prop);
+    if (!_.isFunction(method))
+      throw new Error(
+        'Invoke should be called on function extension point: ' + p.name + '.' + prop,
+      );
+    method.apply(obj, args);
+  });
+}
+
 function sortPlugins() {
   // Sort plugins according dep relations and Rekit config.
   const rekitConfig = config.getRekitConfig();
@@ -399,6 +414,7 @@ function uninstallPlugin(name) {
 }
 
 module.exports = {
+  invoke,
   getPlugins,
   getPlugin,
   loadPlugins,
