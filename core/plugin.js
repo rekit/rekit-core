@@ -81,13 +81,16 @@ function invoke(prop, ...args) {
   const arr = prop.split('.');
   arr.pop();
   const obj = arr.join('.');
-  getPlugins(prop).forEach(p => {
+  return getPlugins(prop).map(p => {
     const method = _.get(p, prop);
-    if (!_.isFunction(method))
-      throw new Error(
-        'Invoke should be called on function extension point: ' + p.name + '.' + prop,
-      );
-    method.apply(obj, args);
+    if (!_.isFunction(method)){
+      return _.get(p, prop);
+    }
+
+      // throw new Error(
+      //   'Invoke should be called on function extension point: ' + p.name + '.' + prop,
+      // );
+    return method.apply(obj, args);
   });
 }
 

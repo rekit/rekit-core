@@ -15,7 +15,7 @@ let cache = {};
 let parentHash = {};
 let allElementById = {};
 const byId = id => allElementById[id];
-
+let otherFiles = {}; // dynamically added files to the project, regardless of exclude configuration
 const files = new EventEmitter();
 
 // const emitChange = () => {
@@ -40,6 +40,7 @@ config.on('change', () => {
 //   }
 // }
 
+// Means read whole project
 function readDir(dir, args = {}) {
   ensureWatch();
   if (args.force) {
@@ -69,6 +70,10 @@ function readDir(dir, args = {}) {
     elementById[cid] = ele;
     if (ele.children) children.push(...ele.children);
   }
+  Object.keys(otherFiles).forEach(k => {
+    if (elementById[k]) return;
+    elementById[k] = getFileElement(k);
+  });
   // Always return a cloned object to avoid acidentally cache modify
   const res = JSON.parse(JSON.stringify({ elements: dirEle.children, elementById }));
   return res;
@@ -115,8 +120,8 @@ function shouldShow(file) {
   return !exclude.some(p => minimatch(file, p)) || include.some(p => minimatch(file, p));
 }
 
-function onAdd(file) {
-  if (!shouldShow(file)) return;
+function onAdd(file, args = {}) {
+  if (!shouldShow(file) && !args.force) return;
   if (!fs.existsSync(file)) return;
   const rFile = paths.relativePath(file);
   allElementById[rFile] = getFileElement(file);
@@ -277,9 +282,15 @@ function sortElements(elements) {
   return elements;
 }
 
+function include(file) {
+  if (path.isAbsolute(file)) file = paths.relativePath(file);
+  otherFiles[paths.normalize(file)] = true;
+  onAdd(paths.map(file), { force: true });
+}
+
 files.readDir = readDir;
 files.getDirElement = getDirElement;
 files.getFileElement = getFileElement;
 // files.setFileChanged = setFileChanged;
-
+files.include = include;
 module.exports = files;
