@@ -4,6 +4,7 @@ const fs = require('fs');
 const paths = require('./paths');
 const config = require('./config');
 const deps = require('./deps');
+const vio = require('./vio');
 const chokidar = require('chokidar');
 const EventEmitter = require('events');
 const minimatch = require('minimatch');
@@ -15,7 +16,7 @@ let cache = {};
 let parentHash = {};
 let allElementById = {};
 const byId = id => allElementById[id];
-let otherFiles = {}; // dynamically added files to the project, regardless of exclude configuration
+const otherFiles = {}; // dynamically added files to the project, regardless of exclude configuration
 const files = new EventEmitter();
 
 // const emitChange = () => {
@@ -127,15 +128,12 @@ function onAdd(file, args = {}) {
   allElementById[rFile] = getFileElement(file);
 
   const dir = path.dirname(rFile);
-  if (!byId(dir) || !byId(dir).children) {
-    return;
-    // onAddDir(dir);
+  if (byId(dir) && byId(dir).children) {
+    const children = byId(dir).children;
+    children.push(rFile);
+
+    sortElements(byId(dir).children);
   }
-
-  const children = byId(dir).children;
-  children.push(rFile);
-
-  sortElements(byId(dir).children);
 
   setLastChangeTime();
   emitChange();
@@ -199,7 +197,7 @@ function onUnlinkDir(file) {
 function getDirElement(dir, theElementById) {
   ensureWatch();
   if (!path.isAbsolute(dir)) dir = paths.map(dir);
-  let rDir = paths.relativePath(dir);// dir.replace(prjRoot, '');
+  let rDir = paths.relativePath(dir); // dir.replace(prjRoot, '');
   if (!rDir) rDir = '.'; // root dir
   const dirEle = {
     name: path.basename(dir),
@@ -284,6 +282,7 @@ function sortElements(elements) {
 
 function include(file) {
   if (path.isAbsolute(file)) file = paths.relativePath(file);
+  if (!vio.fileExists(file)) return;
   otherFiles[paths.normalize(file)] = true;
   onAdd(paths.map(file), { force: true });
 }
