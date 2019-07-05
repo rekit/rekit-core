@@ -8,6 +8,10 @@ function join(...args) {
   return path.normalize(path.join(...args)).replace(/\\/g, '/');
 }
 
+function normalize(p) {
+  return path.normalize(p).replace(/\\/g, '/');
+}
+
 let projectRoot;
 function setProjectRoot(prjRoot) {
   if (!path.isAbsolute(prjRoot)) prjRoot = path.join(process.cwd(), prjRoot);
@@ -68,6 +72,7 @@ module.exports = {
   setProjectRoot,
   getProjectRoot,
   relative,
+  normalize,
   rekitDir,
   configFile,
   configPath,
