@@ -73,7 +73,8 @@ function readDir(dir, args = {}) {
   }
   Object.keys(otherFiles).forEach(k => {
     if (elementById[k]) return;
-    elementById[k] = getFileElement(k);
+    const fileEle = getFileElement(k);
+    if (fileEle) elementById[k] = fileEle;
   });
   // Always return a cloned object to avoid acidentally cache modify
   const res = JSON.parse(JSON.stringify({ elements: dirEle.children, elementById }));
@@ -141,7 +142,6 @@ function onAdd(file, args = {}) {
 function onUnlink(file) {
   if (!shouldShow(file)) return;
   // console.log('on unlink', file);
-  const prjRoot = paths.getProjectRoot();
   const rFile = paths.relativePath(file);
   delete allElementById[rFile];
 
@@ -236,6 +236,8 @@ function getDirElement(dir, theElementById) {
 }
 
 function getFileElement(file, theElementById) {
+  if (!path.isAbsolute(file)) file = paths.map(file);
+  if (!vio.fileExists(file)) return null;
   const rFile = paths.relativePath(file);
   const ext = path.extname(file).replace('.', '');
   const size = fs.statSync(file).size;
@@ -282,7 +284,7 @@ function sortElements(elements) {
 
 function include(file) {
   if (path.isAbsolute(file)) file = paths.relativePath(file);
-  if (!vio.fileExists(file)) return;
+  if (!fs.existsSync(paths.map(file))) return;
   otherFiles[paths.normalize(file)] = true;
   onAdd(paths.map(file), { force: true });
 }
