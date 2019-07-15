@@ -18,8 +18,8 @@ function getFileProps(file) {
 
   // If it's pascal case and has same style file, it's a component
   if (
-    /^[A-Z][a-zA-Z0-9]*\.jsx?$/.test(name) &&
-    vio.fileExists(file.replace(/\.jsx?$/, `.${config.getRekitConfig().css}`))
+    /^[A-Z][a-zA-Z0-9]*\.[jt]sx?$/.test(name) &&
+    vio.fileExists(file.replace(/\.[jt]sx?$/, `.${config.getRekitConfig().css}`))
   ) {
     isComponent = true;
   }
@@ -100,9 +100,10 @@ function getComponents(feature, elementById) {
   eleFolder.children
     .map(eid => elementById[eid])
     .forEach(ele => {
-      if (ele.type === 'file' && /\.jsx?$/.test(ele.name) && getFileProps(ele.id).component) {
-        const styleFile = ele.id.replace(/\.jsx?$/, `.${rekit.core.config.getRekitConfig().css}`);
-        const testFile = ele.id.replace(/^src\//, 'tests/').replace(/\.jsx?$/, '.test.js');
+      const moduleExp = /\.[jt]sx?$/;
+      if (ele.type === 'file' && moduleExp.test(ele.name) && getFileProps(ele.id).component) {
+        const styleFile = ele.id.replace(moduleExp, `.${rekit.core.config.getRekitConfig().css}`);
+        const testFile = ele.id.replace(/^src\//, 'tests/').replace(moduleExp, '.test.js');
         const views = [
           { key: 'diagram', name: 'Diagram' },
           { key: 'code', name: 'Code', target: ele.id, isDefault: true },
