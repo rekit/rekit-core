@@ -4,7 +4,6 @@ const traverse = require('@babel/traverse').default;
 
 const { ast, vio, config, logger } = rekit.core;
 
-// let elementById = {};
 const filePropsCache = {};
 
 function getFileProps(file) {
