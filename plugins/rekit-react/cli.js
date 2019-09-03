@@ -14,5 +14,18 @@ module.exports = {
       help: 'Whether the action is async using redux-thunk.',
       action: 'storeTrue',
     });
+
+    addCmd.addArgument(['--type', '-t'], {
+      help: 'Component type, functional or class component.',
+      dest: 'componentType',
+      choices: ['functional', 'class'],
+      defaultValue: 'functional',
+    });
+
+    addCmd.addArgument(['--hooks'], {
+      help: 'If functional component, which hooks to include.',
+      dest: 'hooks',
+      defaultValue: [],
+    });
   },
 };

@@ -26,7 +26,7 @@ function getFileProps(file) {
   // Files under redux folder are all actions excepts actions.js|constants.js|reducer.js|initialState.js
   if (
     /^src\/features\/[\w\d-]+\/redux\/[\w.]+$/.test(file) &&
-    !['actions.js', 'constants.js', 'reducer.js', 'initialState.js'].includes(name)
+    !['actions.js', 'constants.js', 'hooks.js', 'reducer.js', 'initialState.js'].includes(name)
   ) {
     isAction = true;
   }

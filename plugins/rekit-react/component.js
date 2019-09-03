@@ -1,3 +1,4 @@
+/* eslint no-lonely-if:0 */
 const path = require('path');
 const _ = require('lodash');
 const entry = require('./entry');
@@ -12,9 +13,26 @@ const { parseElePath } = utils;
 // Add a component
 // elePath format: home/MyComponent, home/subFolder/MyComponent
 function add(elePath, args) {
-  const { connect, urlPath } = args;
+  const { connect, urlPath, componentType } = args;
   const ele = parseElePath(elePath, 'component');
-  const tplFile = connect ? 'ConnectedComponent.js.tpl' : 'Component.js.tpl';
+  let tplFile;
+  if (connect) {
+    if (componentType === 'functional') {
+      tplFile = 'FuncComponent.js.tpl';
+    } else {
+      tplFile = 'ConnectedComponent.js.tpl';
+    }
+  } else {
+    if (componentType === 'functional') {
+      tplFile = 'FuncComponent.js.tpl';
+    } else {
+      tplFile = 'Component.js.tpl';
+    }
+  }
+  let hooks = args.hooks || [];
+  if (typeof hooks === 'string') hooks = hooks.split(',');
+  console.log('hooks:', hooks);
+  // const tplFile = connect ? 'ConnectedComponent.js.tpl' : 'Component.js.tpl';
   if (vio.fileExists(ele.modulePath)) {
     throw new Error(`Failed to add component: target file already exsited: ${ele.modulePath}`);
   }
@@ -25,7 +43,7 @@ function add(elePath, args) {
   template.generate(ele.modulePath, {
     templateFile: tplFile,
     cwd: __dirname,
-    context: { ele, prefix: pre, ...args },
+    context: { ...args, ele, prefix: pre, hooks, componentType },
   });
 
   style.add(ele, args);
