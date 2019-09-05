@@ -1,5 +1,4 @@
 /* eslint no-lonely-if:0 */
-const path = require('path');
 const _ = require('lodash');
 const entry = require('./entry');
 const route = require('./route');
@@ -76,6 +75,7 @@ function move(source, target, args) {
   refactor.updateFile(targetEle.modulePath, ast =>
     [].concat(
       refactor.renameClassName(ast, sourceEle.name, targetEle.name),
+      refactor.renameFunctionName(ast, sourceEle.name, targetEle.name),
       refactor.renameCssClassName(ast, oldCssClass, newCssClass),
     ),
   );
