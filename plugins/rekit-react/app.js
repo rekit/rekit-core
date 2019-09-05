@@ -41,10 +41,8 @@ function getFileProps(file) {
           ff.importReact = true;
           break;
         case 'redux':
-          ff.importRedux = true;
-          break;
         case 'react-redux':
-          ff.importReactRedux = true;
+          ff.connectToStore = true;
           break;
         case './constants':
           ff.importConstant = true;
@@ -52,6 +50,12 @@ function getFileProps(file) {
           break;
         default:
           break;
+      }
+      // If import modules from redux folder, then means connect to store.
+      if (!ff.connectToStore) {
+        ff.connectToStore =
+          path.node.source.value.indexOf('/redux/') >= 0 &&
+          !['constants.js', 'reducer.js', 'initialState.js'].includes(path.node.source.value.split('/').pop());
       }
     },
     ClassDeclaration(path) {
@@ -62,11 +66,6 @@ function getFileProps(file) {
         ff.hasClassAndRenderMethod = true;
       }
     },
-    CallExpression(path) {
-      if (path.node.callee.name === 'connect') {
-        ff.connectCall = true;
-      }
-    },
     ExportNamedDeclaration(path) {
       if (_.get(path, 'node.declaration.id.name') === 'reducer') {
         ff.exportReducer = true;
@@ -75,7 +74,7 @@ function getFileProps(file) {
   });
   const props = {
     component: isComponent && {
-      connectToStore: ff.importReactRedux && ff.connectCall,
+      connectToStore: ff.connectToStore,
     },
     action: isAction && {
       isAsync: ff.importMultipleConstants,
@@ -401,9 +400,9 @@ function processProjectData(prjData) {
     if (s && /PORT=(\d+)/.test(s)) {
       prjData.devPort = RegExp.$1;
     }
-  }catch(err) {
+  } catch (err) {
     logger.info('Failed to get devPort from scripts', err);
-  }// eslint-disable-line
+  } // eslint-disable-line
 }
 
 module.exports = {
