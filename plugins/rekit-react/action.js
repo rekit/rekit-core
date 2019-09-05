@@ -26,6 +26,7 @@ function add(elePath, args) {
 
   constant.add(ele.feature, actionType);
   entry.addToActions(ele.feature, ele.name);
+  entry.addToHooks(ele.feature, ele.name);
   entry.addToReducer(ele.feature, ele.name);
 }
 
@@ -39,6 +40,7 @@ function remove(elePath, args) {
   vio.del(ele.modulePath);
   constant.remove(ele.feature, actionType);
   entry.removeFromActions(ele.feature, ele.name);
+  entry.removeFromHooks(ele.feature, ele.name);
   entry.removeFromReducer(ele.feature, ele.name);
 }
 
@@ -65,10 +67,12 @@ function move(source, target) {
 
   if (sourceEle.feature === targetEle.feature) {
     entry.renameInActions(sourceEle.feature, sourceEle.name, targetEle.name);
+    entry.renameInHooks(sourceEle.feature, sourceEle.name, targetEle.name);
     entry.renameInReducer(sourceEle.feature, sourceEle.name, targetEle.name);
     constant.rename(sourceEle.feature, oldActionType, newActionType);
   } else {
     entry.removeFromActions(sourceEle.feature, sourceEle.name);
+    entry.removeFromHooks(sourceEle.feature, sourceEle.name);
     entry.addToActions(targetEle.feature, targetEle.name);
 
     entry.removeFromReducer(sourceEle.feature, sourceEle.name);
@@ -109,6 +113,7 @@ function addAsync(elePath, args = {}) {
 
   entry.addToActions(ele.feature, ele.name);
   entry.addToActions(ele.feature, `dismiss${pascalCase(ele.name)}Error`, ele.name);
+  entry.addToHooks(ele.feature, ele.name);
   entry.addToReducer(ele.feature, ele.name);
   entry.addToInitialState(ele.feature, `${ele.name}Pending`, 'false');
   entry.addToInitialState(ele.feature, `${ele.name}Error`, 'null');
@@ -126,6 +131,7 @@ function removeAsync(elePath) {
   constant.remove(ele.feature, actionTypes.dismissError);
 
   entry.removeFromActions(ele.feature, ele.name);
+  entry.removeFromHooks(ele.feature, ele.name);
   entry.removeFromReducer(ele.feature, ele.name);
   entry.removeFromInitialState(ele.feature, `${ele.name}Pending`, 'false');
   entry.removeFromInitialState(ele.feature, `${ele.name}Error`, 'null');
@@ -199,6 +205,7 @@ function moveAsync(source, target) {
       `dismiss${pascalCase(targetEle.name)}Error`,
       targetEle.name,
     );
+    entry.addToHooks(targetEle.feature, targetEle.name);
     entry.addToReducer(targetEle.feature, targetEle.name);
     entry.addToInitialState(targetEle.feature, `${targetEle.name}Pending`, 'false');
     entry.addToInitialState(targetEle.feature, `${targetEle.name}Error`, 'null');

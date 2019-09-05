@@ -8,6 +8,10 @@ const _ = require('lodash');
 const utils = require('./utils');
 
 const { vio, refactor, logger, config, paths } = rekit.core;
+const pascalCase = _.flow(
+  _.camelCase,
+  _.upperFirst,
+);
 
 // module.exports = {
 function addToIndex(ele) {
@@ -151,6 +155,36 @@ function renameInActions(feature, oldName, newName, actionFile) {
     targetPath,
     oldName,
     newName,
+    `./${_.camelCase(actionFile || oldName)}`
+  );
+  if (!actionFile) refactor.renameModuleSource(targetPath, `./${oldName}`, `./${newName}`);
+}
+
+function ensureHooksFile(feature) {
+  const hookFile = `src/features/${feature}/redux/hooks.js`;
+  if (!vio.fileExists(hookFile)) {
+    vio.put(hookFile, '');
+  }
+}
+function addToHooks(feature, name, actionFile) {
+  if (!actionFile) actionFile = name;
+  ensureHooksFile(feature);
+  refactor.addExportFrom(`src/features/${feature}/redux/hooks.js`, `./${actionFile}`, null, `use${pascalCase(name)}`);
+}
+
+function removeFromHooks(feature, name, actionFile) {
+  if (!actionFile) actionFile = name;
+  ensureHooksFile(feature);
+  refactor.removeImportBySource(`src/features/${feature}/redux/hooks.js`, `./${actionFile}`);
+}
+
+function renameInHooks(feature, oldName, newName, actionFile) {
+  ensureHooksFile(feature);
+  const targetPath = `src/features/${feature}/redux/hooks.js`;
+  refactor.renameExportSpecifier(
+    targetPath,
+    `use${pascalCase(oldName)}`,
+    `use${pascalCase(newName)}`,
     `./${_.camelCase(actionFile || oldName)}`
   );
   if (!actionFile) refactor.renameModuleSource(targetPath, `./${oldName}`, `./${newName}`);
@@ -342,6 +376,9 @@ module.exports = {
   addToActions,
   removeFromActions,
   renameInActions,
+  addToHooks,
+  removeFromHooks,
+  renameInHooks,
   addToReducer,
   renameInReducer,
   removeFromReducer,
