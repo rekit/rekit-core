@@ -27,5 +27,18 @@ module.exports = {
       dest: 'hooks',
       defaultValue: [],
     });
+
+    addCmd.addArgument(['--selector'], {
+      help: 'In useAction, which store value to select.',
+      dest: 'selector',
+      defaultValue: [],
+    });
+
+    addCmd.addArgument(['--allow-auto-effect'], {
+      help: 'Whether to allow auto effect when use the hook version of action',
+      dest: 'allowAutoEffect',
+      action: 'storeTrue',
+      defaultValue: false,
+    });
   },
 };

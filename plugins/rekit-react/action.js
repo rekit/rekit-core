@@ -11,13 +11,17 @@ function add(elePath, args) {
   if (args.async) return addAsync(elePath, args);
   const ele = parseElePath(elePath, 'action');
   if (vio.fileExists(ele.modulePath)) {
-    throw new Error(`Failed to add action: target file already exsited: ${ele.modulePath}`)
+    throw new Error(`Failed to add action: target file already exsited: ${ele.modulePath}`);
   }
   const actionType = getActionType(ele.feature, ele.name);
+  let selector = args.selector || [];
+  if (typeof selector === 'string') {
+    selector = selector.split(',').map(v => v.trim());
+  }
   template.generate(ele.modulePath, {
     templateFile: 'redux/action.js.tpl',
     cwd: __dirname,
-    context: { ele, actionType, ...args },
+    context: { ele, actionType, ...args, hook: true, selector },
   });
 
   constant.add(ele.feature, actionType);
@@ -78,18 +82,23 @@ function move(source, target) {
 function addAsync(elePath, args = {}) {
   const ele = parseElePath(elePath, 'action');
   if (vio.fileExists(ele.modulePath)) {
-    throw new Error(`Failed to add action: target file already exsited: ${ele.modulePath}`)
+    throw new Error(`Failed to add action: target file already exsited: ${ele.modulePath}`);
   }
   const actionTypes = getAsyncActionTypes(ele.feature, ele.name);
+  let selector = args.selector || [];
+  if (typeof selector === 'string') {
+    selector = selector.split(',').map(v => v.trim());
+  }
   template.generate(ele.modulePath, {
     templateFile: 'redux/asyncAction.js.tpl',
     ...args,
     cwd: __dirname,
     context: {
+      ...args,
       ele,
       actionTypes,
       utils,
-      ...args,
+      selector,
     },
   });
 

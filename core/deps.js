@@ -12,8 +12,7 @@ function getDeps(filePath, originalFilePath) {
   // Summary:
   //   Get dependencies of a module
   //   originalFilePath is used to avoid circle loop
-
-  if (originalFilePath === filePath) return [];
+  if (originalFilePath === filePath) return [];//todo: not enough for complex circle dep loop
 
   if (depsCache[filePath] && depsCache[filePath].content === vio.getContent(filePath)) {
     return depsCache[filePath].deps;

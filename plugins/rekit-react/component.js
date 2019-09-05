@@ -30,7 +30,9 @@ function add(elePath, args) {
     }
   }
   let hooks = args.hooks || [];
-  if (typeof hooks === 'string') hooks = hooks.split(',');
+  if (typeof hooks === 'string') {
+    hooks = hooks.split(',').map(s => s.trim());
+  }
   console.log('hooks:', hooks);
   // const tplFile = connect ? 'ConnectedComponent.js.tpl' : 'Component.js.tpl';
   if (vio.fileExists(ele.modulePath)) {

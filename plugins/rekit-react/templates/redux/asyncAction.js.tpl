@@ -1,3 +1,5 @@
+import { useEffect, useCallback } from 'react';
+import { useDispatch, useSelector, shallowEqual } from 'react-redux';
 import {
   ${actionTypes.begin},
   ${actionTypes.success},
@@ -5,22 +7,13 @@ import {
   ${actionTypes.dismissError},
 } from './constants';
 
-// Rekit uses redux-thunk for async actions by default: https://github.com/gaearon/redux-thunk
-// If you prefer redux-saga, you can use rekit-plugin-redux-saga: https://github.com/supnate/rekit-plugin-redux-saga
 export function ${ele.name}(args = {}) {
   return (dispatch) => { // optionally you can have getState as the second argument
     dispatch({
       type: ${actionTypes.begin},
     });
 
-    // Return a promise so that you could control UI flow without states in the store.
-    // For example: after submit a form, you need to redirect the page to another when succeeds or show some errors message if fails.
-    // It's hard to use state to manage it, but returning a promise allows you to easily achieve it.
-    // e.g.: handleSubmit() { this.props.actions.submitForm(data).then(()=> {}).catch(() => {}); }
     const promise = new Promise((resolve, reject) => {
-      // doRequest is a placeholder Promise. You should replace it with your own logic.
-      // See the real-word example at:  https://github.com/supnate/rekit/blob/master/src/features/home/redux/fetchRedditReactjsList.js
-      // args.error here is only for test coverage purpose.
       const doRequest = args.error ? Promise.reject(new Error()) : Promise.resolve();
       doRequest.then(
         (res) => {
@@ -45,11 +38,40 @@ export function ${ele.name}(args = {}) {
   };
 }
 
-// Async action saves request error by default, this method is used to dismiss the error info.
-// If you don't want errors to be saved in Redux store, just ignore this method.
 export function dismiss${utils.pascalCase(ele.name)}Error() {
   return {
     type: ${actionTypes.dismissError},
+  };
+}
+
+export function use${utils.pascalCase(ele.name)}(${allowAutoEffect ? 'params' : ''}) {
+  const dispatch = useDispatch();
+
+  const { <% _.forEach(selector, p => print(p + ', ')) %>${ele.name}Pending, ${ele.name}Error } = useSelector(
+    state => ({<%_.forEach(selector, p => print('\r\n      ' + p + ': state.' + ele.feature + '.' + p + ',')) %>
+      ${ele.name}Pending: state.${ele.feature}.${ele.name}Pending,
+      ${ele.name}Error: state.${ele.feature}.${ele.name}Error,
+    }),
+    shallowEqual,
+  );
+
+  const boundAction = useCallback((...args) => {
+    dispatch(${ele.name}(...args));
+  }, [dispatch]);<% if (allowAutoEffect) { %>
+
+  useEffect(() => {
+    if (params) boundAction(...(params || []));
+  }, [...(params || []), boundAction]); // eslint-disable-line<% } %>
+
+  const boundDismissError = useCallback(() => {
+    dispatch(dismiss${utils.pascalCase(ele.name)}Error());
+  }, [dispatch]);
+
+  return {<% selector.forEach(p => print('\r\n    ' + p + ','))%>
+    ${ele.name}: boundAction,
+    ${ele.name}Pending,
+    ${ele.name}Error,
+    dismiss${utils.pascalCase(ele.name)}Error: boundDismissError,
   };
 }
 
