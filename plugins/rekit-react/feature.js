@@ -25,6 +25,7 @@ function add(feature, args = {}) {
     'route.js',
     'style.' + config.getRekitConfig().css,
     'redux/actions.js',
+    'redux/hooks.js',
     'redux/reducer.js',
     'redux/constants.js',
     'redux/initialState.js',

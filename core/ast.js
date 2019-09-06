@@ -8,7 +8,7 @@ const config = require('./config');
 let cache = {};
 const failedToParse = {};
 
-function getAst(filePath, throwIfError) {console.log('get ast: ', filePath);
+function getAst(filePath, throwIfError) {
   const astFolders = config.getRekitConfig().astFolders || [];
   const excludeAstFolders = config.getRekitConfig().excludeAstFolders || [];
 
