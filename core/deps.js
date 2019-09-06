@@ -8,11 +8,11 @@ const plugin = require('./plugin');
 
 const depsCache = {};
 
-function getDeps(filePath, originalFilePaths = {}) {
+function getDeps(filePath, filesInPath = {}) {
   // Summary:
   //   Get dependencies of a module
   //   originalFilePath is used to avoid circle loop
-  if (originalFilePaths[filePath]) return []; //todo: not enough for complex circle dep loop
+  // if (filesInPath[filePath]) return []; //todo: not enough for complex circle dep loop
 
   if (depsCache[filePath] && depsCache[filePath].content === vio.getContent(filePath)) {
     return depsCache[filePath].deps;
@@ -128,8 +128,8 @@ function getDeps(filePath, originalFilePaths = {}) {
   // someModule: export { default as a, b } from './anotherModule';
   // then: currentModule depends on anotherrModule
   const realDeps = deps.reduce((prev, dep) => {
-    if (dep.imported && dep.imported.length) {
-      const depsOfDep = getDeps(dep.id, { ...originalFilePaths, [filePath]: true });
+    if (dep.imported && dep.imported.length && !filesInPath[dep.id] && dep.id !== filePath) {
+      const depsOfDep = getDeps(dep.id, { ...filesInPath, [filePath]: true });
       const imported = [...dep.imported];
       if (depsOfDep) {
         dep.imported.forEach(importedName => {

@@ -251,7 +251,7 @@ function getFileElement(file, theElementById) {
 
   allElementById[rFile] = fileEle;
   if (theElementById) theElementById[rFile] = fileEle;
-  const fileDeps = size < 50000 ? deps.getDeps({ [rFile]: true }) : null;
+  const fileDeps = size < 50000 ? deps.getDeps(rFile) : null;
   if (fileDeps) {
     fileEle.views = [
       { key: 'diagram', name: 'Diagram' },
