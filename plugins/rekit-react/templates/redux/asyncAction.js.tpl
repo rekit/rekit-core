@@ -48,15 +48,15 @@ export function use${utils.pascalCase(ele.name)}(${allowAutoEffect ? 'params' : 
   const dispatch = useDispatch();
 
   const { <% _.forEach(selector, p => print(p + ', ')) %>${ele.name}Pending, ${ele.name}Error } = useSelector(
-    state => ({<%_.forEach(selector, p => print('\r\n      ' + p + ': state.' + ele.feature + '.' + p + ',')) %>
-      ${ele.name}Pending: state.${ele.feature}.${ele.name}Pending,
-      ${ele.name}Error: state.${ele.feature}.${ele.name}Error,
+    state => ({<%_.forEach(selector, p => print('\r\n      ' + p + ': state.' + _.camelCase(ele.feature) + '.' + p + ',')) %>
+      ${ele.name}Pending: state.${_.camelCase(ele.feature)}.${ele.name}Pending,
+      ${ele.name}Error: state.${_.camelCase(ele.feature)}.${ele.name}Error,
     }),
     shallowEqual,
   );
 
   const boundAction = useCallback((...args) => {
-    dispatch(${ele.name}(...args));
+    return dispatch(${ele.name}(...args));
   }, [dispatch]);<% if (allowAutoEffect) { %>
 
   useEffect(() => {
@@ -64,7 +64,7 @@ export function use${utils.pascalCase(ele.name)}(${allowAutoEffect ? 'params' : 
   }, [...(params || []), boundAction]); // eslint-disable-line<% } %>
 
   const boundDismissError = useCallback(() => {
-    dispatch(dismiss${utils.pascalCase(ele.name)}Error());
+    return dispatch(dismiss${utils.pascalCase(ele.name)}Error());
   }, [dispatch]);
 
   return {<% selector.forEach(p => print('\r\n    ' + p + ','))%>
