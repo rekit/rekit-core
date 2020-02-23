@@ -32,7 +32,6 @@ function add(elePath, args) {
   if (typeof hooks === 'string') {
     hooks = hooks.split(',').map(s => s.trim());
   }
-  console.log('hooks:', hooks);
   // const tplFile = connect ? 'ConnectedComponent.js.tpl' : 'Component.js.tpl';
   if (vio.fileExists(ele.modulePath)) {
     throw new Error(`Failed to add component: target file already exsited: ${ele.modulePath}`);
