@@ -57,7 +57,7 @@ function remove(elePath) {
   const ele = parseElePath(elePath, 'component');
   const routePath = `src/features/${ele.feature}/route.js`;
   if (!vio.fileExists(routePath)) {
-    throw new Error(`route.add failed: file not found ${routePath}`);
+    throw new Error(`route.remove failed: file not found ${routePath}`);
   }
 
   refactor.removeImportSpecifier(routePath, ele.name);
