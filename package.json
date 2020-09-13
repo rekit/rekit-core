@@ -55,6 +55,7 @@
     "download-npm-package": "^3.1.12",
     "fast-safe-stringify": "^2.0.6",
     "fs-extra": "^7.0.1",
+    "js-plugin": "^1.0.7",
     "lodash": "^4.17.11",
     "minimatch": "^3.0.4",
     "prettier": "^1.16.4",
