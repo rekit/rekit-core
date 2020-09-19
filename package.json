@@ -1,6 +1,6 @@
 {
-  "name": "rekit-core",
-  "version": "3.0.0",
+  "name": "@rekit/core",
+  "version": "5.0.0-alpha.1",
   "description": "Rekit core functions.",
   "author": "Nate Wang <supnate@gmail.com>",
   "license": "MIT",
@@ -51,6 +51,7 @@
     "chalk": "^2.4.2",
     "chokidar": "^2.1.5",
     "diff": "^4.0.1",
+    "dotenv": "^8.2.0",
     "download-git-repo": "^1.1.0",
     "download-npm-package": "^3.1.12",
     "fast-safe-stringify": "^2.0.6",

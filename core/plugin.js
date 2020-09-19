@@ -83,13 +83,13 @@ function invoke(prop, ...args) {
   const obj = arr.join('.');
   return getPlugins(prop).map(p => {
     const method = _.get(p, prop);
-    if (!_.isFunction(method)){
+    if (!_.isFunction(method)) {
       return _.get(p, prop);
     }
 
-      // throw new Error(
-      //   'Invoke should be called on function extension point: ' + p.name + '.' + prop,
-      // );
+    // throw new Error(
+    //   'Invoke should be called on function extension point: ' + p.name + '.' + prop,
+    // );
     return method.apply(obj, args);
   });
 }
@@ -133,7 +133,10 @@ function filterPluginsIfNecessary() {
   const rekitConfig = config.getRekitConfig();
 
   // A plugin could decide if it's fit for the current project by feature files
-  logger.info('All plugins:', allPlugins.map(p => p.name));
+  logger.info(
+    'All plugins:',
+    allPlugins.map(p => p.name),
+  );
   const appType = rekitConfig.appType;
   appliedPlugins = allPlugins.filter(
     p =>
@@ -141,7 +144,10 @@ function filterPluginsIfNecessary() {
       (!p.appType || _.castArray(p.appType).includes(appType)) &&
       !(rekitConfig.excludePlugins || []).map(s => s.replace('rekit-plugin', '')).includes(p.name),
   );
-  logger.info('Applied plugins for appType ' + appType + ': ', appliedPlugins.map(p => p.name));
+  logger.info(
+    'Applied plugins for appType ' + appType + ': ',
+    appliedPlugins.map(p => p.name),
+  );
   needFilterPlugin = false;
 }
 
