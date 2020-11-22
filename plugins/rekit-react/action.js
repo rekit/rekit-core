@@ -19,7 +19,7 @@ function add(elePath, args) {
     selector = selector.split(',').map(v => v.trim());
   }
   template.generate(ele.modulePath, {
-    templateFile: 'redux/action.js.tpl',
+    templateFile: 'rekit-react:redux/action.js.tpl',
     cwd: __dirname,
     context: { ele, actionType, ...args, hook: true, selector },
   });
@@ -94,7 +94,7 @@ function addAsync(elePath, args = {}) {
     selector = selector.split(',').map(v => v.trim());
   }
   template.generate(ele.modulePath, {
-    templateFile: 'redux/asyncAction.js.tpl',
+    templateFile: 'rekit-react:redux/asyncAction.js.tpl',
     ...args,
     cwd: __dirname,
     context: {

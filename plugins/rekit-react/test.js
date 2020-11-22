@@ -51,7 +51,7 @@ function addComponentTest(name, args) {
     throw new Error(`Failed to add component: target file already exsited: ${ele.testPath}`);
   }
   template.generate(ele.testPath, {
-    templateFile: connect ? 'ConnectedComponent.test.js.tpl' : 'Component.test.js.tpl',
+    templateFile: connect ? 'rekit-react:ConnectedComponent.test.js.tpl' : 'rekit-react:Component.test.js.tpl',
     cwd: __dirname,
     context: { ele, ...args },
   });
@@ -112,7 +112,7 @@ function addActionTest(elePath, args) {
   const asyncActionTypes = getAsyncActionTypes(ele.feature, ele.name);
 
   template.generate(ele.testPath, {
-    templateFile: args.async ? 'redux/asyncAction.test.js.tpl' : 'redux/action.test.js.tpl',
+    templateFile: args.async ? 'rekit-react:redux/asyncAction.test.js.tpl' : 'rekit-react:redux/action.test.js.tpl',
     cwd: __dirname,
     context: { ele, actionType, asyncActionTypes, ...args },
   });

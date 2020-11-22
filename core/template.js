@@ -49,7 +49,8 @@ function getTemplatePath(templateFile, args) {
   const tplDir2 = path.join(p.root, 'templates'); // for built-in core plugins
   const pluginTplDir = fs.existsSync(tplDir1) ? tplDir1 : tplDir2;
   let customTplDir = config.getRekitConfig().templateDir;
-  if (customTplDir && !path.isAbsolute(customTplDir)) customTplDir = paths.map(customTplDir);
+  if (customTplDir && !path.isAbsolute(customTplDir))
+    customTplDir = path.join(paths.map(customTplDir), pluginName);
   if (!customTplDir) customTplDir = paths.map('rekit-templates/' + pluginName);
 
   let realTplFile;

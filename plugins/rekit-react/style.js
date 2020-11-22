@@ -17,7 +17,7 @@ function add(ele, args) {
   template.generate(
     ele.stylePath,
     Object.assign({}, args, {
-      templateFile: 'Component.less.tpl',
+      templateFile: 'rekit-react:Component.less.tpl',
       cwd: __dirname,
       context: {
         ele,

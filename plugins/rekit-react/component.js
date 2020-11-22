@@ -17,15 +17,15 @@ function add(elePath, args) {
   let tplFile;
   if (connect) {
     if (componentType === 'functional') {
-      tplFile = 'FuncComponent.js.tpl';
+      tplFile = 'rekit-react:FuncComponent.js.tpl';
     } else {
-      tplFile = 'ConnectedComponent.js.tpl';
+      tplFile = 'rekit-react:ConnectedComponent.js.tpl';
     }
   } else {
     if (componentType === 'functional') {
-      tplFile = 'FuncComponent.js.tpl';
+      tplFile = 'rekit-react:FuncComponent.js.tpl';
     } else {
-      tplFile = 'Component.js.tpl';
+      tplFile = 'rekit-react:Component.js.tpl';
     }
   }
   let hooks = args.hooks || [];

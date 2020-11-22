@@ -31,7 +31,7 @@ function add(feature, args = {}) {
     'redux/initialState.js',
   ].forEach(fileName => {
     template.generate(`src/features/${feature}/${fileName}`, {
-      templateFile: fileName + '.tpl',
+      templateFile: 'rekit-react:' + fileName + '.tpl',
       cwd: __dirname,
       context: { feature, ...args },
     });
