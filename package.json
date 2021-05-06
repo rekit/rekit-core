@@ -49,7 +49,7 @@
     "@babel/traverse": "^7.4.3",
     "@babel/types": "^7.4.0",
     "chalk": "^2.4.2",
-    "chokidar": "^2.1.5",
+    "chokidar": "^3.5.1",
     "diff": "^4.0.1",
     "download-git-repo": "^1.1.0",
     "download-npm-package": "^3.1.12",

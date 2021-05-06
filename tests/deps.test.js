@@ -16,6 +16,7 @@ describe('deps', function() {
   const pkgJsonPath = paths.map('package.json');
   before(() => {
     vio.reset();
+    
     require.cache[pkgJsonPath] = {
       id: pkgJsonPath,
       filename: pkgJsonPath,
@@ -47,6 +48,12 @@ describe('deps', function() {
 
   beforeEach(() => {
     vio.reset();
+    vio.put(moduleA, '');
+    vio.put(moduleB, '');
+    vio.put(moduleC, '');
+    vio.put(moduleD, '');
+    vio.put('src/moduleFolder/index.js', '');
+    vio.put(moduleIndex, '');
   });
 
   it('handle normal import', () => {
