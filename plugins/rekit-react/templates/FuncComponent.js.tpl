@@ -1,5 +1,4 @@
-import React<% if(hooks.length) { print(', { ' + hooks.join(', ') + ' }'); } %> from 'react';
-// import PropTypes from 'prop-types';<%if (connect) {%>
+import React<% if(hooks.length) { print(', { ' + hooks.join(', ') + ' }'); } %> from 'react';<%if (connect) {%>
 import {} from './redux/hooks';<%}%>
 
 export default function ${ele.name}() {
@@ -9,6 +8,3 @@ export default function ${ele.name}() {
     </div>
   );
 };
-
-${ele.name}.propTypes = {};
-${ele.name}.defaultProps = {};

@@ -49,6 +49,7 @@ function getAst(filePath, throwIfError) {
           'functionBind',
           'functionSent',
           'dynamicImport',
+          'optionalChaining'
         ],
       });
 
